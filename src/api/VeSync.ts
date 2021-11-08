@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import AsyncLock from 'async-lock';
 import crypto from 'crypto';
 
 import VeSyncFan from './VeSyncFan';
@@ -12,6 +13,10 @@ export enum BypassMethod {
   DISPLAY = 'setDisplay',
   LOCK = 'setChildLock'
 }
+
+const lock = new AsyncLock();
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default class VeSync {
   private api?: AxiosInstance;
@@ -79,110 +84,131 @@ export default class VeSync {
     method: BypassMethod,
     body: any = {}
   ): Promise<boolean> {
-    if (!this.api) {
-      throw new Error('The user is not logged in!');
-    }
+    return lock.acquire('api-call', async () => {
+      if (!this.api) {
+        throw new Error('The user is not logged in!');
+      }
 
-    const response = await this.api.put('cloud/v2/deviceManaged/bypassV2', {
-      ...this.generateV2Body(fan, method, body),
-      ...this.generateDetailBody(),
-      ...this.generateBody(true)
+      const response = await this.api.put('cloud/v2/deviceManaged/bypassV2', {
+        ...this.generateV2Body(fan, method, body),
+        ...this.generateDetailBody(),
+        ...this.generateBody(true)
+      });
+
+      await delay(500);
+
+      return response.data.code === 0;
     });
-
-    return response.data.code === 0;
   }
 
   public async getDeviceInfo(fan: VeSyncFan): Promise<any> {
-    if (!this.api) {
-      throw new Error('The user is not logged in!');
-    }
+    return lock.acquire('api-call', async () => {
+      if (!this.api) {
+        throw new Error('The user is not logged in!');
+      }
 
-    const response = await this.api.post('cloud/v2/deviceManaged/bypassV2', {
-      ...this.generateV2Body(fan, BypassMethod.STATUS),
-      ...this.generateDetailBody(),
-      ...this.generateBody(true)
+      const response = await this.api.post('cloud/v2/deviceManaged/bypassV2', {
+        ...this.generateV2Body(fan, BypassMethod.STATUS),
+        ...this.generateDetailBody(),
+        ...this.generateBody(true)
+      });
+
+      await delay(500);
+
+      return response.data;
     });
-
-    return response.data;
   }
 
-  public async login(): Promise<boolean> {
-    if (!this.email || !this.password) {
-      throw new Error('Email and password are required');
-    }
+  public async startSession() {
+    await this.login();
+    setInterval(this.login.bind(this), 1000 * 60 * 55);
+  }
 
-    const pwdHashed = crypto
-      .createHash('md5')
-      .update(this.password)
-      .digest('hex');
-
-    const response = await axios.post(
-      'cloud/v1/user/login',
-      {
-        email: this.email,
-        password: pwdHashed,
-        devToken: '',
-        userType: 1,
-        method: 'login',
-        token: '',
-        ...this.generateDetailBody(),
-        ...this.generateBody()
-      },
-      {
-        ...this.AXIOS_OPTIONS
+  private async login(): Promise<boolean> {
+    return lock.acquire('api-call', async () => {
+      if (!this.email || !this.password) {
+        throw new Error('Email and password are required');
       }
-    );
 
-    if (!response?.data) {
-      return false;
-    }
+      const pwdHashed = crypto
+        .createHash('md5')
+        .update(this.password)
+        .digest('hex');
 
-    const { result } = response.data;
-    const { token, accountID } = result ?? {};
+      const response = await axios.post(
+        'cloud/v1/user/login',
+        {
+          email: this.email,
+          password: pwdHashed,
+          devToken: '',
+          userType: 1,
+          method: 'login',
+          token: '',
+          ...this.generateDetailBody(),
+          ...this.generateBody()
+        },
+        {
+          ...this.AXIOS_OPTIONS
+        }
+      );
 
-    if (!token || !accountID) {
-      return false;
-    }
-
-    this.accountId = accountID;
-    this.token = token;
-
-    this.api = axios.create({
-      ...this.AXIOS_OPTIONS,
-      headers: {
-        'accept-language': this.LANG,
-        accountid: this.accountId!,
-        appversion: this.VERSION,
-        'content-type': 'application/json',
-        tk: this.token!,
-        tz: this.TIMEZONE,
-        'user-agent': this.AGENT
+      if (!response?.data) {
+        return false;
       }
+
+      const { result } = response.data;
+      const { token, accountID } = result ?? {};
+
+      if (!token || !accountID) {
+        return false;
+      }
+
+      this.accountId = accountID;
+      this.token = token;
+
+      this.api = axios.create({
+        ...this.AXIOS_OPTIONS,
+        headers: {
+          'accept-language': this.LANG,
+          accountid: this.accountId!,
+          appversion: this.VERSION,
+          'content-type': 'application/json',
+          tk: this.token!,
+          tz: this.TIMEZONE,
+          'user-agent': this.AGENT
+        }
+      });
+
+      await delay(500);
+
+      return true;
     });
-
-    return true;
   }
 
   public async getDevices(): Promise<VeSyncFan[]> {
-    if (!this.api) {
-      throw new Error('The user is not logged in!');
-    }
+    return lock.acquire('api-call', async () => {
+      if (!this.api) {
+        throw new Error('The user is not logged in!');
+      }
 
-    const response = await this.api.post('cloud/v2/deviceManaged/devices', {
-      method: 'devices',
-      pageNo: 1,
-      pageSize: 1000,
-      ...this.generateDetailBody(),
-      ...this.generateBody(true)
+      const response = await this.api.post('cloud/v2/deviceManaged/devices', {
+        method: 'devices',
+        pageNo: 1,
+        pageSize: 1000,
+        ...this.generateDetailBody(),
+        ...this.generateBody(true)
+      });
+
+      const { result } = response.data;
+      const { list } = result ?? { list: [] };
+
+      const devices = list
+        .filter(({ deviceType }) => this.DEVICE_TYPES.includes(deviceType))
+        .map(VeSyncFan.fromResponse(this));
+
+      await delay(500);
+
+      return devices;
     });
-
-    const { result } = response.data;
-    const { list } = result ?? { list: [] };
-
-    const devices = list
-      .filter(({ deviceType }) => this.DEVICE_TYPES.includes(deviceType))
-      .map(VeSyncFan.fromResponse(this));
-
-    return devices;
   }
 }

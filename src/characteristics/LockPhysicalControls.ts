@@ -13,6 +13,8 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
+    await this.device.updateInfo();
+
     const { CONTROL_LOCK_DISABLED, CONTROL_LOCK_ENABLED } =
       this.platform.Characteristic.LockPhysicalControls;
 

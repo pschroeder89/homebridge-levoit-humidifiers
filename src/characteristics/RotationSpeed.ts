@@ -23,6 +23,8 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
+    await this.device.updateInfo();
+
     return calculateSpeed(this.device);
   },
   set: async function (value: CharacteristicValue) {

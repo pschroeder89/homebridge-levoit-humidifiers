@@ -13,6 +13,8 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
+    await this.device.updateInfo();
+
     const { MANUAL, AUTO } =
       this.platform.Characteristic.TargetAirPurifierState;
 

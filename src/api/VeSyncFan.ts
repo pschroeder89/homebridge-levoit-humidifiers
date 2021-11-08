@@ -1,3 +1,5 @@
+import AsyncLock from 'async-lock';
+
 import VeSync, { BypassMethod } from './VeSync';
 
 export enum AirQuality {
@@ -20,8 +22,12 @@ export enum Mode {
 }
 
 export default class VeSyncFan {
+  private lock: AsyncLock = new AsyncLock();
+  private lastCheck: number = 0;
+
   private _screenVisible: boolean = true;
   private _childLock: boolean = false;
+  private _filterLife: number = 0;
   private _pm25: number = 0;
 
   public readonly manufacturer = 'Levoit';
@@ -31,6 +37,9 @@ export default class VeSyncFan {
   }
   public get screenVisible() {
     return this._screenVisible;
+  }
+  public get filterLife() {
+    return this._filterLife;
   }
   public get childLock() {
     return this._childLock;
@@ -116,20 +125,33 @@ export default class VeSyncFan {
   }
 
   public async updateInfo(): Promise<void> {
-    const data = await this.client.getDeviceInfo(this);
-    if (!data?.result?.result) {
-      return;
-    }
+    return this.lock.acquire('update-info', async () => {
+      try {
+        if (Date.now() - this.lastCheck < 5 * 1000) {
+          return;
+        }
 
-    const result = data?.result?.result;
+        this.lastCheck = Date.now();
 
-    this._airQualityLevel = result.air_quality;
-    this._pm25 = result.air_quality_value;
-    this._screenVisible = result.display;
-    this._childLock = result.child_lock;
-    this._speed = result.level;
-    this._isOn = result.enabled;
-    this._mode = result.mode;
+        const data = await this.client.getDeviceInfo(this);
+        if (!data?.result?.result) {
+          return;
+        }
+
+        const result = data?.result?.result;
+
+        this._airQualityLevel = result.air_quality;
+        this._filterLife = result.filter_life;
+        this._pm25 = result.air_quality_value;
+        this._screenVisible = result.display;
+        this._childLock = result.child_lock;
+        this._isOn = result.enabled;
+        this._speed = result.level;
+        this._mode = result.mode;
+      } catch (err) {
+        console.error(err);
+      }
+    });
   }
 
   public static fromResponse =

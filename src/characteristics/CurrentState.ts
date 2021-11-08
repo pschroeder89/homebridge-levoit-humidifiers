@@ -12,6 +12,8 @@ const characteristic: {
   get: CharacteristicGetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
+    await this.device.updateInfo();
+
     const { PURIFYING_AIR, INACTIVE } =
       this.platform.Characteristic.CurrentAirPurifierState;
 

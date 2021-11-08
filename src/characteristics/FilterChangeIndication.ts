@@ -4,7 +4,6 @@ import {
   CharacteristicValue,
   Nullable
 } from 'homebridge';
-import { AirQuality } from '../api/VeSyncFan';
 
 import { AccessoryThisType } from '../VeSyncAccessory.ts';
 
@@ -14,18 +13,10 @@ const characteristic: {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
 
-    switch (this.device.airQualityLevel) {
-      case AirQuality.VERY_GOOD:
-        return 1;
-      case AirQuality.GOOD:
-        return 2;
-      case AirQuality.MODERATE:
-        return 4;
-      case AirQuality.POOR:
-        return 5;
-      default:
-        return 0;
-    }
+    const { FILTER_OK, CHANGE_FILTER } =
+      this.platform.Characteristic.FilterChangeIndication;
+
+    return (this.device.filterLife ?? 0) <= 25 ? CHANGE_FILTER : FILTER_OK;
   }
 };
 

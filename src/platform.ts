@@ -67,7 +67,7 @@ export default class Platform implements DynamicPlatformPlugin {
     }
 
     this.log.info('Connecting to the servers...');
-    await this.client.login();
+    await this.client.startSession();
     this.log.info('Discovering devices...');
 
     const devices = await this.client.getDevices();

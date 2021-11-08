@@ -1,6 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
+import FilterChangeIndication from './characteristics/FilterChangeIndication';
 import LockPhysicalControls from './characteristics/LockPhysicalControls';
+import FilterLifeLevel from './characteristics/FilterLifeLevel';
 import Platform, { VeSyncPlatformAccessory } from './platform';
 import RotationSpeed from './characteristics/RotationSpeed';
 import CurrentState from './characteristics/CurrentState';
@@ -19,6 +21,7 @@ export type AccessoryThisType = ThisType<{
 export default class VeSyncAccessory {
   private airQualitySensorService: Service;
   private airPurifierService: Service;
+  private filterService: Service;
 
   public get UUID() {
     return this.device.uuid.toString();
@@ -50,6 +53,15 @@ export default class VeSyncAccessory {
     this.airQualitySensorService =
       this.accessory.getService(this.platform.Service.AirQualitySensor) ||
       this.accessory.addService(this.platform.Service.AirQualitySensor);
+
+    this.filterService = (
+      this.accessory.getService(this.platform.Service.FilterMaintenance) ||
+      this.accessory.addService(this.platform.Service.FilterMaintenance)
+    ).setCharacteristic(this.platform.Characteristic.Name, 'Filter');
+
+    this.airPurifierService.setPrimaryService(true);
+    this.airPurifierService.addLinkedService(this.airQualitySensorService);
+    this.airPurifierService.addLinkedService(this.filterService);
 
     this.airPurifierService
       .getCharacteristic(this.platform.Characteristic.Active)
@@ -86,5 +98,13 @@ export default class VeSyncAccessory {
     this.airQualitySensorService
       .getCharacteristic(this.platform.Characteristic.PM2_5Density)
       .onGet(PM25Density.get.bind(this));
+
+    this.filterService
+      .getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
+      .onGet(FilterChangeIndication.get.bind(this));
+
+    this.filterService
+      .getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
+      .onGet(FilterLifeLevel.get.bind(this));
   }
 }
