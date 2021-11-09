@@ -32,7 +32,7 @@ Any device from VeSync that is not listed in the supported versions are automati
    - 2 -> Level 1
    - 3 -> Level 2
    - 4 -> Level 4
-5. Filter Change Indicator & Filter Life Level (Still checking it, the service is added but not visible)
+5. Filter Change Indicator & Filter Life Level
 6. Mode change
    - Auto
    - Manual

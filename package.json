@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Levoit Air Purifier",
   "name": "homebridge-levoit-air-purifier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Made for Core 300S | Is possible to also work with 200S and 400S.",
   "license": "MIT",
   "repository": {

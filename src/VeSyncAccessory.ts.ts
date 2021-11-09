@@ -21,7 +21,6 @@ export type AccessoryThisType = ThisType<{
 export default class VeSyncAccessory {
   private airQualitySensorService: Service;
   private airPurifierService: Service;
-  private filterService: Service;
 
   public get UUID() {
     return this.device.uuid.toString();
@@ -54,14 +53,8 @@ export default class VeSyncAccessory {
       this.accessory.getService(this.platform.Service.AirQualitySensor) ||
       this.accessory.addService(this.platform.Service.AirQualitySensor);
 
-    this.filterService = (
-      this.accessory.getService(this.platform.Service.FilterMaintenance) ||
-      this.accessory.addService(this.platform.Service.FilterMaintenance)
-    ).setCharacteristic(this.platform.Characteristic.Name, 'Filter');
-
     this.airPurifierService.setPrimaryService(true);
     this.airPurifierService.addLinkedService(this.airQualitySensorService);
-    this.airPurifierService.addLinkedService(this.filterService);
 
     this.airPurifierService
       .getCharacteristic(this.platform.Characteristic.Active)
@@ -99,11 +92,11 @@ export default class VeSyncAccessory {
       .getCharacteristic(this.platform.Characteristic.PM2_5Density)
       .onGet(PM25Density.get.bind(this));
 
-    this.filterService
+    this.airPurifierService
       .getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
       .onGet(FilterChangeIndication.get.bind(this));
 
-    this.filterService
+    this.airPurifierService
       .getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
       .onGet(FilterLifeLevel.get.bind(this));
   }
