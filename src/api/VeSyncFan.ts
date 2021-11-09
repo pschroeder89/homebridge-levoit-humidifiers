@@ -131,9 +131,9 @@ export default class VeSyncFan {
           return;
         }
 
+        const data = await this.client.getDeviceInfo(this);
         this.lastCheck = Date.now();
 
-        const data = await this.client.getDeviceInfo(this);
         if (!data?.result?.result) {
           return;
         }

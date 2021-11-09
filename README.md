@@ -1,4 +1,4 @@
-[![Build and Lint](https://github.com/RaresAil/homebridge-levoit-air-purifier/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/RaresAil/homebridge-levoit-air-purifier/actions/workflows/build.yml)
+[![Build and Lint](https://github.com/RaresAil/homebridge-levoit-air-purifier/actions/workflows/build.yml/badge.svg)](https://github.com/RaresAil/homebridge-levoit-air-purifier/actions/workflows/build.yml)
 
 # Homebridge Levoit Air Purifier
 
