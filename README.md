@@ -53,6 +53,19 @@ This plugin requires your VeSync credentials as it communicates with the VeSync 
 
 You can also do this directly via the homebridge config by adding your credentials to the config file under platforms. Replace the values of `username` and `password` by your credentials.
 
+```json
+{
+  "platforms": [
+    {
+      "name": "Levoit Air Purifiers",
+      "email": "email",
+      "password": "password",
+      "platform": "LevoitAirPurifiers"
+    }
+  ]
+}
+```
+
 ### Local Development
 
 To setup the local project clone the files and inside the root directory of the project run:

@@ -7,12 +7,12 @@ import VeSyncFan from './VeSyncFan';
 
 export enum BypassMethod {
   STATUS = 'getPurifierStatus',
-  SWITCH = 'setSwitch',
-  NIGHT = 'setNightLight',
-  SPEED = 'setLevel',
   MODE = 'setPurifierMode',
+  NIGHT = 'setNightLight',
   DISPLAY = 'setDisplay',
-  LOCK = 'setChildLock'
+  LOCK = 'setChildLock',
+  SWITCH = 'setSwitch',
+  SPEED = 'setLevel'
 }
 
 const lock = new AsyncLock();
@@ -24,11 +24,11 @@ export default class VeSync {
   private accountId?: string;
   private token?: string;
 
-  private readonly AGENT = 'VeSync/VeSync 3.0.51(F5321;Android 8.0.0)';
+  private readonly VERSION = '1.0.0';
+  private readonly AGENT = `VeSync/VeSync 3.0.51(F5321;HomeBridge-VeSync ${this.VERSION})`;
   private readonly DEVICE_TYPES = ['Core200S', 'Core300S', 'Core400S'];
   private readonly TIMEZONE = 'America/New_York';
   private readonly OS = 'HomeBridge-VeSync';
-  private readonly VERSION = '1.0.0';
   private readonly LANG = 'en';
 
   private readonly AXIOS_OPTIONS = {
@@ -171,13 +171,13 @@ export default class VeSync {
       this.api = axios.create({
         ...this.AXIOS_OPTIONS,
         headers: {
+          'content-type': 'application/json',
           'accept-language': this.LANG,
           accountid: this.accountId!,
+          'user-agent': this.AGENT,
           appversion: this.VERSION,
-          'content-type': 'application/json',
-          tk: this.token!,
           tz: this.TIMEZONE,
-          'user-agent': this.AGENT
+          tk: this.token!
         }
       });
 
