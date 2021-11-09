@@ -1,9 +1,9 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "Levoit Air Purifier",
   "name": "homebridge-levoit-air-purifier",
   "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "description": "Made for Core 300S | Is possible to also work with 400S.",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -25,7 +25,7 @@ export default class VeSync {
   private token?: string;
 
   private readonly AGENT = 'VeSync/VeSync 3.0.51(F5321;Android 8.0.0)';
-  private readonly DEVICE_TYPES = ['Core300S', 'Core400S'];
+  private readonly DEVICE_TYPES = ['Core200S', 'Core300S', 'Core400S'];
   private readonly TIMEZONE = 'America/New_York';
   private readonly OS = 'HomeBridge-VeSync';
   private readonly VERSION = '1.0.0';
