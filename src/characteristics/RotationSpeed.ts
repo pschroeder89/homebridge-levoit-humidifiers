@@ -1,5 +1,4 @@
 import {
-  Characteristic,
   CharacteristicGetHandler,
   CharacteristicSetHandler,
   CharacteristicValue,

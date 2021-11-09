@@ -23,12 +23,12 @@ export enum Mode {
 
 export default class VeSyncFan {
   private lock: AsyncLock = new AsyncLock();
-  private lastCheck: number = 0;
+  private lastCheck = 0;
 
-  private _screenVisible: boolean = true;
-  private _childLock: boolean = false;
-  private _filterLife: number = 0;
-  private _pm25: number = 0;
+  private _screenVisible = true;
+  private _childLock = false;
+  private _filterLife = 0;
+  private _pm25 = 0;
 
   public readonly manufacturer = 'Levoit';
 
@@ -148,8 +148,8 @@ export default class VeSyncFan {
         this._isOn = result.enabled;
         this._speed = result.level;
         this._mode = result.mode;
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        this.client.log.error(err?.message);
       }
     });
   }

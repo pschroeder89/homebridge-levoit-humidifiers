@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service } from 'homebridge';
 
 import FilterChangeIndication from './characteristics/FilterChangeIndication';
 import LockPhysicalControls from './characteristics/LockPhysicalControls';

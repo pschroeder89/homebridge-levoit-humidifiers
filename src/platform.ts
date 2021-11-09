@@ -39,7 +39,7 @@ export default class Platform implements DynamicPlatformPlugin {
 
     this.log.debug('Finished initializing platform:', this.config.name);
 
-    this.client = new VeSync(email, password);
+    this.client = new VeSync(email, password, log);
 
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');

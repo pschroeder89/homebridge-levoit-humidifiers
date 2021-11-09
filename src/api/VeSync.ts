@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { Logger } from 'homebridge';
 import AsyncLock from 'async-lock';
 import crypto from 'crypto';
 
@@ -37,7 +38,8 @@ export default class VeSync {
 
   constructor(
     private readonly email: string,
-    private readonly password: string
+    private readonly password: string,
+    public readonly log: Logger
   ) {}
 
   private generateDetailBody() {
@@ -49,7 +51,7 @@ export default class VeSync {
     };
   }
 
-  private generateBody(includeAuth: boolean = false) {
+  private generateBody(includeAuth = false) {
     return {
       acceptLanguage: this.LANG,
       timeZone: this.TIMEZONE,
@@ -62,7 +64,7 @@ export default class VeSync {
     };
   }
 
-  private generateV2Body(fan: VeSyncFan, method: BypassMethod, data: any = {}) {
+  private generateV2Body(fan: VeSyncFan, method: BypassMethod, data = {}) {
     return {
       method: 'bypassV2',
       debugMode: false,
@@ -82,7 +84,7 @@ export default class VeSync {
   public async sendCommand(
     fan: VeSyncFan,
     method: BypassMethod,
-    body: any = {}
+    body = {}
   ): Promise<boolean> {
     return lock.acquire('api-call', async () => {
       if (!this.api) {

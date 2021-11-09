@@ -1,7 +1,5 @@
 import {
-  Characteristic,
   CharacteristicGetHandler,
-  CharacteristicSetHandler,
   CharacteristicValue,
   Nullable
 } from 'homebridge';
