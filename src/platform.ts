@@ -9,8 +9,9 @@ import {
 } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import VeSyncAccessory from './VeSyncAccessory.ts';
+import VeSyncAccessory from './VeSyncAccessory';
 import VeSyncFan from './api/VeSyncFan';
+import DebugMode from './debugMode';
 import VeSync from './api/VeSync';
 
 export interface VeSyncContext {
@@ -28,6 +29,7 @@ export default class Platform implements DynamicPlatformPlugin {
   public readonly cachedAccessories: VeSyncPlatformAccessory[] = [];
   public readonly registeredDevices: VeSyncAccessory[] = [];
 
+  public readonly debugger: DebugMode;
   private readonly client: VeSync;
 
   constructor(
@@ -35,14 +37,14 @@ export default class Platform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API
   ) {
-    const { email, password } = this.config ?? {};
+    const { email, password, enableDebugMode } = this.config ?? {};
 
-    this.log.debug('Finished initializing platform:', this.config.name);
+    this.debugger = new DebugMode(!!enableDebugMode, this.log);
+    this.debugger.debug('[PLATFORM]', 'Debug mode enabled');
 
-    this.client = new VeSync(email, password, log);
+    this.client = new VeSync(email, password, this.debugger, log);
 
     this.api.on('didFinishLaunching', () => {
-      log.debug('Executed didFinishLaunching callback');
       this.discoverDevices();
     });
   }
@@ -56,6 +58,11 @@ export default class Platform implements DynamicPlatformPlugin {
     const { email, password } = this.config ?? {};
     if (!email || !password) {
       if (this.cachedAccessories.length > 0) {
+        this.debugger.debug(
+          '[PLATFORM]',
+          'Removing cached accessories because the email and password are not set (Count:',
+          `${this.cachedAccessories.length})`
+        );
         this.api.unregisterPlatformAccessories(
           PLUGIN_NAME,
           PLATFORM_NAME,

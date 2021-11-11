@@ -7,7 +7,8 @@ This is a Homebridge plugin to control Levoit Air Purifiers with via the VeSync 
 | Supported Versions | Tested                           |
 | ------------------ | -------------------------------- |
 | Core 300S          | ✅                               |
-| Core 400S          | ❔ (Untested but it should work) |
+| Core 400S          | ✅                               |
+| Core 400S Pro      | ✅                               |
 | Core 200S          | ❔ (Untested but it should work) |
 
 **If you have the version 400S or 200S and you have issues,
@@ -31,9 +32,10 @@ Any device from VeSync that is not listed in the supported versions are automati
    - 1 -> Sleep Mode
    - 2 -> Level 1
    - 3 -> Level 2
-   - 4 -> Level 4
+   - 4 -> Level 3
+   - 5 -> Level 4 (Only for Core 400S and 400S Pro)
 5. Filter Change Indicator & Filter Life Level
-6. Mode change
+6. Mode change (Not for 200S)
    - Auto
    - Manual
 
@@ -61,6 +63,24 @@ You can also do this directly via the homebridge config by adding your credentia
       "email": "email",
       "password": "password",
       "platform": "LevoitAirPurifiers"
+    }
+  ]
+}
+```
+
+### Enabling Debug Mode
+
+In the config file, add `enableDebugMode: true`
+
+```json
+{
+  "platforms": [
+    {
+      "name": "Levoit Air Purifiers",
+      "email": "email",
+      "password": "password",
+      "platform": "LevoitAirPurifiers",
+      "enableDebugMode": true
     }
   ]
 }

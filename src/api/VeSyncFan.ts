@@ -1,4 +1,5 @@
 import AsyncLock from 'async-lock';
+import deviceTypes, { DeviceType } from './deviceTypes';
 
 import VeSync, { BypassMethod } from './VeSync';
 
@@ -9,12 +10,6 @@ export enum AirQuality {
   GOOD = 2,
   POOR = 4
 }
-export enum Speed {
-  UNKNOWN = 0,
-  MEDIUM = 2,
-  HIGH = 3,
-  LOW = 1
-}
 export enum Mode {
   Manual = 'manual',
   Sleep = 'sleep',
@@ -23,6 +18,7 @@ export enum Mode {
 
 export default class VeSyncFan {
   private lock: AsyncLock = new AsyncLock();
+  public readonly deviceType: DeviceType;
   private lastCheck = 0;
 
   private _screenVisible = true;
@@ -62,7 +58,7 @@ export default class VeSyncFan {
     private readonly client: VeSync,
     public readonly name: string,
     private _mode: Mode,
-    private _speed: Speed,
+    private _speed: number,
     public readonly uuid: string,
     private _isOn: boolean,
     private _airQualityLevel: AirQuality,
@@ -71,7 +67,9 @@ export default class VeSyncFan {
     public readonly region: string,
     public readonly model: string,
     public readonly mac: string
-  ) {}
+  ) {
+    this.deviceType = deviceTypes.find(({ isValid }) => isValid(this.model))!;
+  }
 
   public async setChildLock(lock: boolean): Promise<boolean> {
     const success = await this.client.sendCommand(this, BypassMethod.LOCK, {
@@ -99,6 +97,13 @@ export default class VeSyncFan {
   }
 
   public async changeMode(mode: Mode): Promise<boolean> {
+    if (
+      (mode === Mode.Auto || mode === Mode.Manual) &&
+      !this.deviceType.hasAutoMode
+    ) {
+      return false;
+    }
+
     const success = await this.client.sendCommand(this, BypassMethod.MODE, {
       mode: mode.toString()
     });
@@ -110,7 +115,11 @@ export default class VeSyncFan {
     return success;
   }
 
-  public async changeSpeed(speed: Speed): Promise<boolean> {
+  public async changeSpeed(speed: number): Promise<boolean> {
+    if (speed > this.deviceType.speedLevels - 1 || speed <= 0) {
+      return false;
+    }
+
     const success = await this.client.sendCommand(this, BypassMethod.SPEED, {
       level: speed,
       type: 'wind',
@@ -171,7 +180,7 @@ export default class VeSyncFan {
         client,
         deviceName,
         mode,
-        parseInt(fanSpeedLevel ?? '0', 10) as Speed,
+        parseInt(fanSpeedLevel ?? '0', 10),
         uuid,
         deviceStatus === 'on',
         airQualityLevel,

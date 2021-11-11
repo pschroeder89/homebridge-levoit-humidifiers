@@ -78,7 +78,7 @@ export default class VeSyncAccessory {
     this.airPurifierService
       .getCharacteristic(this.platform.Characteristic.RotationSpeed)
       .setProps({
-        minStep: 25,
+        minStep: this.device.deviceType.speedMinStep,
         maxValue: 100
       })
       .onGet(RotationSpeed.get.bind(this))

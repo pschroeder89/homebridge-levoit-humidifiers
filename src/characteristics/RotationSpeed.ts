@@ -6,12 +6,12 @@ import {
 } from 'homebridge';
 import VeSyncFan, { Mode } from '../api/VeSyncFan';
 
-import { AccessoryThisType } from '../VeSyncAccessory.ts';
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const calculateSpeed = (device: VeSyncFan) => {
-  let speed = (device.speed + 1) * 25;
+  let speed = (device.speed + 1) * device.deviceType.speedMinStep;
   if (device.mode === Mode.Sleep) {
-    speed = 25;
+    speed = device.deviceType.speedMinStep;
   }
 
   return device.isOn ? speed : 0;
@@ -27,7 +27,9 @@ const characteristic: {
     return calculateSpeed(this.device);
   },
   set: async function (value: CharacteristicValue) {
-    const parsedValue = Math.round(parseInt(value.toString(), 10) / 25);
+    const parsedValue = Math.round(
+      parseInt(value.toString(), 10) / this.device.deviceType.speedMinStep
+    );
 
     if (parsedValue - 1 === this.device.speed) {
       return;

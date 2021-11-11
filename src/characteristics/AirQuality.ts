@@ -5,7 +5,7 @@ import {
 } from 'homebridge';
 import { AirQuality } from '../api/VeSyncFan';
 
-import { AccessoryThisType } from '../VeSyncAccessory.ts';
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const characteristic: {
   get: CharacteristicGetHandler;

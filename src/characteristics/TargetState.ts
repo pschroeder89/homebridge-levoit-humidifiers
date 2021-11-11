@@ -6,21 +6,29 @@ import {
 } from 'homebridge';
 import { Mode } from '../api/VeSyncFan';
 
-import { AccessoryThisType } from '../VeSyncAccessory.ts';
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const characteristic: {
   get: CharacteristicGetHandler;
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
-    await this.device.updateInfo();
-
     const { MANUAL, AUTO } =
       this.platform.Characteristic.TargetAirPurifierState;
+
+    if (!this.device.deviceType.hasAutoMode) {
+      return MANUAL;
+    }
+
+    await this.device.updateInfo();
 
     return this.device.mode === Mode.Auto ? AUTO : MANUAL;
   },
   set: async function (value: CharacteristicValue) {
+    if (!this.device.deviceType.hasAutoMode) {
+      return;
+    }
+
     const { MANUAL, AUTO } =
       this.platform.Characteristic.TargetAirPurifierState;
 
