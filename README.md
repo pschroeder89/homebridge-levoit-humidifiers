@@ -10,10 +10,10 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 
 ### Features
 
-#. Set Mist Level
+1. Set Mist Level
    - Levels 1-9
 
-#. Mode change
+2. Mode change
    - Auto
    - Manual
 
