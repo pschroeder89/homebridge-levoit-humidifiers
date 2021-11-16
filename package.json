@@ -7,10 +7,10 @@
   "version": "1.2.2",
   "private": false,
   "bugs": {
-    "url": "https://github.com/RaresAil/homebridge-levoit-humidifiers/issues"
+    "url": "https://github.com/pschroeder89/homebridge-levoit-humidifiers/issues"
   },
   "repository": {
-    "url": "git://github.com/RaresAil/homebridge-levoit-humidifiers.git",
+    "url": "git://github.com/pschroeder89/homebridge-levoit-humidifiers.git",
     "type": "git"
   },
   "scripts": {
@@ -49,6 +49,6 @@
     "300s"
   ],
   "types": "./dist/index.d.ts",
-  "homepage": "https://github.com/RaresAil/homebridge-levoit-humidifiers#readme",
+  "homepage": "https://github.com/pschroeder89/homebridge-levoit-humidifiers#readme",
   "author": "Paul Schroeder"
 }
