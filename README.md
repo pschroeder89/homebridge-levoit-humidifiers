@@ -16,6 +16,10 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 2. Mode change
    - Auto
    - Manual
+     
+![](https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/off.png?raw=true)
+![](https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/humidity.png?raw=true)
+![](https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/auto.png?raw=true)
 
 The read data is cached for 5 seconds to not trigger the rate limiter for the API.
 Each request is delayed by 500ms to not trigger the rate limiter if a huge number of requests are sent.
