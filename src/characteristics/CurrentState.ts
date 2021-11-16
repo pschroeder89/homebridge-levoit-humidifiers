@@ -12,10 +12,10 @@ const characteristic: {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
 
-    const { PURIFYING_AIR, INACTIVE } =
-      this.platform.Characteristic.CurrentAirPurifierState;
+    const { HUMIDIFYING, IDLE } =
+      this.platform.Characteristic.CurrentHumidifierDehumidifierState;
 
-    return this.device.isOn ? PURIFYING_AIR : INACTIVE;
+    return this.device.isOn ? HUMIDIFYING : IDLE;
   }
 };
 

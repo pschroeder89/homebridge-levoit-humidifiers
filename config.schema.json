@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "LevoitAirPurifiers",
+  "pluginAlias": "LevoitHumidifiers",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -9,7 +9,7 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Levoit Air Purifiers"
+        "default": "Levoit Humidifiers"
       },
       "email": {
         "title": "Email",

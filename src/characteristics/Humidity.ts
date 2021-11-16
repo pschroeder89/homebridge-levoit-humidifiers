@@ -12,7 +12,7 @@ const characteristic: {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
 
-    return this.device.filterLife ?? 0;
+    return this.device.humidityLevel;
   }
 };
 

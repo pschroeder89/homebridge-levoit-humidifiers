@@ -1,20 +1,20 @@
 {
-  "description": "Made for Core 200S/300S/400S/400S Pro",
-  "name": "homebridge-levoit-air-purifier",
-  "displayName": "Levoit Air Purifier",
+  "description": "Made for Classic 300s",
+  "name": "homebridge-levoit-humidifiers",
+  "displayName": "Levoit Humidifiers",
   "main": "dist/index.js",
   "license": "Apache-2.0",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "private": false,
   "bugs": {
-    "url": "https://github.com/RaresAil/homebridge-levoit-air-purifier/issues"
+    "url": "https://github.com/RaresAil/homebridge-levoit-humidifiers/issues"
   },
   "repository": {
-    "url": "git://github.com/RaresAil/homebridge-levoit-air-purifier.git",
+    "url": "git://github.com/RaresAil/homebridge-levoit-humidifiers.git",
     "type": "git"
   },
   "scripts": {
-    "remove-link": "npm -g remove homebridge-levoit-air-purifier",
+    "remove-link": "npm -g remove homebridge-levoit-humidifiers",
     "prepublishOnly": "npm run lint && npm run build",
     "watch": "npm run build && npm link && nodemon",
     "lint": "eslint src/**.ts --max-warnings=0",
@@ -42,12 +42,13 @@
   },
   "keywords": [
     "homebridge-plugin",
-    "air-purifier",
-    "400s Pro",
+    "humidifier",
+    "classic 300s",
     "vesync",
     "levoit",
-    "200s",
-    "300s",
-    "400s"
-  ]
+    "300s"
+  ],
+  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/RaresAil/homebridge-levoit-humidifiers#readme",
+  "author": "Paul Schroeder"
 }

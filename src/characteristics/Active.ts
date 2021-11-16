@@ -20,7 +20,7 @@ const characteristic: {
     const boolValue = value === 1;
 
     if (boolValue !== this.device.isOn) {
-      this.device.setPower(boolValue);
+      await this.device.setPower(boolValue);
     }
   }
 };

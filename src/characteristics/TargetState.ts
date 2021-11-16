@@ -13,34 +13,34 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
-    const { MANUAL, AUTO } =
-      this.platform.Characteristic.TargetAirPurifierState;
+    const { HUMIDIFIER, AUTO } =
+      this.platform.Characteristic.TargetHumidifierDehumidifierState;
 
     if (!this.device.deviceType.hasAutoMode) {
-      return MANUAL;
+      return HUMIDIFIER;
     }
 
     await this.device.updateInfo();
 
-    return this.device.mode === Mode.Auto ? AUTO : MANUAL;
+    return this.device.mode === Mode.Auto ? AUTO : HUMIDIFIER;
   },
   set: async function (value: CharacteristicValue) {
     if (!this.device.deviceType.hasAutoMode) {
       return;
     }
 
-    const { MANUAL, AUTO } =
-      this.platform.Characteristic.TargetAirPurifierState;
+    const { HUMIDIFIER , AUTO } =
+      this.platform.Characteristic.TargetHumidifierDehumidifierState;
 
     switch (value) {
       case AUTO:
         if (this.device.mode !== Mode.Auto) {
-          this.device.changeMode(Mode.Auto);
+          await this.device.changeMode(Mode.Auto);
         }
         break;
-      case MANUAL:
+      case HUMIDIFIER:
         if (this.device.mode !== Mode.Manual) {
-          this.device.changeMode(Mode.Manual);
+          await this.device.changeMode(Mode.Manual);
         }
         break;
     }
