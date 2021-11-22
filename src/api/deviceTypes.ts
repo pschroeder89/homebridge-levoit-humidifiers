@@ -1,5 +1,6 @@
 export enum DeviceName {
   Classic300S = '300S',
+  Dual200S = 'Dual200S',
 }
 
 export interface DeviceType {
@@ -16,7 +17,13 @@ const deviceTypes: DeviceType[] = [
     hasAutoMode: true,
     mistMinLevel: 1,
     mistLevels: 9
-  }
+  },
+  {
+    isValid: (input: string) => input.includes(DeviceName.Dual200S),
+    hasAutoMode: true,
+    mistMinLevel: 1,
+    mistLevels: 2
+  },
 ];
 
 export default deviceTypes;
