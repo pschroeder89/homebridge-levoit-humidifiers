@@ -5,8 +5,9 @@ This is a Homebridge plugin to control Levoit Humidifiers with via the VeSync Pl
 | Supported Versions | Tested                           |
 | ------------------ | -------------------------------- |
 | Classic 300S       | ✅                               |
+| Classic 200S       | ✅                               |
 
-This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic for the Levoit Classic 300s humidifer. I assume this will work at least partially with other models.
+This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic for the Levoit Classic humidifers.
 
 ### Features
 
