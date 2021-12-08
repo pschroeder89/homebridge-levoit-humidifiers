@@ -90,10 +90,5 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
 
-
-        this.humiditySensorService
-            .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-            .onGet(Humidity.get.bind(this));
-
     }
 }
