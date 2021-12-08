@@ -122,6 +122,13 @@ export default class VeSync {
                     `with (${JSON.stringify(body)})!`,
                     `Response: ${JSON.stringify(response)}`
                 );
+            } else {
+                this.debugMode.debug(
+                    '[SEND COMMAND]',
+                    `Successfully sent command ${method} to ${fan.name}`,
+                    `with (${JSON.stringify(body)})!`,
+                    `Response: ${JSON.stringify(response.data)}`
+                );
             }
 
             await delay(500);
