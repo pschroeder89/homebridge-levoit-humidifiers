@@ -6,6 +6,7 @@ import Humidity from './characteristics/Humidity';
 import Active from './characteristics/Active';
 import VeSyncFan from './api/VeSyncFan';
 import MistLevel from "./characteristics/MistLevel";
+import TargetState from "./characteristics/TargetState";
 
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
@@ -61,8 +62,8 @@ export default class VeSyncAccessory {
             .setProps({
                 validValues: [0, 1],
             })
-            .onGet(Active.get.bind(this))
-            .onSet(Active.set.bind(this));
+            .onGet(TargetState.get.bind(this))
+            .onSet(TargetState.set.bind(this));
 
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
