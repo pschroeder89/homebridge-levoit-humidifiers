@@ -1,6 +1,6 @@
 export enum DeviceName {
-  Classic300S = '300S',
-  Classic200S = "200S",
+  Classic300S = 'Classic300S',
+  Classic200S = "Classic200S",
   Dual200S = 'Dual200S',
 }
 
