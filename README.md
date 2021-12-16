@@ -3,16 +3,19 @@
 This is a Homebridge plugin to control Levoit Humidifiers with via the VeSync Platform.
 
 | Supported Versions | Tested                           |
-| ------------------ | -------------------------------- |
+|--------------------| -------------------------------- |
 | Classic 300S       | ✅                               |
-| Dual 200S       | ✅                               |
+| Classic 200S       | ✅                               |
+| Dual 200S          | ✅                               |
 
 This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic for the Levoit humidifers.
 
 ### Features
 
 1. Set Mist Level
-   - Levels 1-9 on 300s, 1-2 on 200s
+   - Levels 1-9 on Classic300s
+   - Levels 1-3 on Classic200s
+   - Levels 1-2 on Dual200s
 
 2. Mode change
    - Auto
