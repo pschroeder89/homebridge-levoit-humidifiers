@@ -9,10 +9,18 @@ import VeSyncFan, { Mode } from '../api/VeSyncFan';
 import { AccessoryThisType } from '../VeSyncAccessory';
 
 const calculateMistLevel = (device: VeSyncFan) => {
-  let mist_level = device.mist_level;
-  mist_level = Math.ceil(mist_level * 100 / 9 / 10) * 10;
+  let current_mist_level = device.mist_level;
+  const total_mist_levels = device.deviceType.mistLevels;
+  current_mist_level = Math.ceil(current_mist_level * 100 / total_mist_levels / 10) * 10;
 
-  return device.isOn ? mist_level : 0;
+  return device.isOn ? current_mist_level : 0;
+};
+
+const convertMistLevelFromPerc = (device: VeSyncFan, percentage) => {
+  const total_mist_levels = device.deviceType.mistLevels;
+  const mist_int = Math.round(Math.ceil(Number(percentage) / 100 *  total_mist_levels));
+
+  return mist_int;
 };
 
 const characteristic: {
@@ -21,14 +29,12 @@ const characteristic: {
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
-
     return calculateMistLevel(this.device);
   },
+
   set: async function (value: CharacteristicValue) {
-    const intVal = Math.round(Math.ceil(Number(value) / 100 * 9));
-    // await this.device.changeMode(Mode.Manual);
+    const intVal = convertMistLevelFromPerc(this.device, value);
     await this.device.changeMistLevel(intVal);
-    return intVal;
   }
 };
 
