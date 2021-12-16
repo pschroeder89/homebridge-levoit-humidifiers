@@ -146,7 +146,7 @@ export default class VeSyncFan {
                     client,
                     deviceName,
                     mode,
-                    parseInt(mistLevel ?? '0', 9),
+                    parseInt(mistLevel ?? '0', 10),
                     uuid,
                     deviceStatus === 'on',
                     extension,
