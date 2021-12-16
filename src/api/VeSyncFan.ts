@@ -26,8 +26,8 @@ export default class VeSyncFan {
         return this._screenVisible;
     }
 
-    public get mist_level() {
-        return this._mist_level;
+    public get mistLevel() {
+        return this._mistLevel;
     }
 
     public get mode() {
@@ -42,7 +42,7 @@ export default class VeSyncFan {
         private readonly client: VeSync,
         public readonly name: string,
         private _mode: Mode,
-        private _mist_level: number,
+        private _mistLevel: number,
         public readonly uuid: string,
         private _isOn: boolean,
         private _humidityLevel: number,
@@ -81,20 +81,20 @@ export default class VeSyncFan {
         return success;
     }
 
-    public async changeMistLevel(mist_level: number): Promise<boolean> {
-        this.client.log.info("Setting Mist Level to " + mist_level);
-        if (mist_level > this.deviceType.mistLevels || mist_level < 1) {
+    public async changeMistLevel(mistLevel: number): Promise<boolean> {
+        this.client.log.info("Setting Mist Level to " + mistLevel);
+        if (mistLevel > this.deviceType.mistLevels || mistLevel < 1) {
             return false;
         }
 
         const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, {
-            level: mist_level,
+            level: mistLevel,
             type: 'mist',
             id: 0
         });
 
         if (success) {
-            this._mist_level = mist_level;
+            this._mistLevel = mistLevel;
         }
 
         return success;
@@ -119,7 +119,7 @@ export default class VeSyncFan {
                 this._humidityLevel = result.humidity;
                 this._screenVisible = result.display;
                 this._isOn = result.enabled;
-                this._mist_level = result.mist_virtual_level;
+                this._mistLevel = result.mist_virtual_level;
                 this._mode = result.mode;
             } catch (err: any) {
                 this.client.log.error(err?.message);
@@ -132,7 +132,7 @@ export default class VeSyncFan {
             ({
                  deviceStatus,
                  deviceName,
-                 mist_level,
+                 mistLevel,
                  mode,
                  extension,
                  uuid,
@@ -146,7 +146,7 @@ export default class VeSyncFan {
                     client,
                     deviceName,
                     mode,
-                    parseInt(mist_level ?? '0', 9),
+                    parseInt(mistLevel ?? '0', 9),
                     uuid,
                     deviceStatus === 'on',
                     extension,

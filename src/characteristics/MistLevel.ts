@@ -4,23 +4,23 @@ import {
   CharacteristicValue,
   Nullable
 } from 'homebridge';
-import VeSyncFan, { Mode } from '../api/VeSyncFan';
+import VeSyncFan from '../api/VeSyncFan';
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 
 const calculateMistLevel = (device: VeSyncFan) => {
-  let current_mist_level = device.mist_level;
-  const total_mist_levels = device.deviceType.mistLevels;
-  current_mist_level = Math.ceil(current_mist_level * 100 / total_mist_levels / 10) * 10;
+  let currentMistLevel = device.mistLevel;
+  const totalMistLevels = device.deviceType.mistLevels;
+  currentMistLevel = Math.ceil(currentMistLevel * 100 / totalMistLevels / 10) * 10;
 
-  return device.isOn ? current_mist_level : 0;
+  return device.isOn ? currentMistLevel : 0;
 };
 
 const convertMistLevelFromPerc = (device: VeSyncFan, percentage) => {
-  const total_mist_levels = device.deviceType.mistLevels;
-  const mist_int = Math.round(Math.ceil(Number(percentage) / 100 *  total_mist_levels));
+  const totalMistLevels = device.deviceType.mistLevels;
+  const mistInt = Math.round(Math.ceil(Number(percentage) / 100 *  totalMistLevels));
 
-  return mist_int;
+  return mistInt;
 };
 
 const characteristic: {
