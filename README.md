@@ -14,7 +14,7 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 
 1. Set Mist Level
    - Levels 1-9 on Classic300s
-   - Levels 1-3 on Classic200s
+   - Levels 1-9 on Classic200s
    - Levels 1-2 on Dual200s
 
 2. Mode change

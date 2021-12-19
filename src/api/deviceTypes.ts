@@ -24,7 +24,7 @@ const deviceTypes: DeviceType[] = [
         input.includes(DeviceName.Classic200S),
     hasAutoMode: true,
     mistMinLevel: 1,
-    mistLevels: 3
+    mistLevels: 9
   },
   {
     isValid: (input: string) => input.includes(DeviceName.Dual200S),
