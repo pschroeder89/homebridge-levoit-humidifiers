@@ -26,6 +26,16 @@ export default class VeSyncAccessory {
         return this.accessory.context.device;
     }
 
+    private get getValues() {
+        /*
+        Determines the number of mist level values to slide through in the Humidify slider.
+        Returns an array that contains the range of values between 0 and (mistLevels + 1).
+        We add 1 to mistLevels to account for 0 as a potential level.
+        Example: The Classic300s has 9 mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
+         */
+        const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
+        return arr;
+    }
     constructor(
         private readonly platform: Platform,
         private readonly accessory: VeSyncPlatformAccessory
@@ -75,9 +85,10 @@ export default class VeSyncAccessory {
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
             .setProps({
-                minStep: 10,
+                minStep: 1,
                 minValue: 0,
-                maxValue: 100
+                maxValue: this.device.deviceType.mistLevels,
+                validValues: this.getValues
             })
             .onGet(MistLevel.get.bind(this))
             .onSet(MistLevel.set.bind(this));

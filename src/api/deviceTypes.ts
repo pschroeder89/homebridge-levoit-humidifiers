@@ -1,5 +1,6 @@
 export enum DeviceName {
-  Classic300S = '300S',
+  Classic300S = 'Classic300S',
+  Classic200S = "Classic200S",
   Dual200S = 'Dual200S',
 }
 
@@ -14,6 +15,13 @@ const deviceTypes: DeviceType[] = [
   {
     isValid: (input: string) =>
       input.includes(DeviceName.Classic300S),
+    hasAutoMode: true,
+    mistMinLevel: 1,
+    mistLevels: 9
+  },
+  {
+    isValid: (input: string) =>
+        input.includes(DeviceName.Classic200S),
     hasAutoMode: true,
     mistMinLevel: 1,
     mistLevels: 9
