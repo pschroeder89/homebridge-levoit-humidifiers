@@ -10,8 +10,6 @@ import {AccessoryThisType} from '../VeSyncAccessory';
 
 const calculateMistLevel = (device: VeSyncFan) => {
     const currentMistLevel = device.mistLevel;
-    // eslint-disable-next-line no-console
-    console.log("MIST: " + currentMistLevel);
     return device.isOn ? currentMistLevel : 0;
 };
 
