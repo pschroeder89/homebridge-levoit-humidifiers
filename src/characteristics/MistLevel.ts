@@ -1,41 +1,36 @@
 import {
-  CharacteristicGetHandler,
-  CharacteristicSetHandler,
-  CharacteristicValue,
-  Nullable
+    CharacteristicGetHandler,
+    CharacteristicSetHandler,
+    CharacteristicValue,
+    Nullable
 } from 'homebridge';
 import VeSyncFan from '../api/VeSyncFan';
 
-import { AccessoryThisType } from '../VeSyncAccessory';
+import {AccessoryThisType} from '../VeSyncAccessory';
 
 const calculateMistLevel = (device: VeSyncFan) => {
-  let currentMistLevel = device.mistLevel;
-  const totalMistLevels = device.deviceType.mistLevels;
-  currentMistLevel = Math.ceil(currentMistLevel * 100 / totalMistLevels / 10) * 10;
-
-  return device.isOn ? currentMistLevel : 0;
-};
-
-const convertMistLevelFromPerc = (device: VeSyncFan, percentage) => {
-  const totalMistLevels = device.deviceType.mistLevels;
-  const mistInt = Math.round(Math.ceil(Number(percentage) / 100 *  totalMistLevels));
-
-  return mistInt;
+    const currentMistLevel = device.mistLevel;
+    // eslint-disable-next-line no-console
+    console.log("MIST: " + currentMistLevel);
+    return device.isOn ? currentMistLevel : 0;
 };
 
 const characteristic: {
-  get: CharacteristicGetHandler;
-  set: CharacteristicSetHandler;
+    get: CharacteristicGetHandler;
+    set: CharacteristicSetHandler;
 } & AccessoryThisType = {
-  get: async function (): Promise<Nullable<CharacteristicValue>> {
-    await this.device.updateInfo();
-    return calculateMistLevel(this.device);
-  },
+    get: async function (): Promise<Nullable<CharacteristicValue>> {
+        await this.device.updateInfo();
+        return calculateMistLevel(this.device);
+    },
 
-  set: async function (value: CharacteristicValue) {
-    const intVal = convertMistLevelFromPerc(this.device, value);
-    await this.device.changeMistLevel(intVal);
-  }
+    set: async function (value: CharacteristicValue) {
+        if (value == 0) {
+            await this.device.setPower(false);
+        } else {
+            await this.device.changeMistLevel(Number(value));
+        }
+    }
 };
 
 export default characteristic;

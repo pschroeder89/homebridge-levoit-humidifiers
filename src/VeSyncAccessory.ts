@@ -26,6 +26,12 @@ export default class VeSyncAccessory {
         return this.accessory.context.device;
     }
 
+    private get getValues() {
+        const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
+        // eslint-disable-next-line no-console
+        console.log("VALUES: " + arr);
+        return arr;
+    }
     constructor(
         private readonly platform: Platform,
         private readonly accessory: VeSyncPlatformAccessory
@@ -75,9 +81,8 @@ export default class VeSyncAccessory {
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
             .setProps({
-                minStep: 10,
-                minValue: 0,
-                maxValue: 100
+                minStep: 1,
+                validValues: this.getValues
             })
             .onGet(MistLevel.get.bind(this))
             .onSet(MistLevel.set.bind(this));
