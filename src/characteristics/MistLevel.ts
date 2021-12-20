@@ -11,7 +11,7 @@ import { AccessoryThisType } from '../VeSyncAccessory';
 const calculateMistLevel = (device: VeSyncFan) => {
   let currentMistLevel = device.mistLevel;
   const totalMistLevels = device.deviceType.mistLevels;
-  currentMistLevel = currentMistLevel * 100 / totalMistLevels;
+  currentMistLevel = Math.ceil(currentMistLevel * 100 / totalMistLevels / 10) * 10;
 
   return device.isOn ? currentMistLevel : 0;
 };

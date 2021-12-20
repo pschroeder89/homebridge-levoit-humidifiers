@@ -26,23 +26,6 @@ export default class VeSyncAccessory {
         return this.accessory.context.device;
     }
 
-    private get getStep() {
-        const levels = this.device.deviceType.mistLevels;
-        const percentage = 100 / levels;
-        return Math.round(percentage * 100) / 100;
-    }
-
-    private get getValues() {
-        const values: number[] = [];
-        const percentage = this.getStep;
-        let levelStep = 0;
-        while (levelStep <= 100) {
-            values.push(levelStep);
-            levelStep = levelStep + percentage;
-        }
-        return values;
-    }
-
     constructor(
         private readonly platform: Platform,
         private readonly accessory: VeSyncPlatformAccessory
@@ -92,8 +75,9 @@ export default class VeSyncAccessory {
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
             .setProps({
-                validValues: this.getValues,
-                minStep: this.getStep
+                minStep: 10,
+                minValue: 0,
+                maxValue: 100
             })
             .onGet(MistLevel.get.bind(this))
             .onSet(MistLevel.set.bind(this));
