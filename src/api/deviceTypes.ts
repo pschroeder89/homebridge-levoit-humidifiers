@@ -1,7 +1,8 @@
 export enum DeviceName {
-    Classic300S = 'classic300s',
-    Classic200S = "classic200s",
-    Dual200S = 'dual200s',
+    Classic300S = 'Classic300S',
+    Classic200S = "Classic200S",
+    Dual200S = 'Dual200S',
+    Dual200S_EU = 'LUH-D301S-WEU'
 }
 
 export interface DeviceType {
@@ -11,28 +12,29 @@ export interface DeviceType {
     mistMinLevel: number;
 }
 
-function sanitizeString(input) {
-    // Lowercase the input and remove all whitespace
-    return input.toLowerCase().replace(/\s+/g, '');
-}
-
 const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) =>
-            sanitizeString(input).includes(DeviceName.Classic300S),
+            input.includes(DeviceName.Classic300S),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 9
     },
     {
         isValid: (input: string) =>
-            sanitizeString(input).includes(DeviceName.Classic200S),
+            input.includes(DeviceName.Classic200S),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 9
     },
     {
-        isValid: (input: string) => sanitizeString(input).includes(DeviceName.Dual200S),
+        isValid: (input: string) => input.includes(DeviceName.Dual200S),
+        hasAutoMode: true,
+        mistMinLevel: 1,
+        mistLevels: 2
+    },
+    {
+        isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 2
