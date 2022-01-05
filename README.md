@@ -1,6 +1,6 @@
 # Homebridge Levoit Humidifiers
 
-This is a Homebridge plugin to control Levoit Humidifiers with via the VeSync Platform.
+This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
 | Supported Versions | Tested                           |
 |--------------------| -------------------------------- |
