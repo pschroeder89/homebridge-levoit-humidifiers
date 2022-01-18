@@ -3,7 +3,8 @@ export enum DeviceName {
     Classic200S = "Classic200S",
     Dual200S = 'Dual200S',
     Dual200S_EU = 'LUH-D301S-WEU',
-    Dual200S_UK = 'LUH-D301S-WUK'
+    Dual200S_UK = 'LUH-D301S-WUK',
+    LV600S = "LUH-A602S-WUS"
 }
 
 export interface DeviceType {
@@ -45,6 +46,13 @@ const deviceTypes: DeviceType[] = [
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 2
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.LV600S),
+        hasAutoMode: true,
+        mistMinLevel: 1,
+        mistLevels: 9
     },
 ];
 

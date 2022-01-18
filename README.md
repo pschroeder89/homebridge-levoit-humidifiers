@@ -9,27 +9,39 @@ This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platfor
 | Dual 200S            | ✅                               |
 | Dual 200S (EU model) | ✅                               |
 | Dual 200S (UK model) | ✅                               |
+| LV600S (cool mode only) | ✅                               |
 
-This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic for the Levoit humidifers.
+This plugin was forked
+from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
+for the Levoit humidifers.
 
 ### Features
 
 1. Set Mist Level
-   - Levels 1-9 on Classic300s and Classic200s
-   - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
+    - Levels 1-9 on Classic300s, Classic200s, and LV600S
+    - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
 
 2. Mode change
-   - Auto
-   - Manual
+    - Auto
+    - Manual
+
+### TODOs
+
+* Add Sleep Mode
+* Add LV600S Warm Mode
+* Improve Auto Mode to specify target humidity
+
+### Details
 
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/auto.png?raw=true" width=25% height=25%></a>
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/humidity.png?raw=true" width=25% height=25%></a>
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/off.png?raw=true" width=25% height=25%></a>
 
-The read data is cached for 5 seconds to not trigger the rate limiter for the API.
-Each request is delayed by 500ms to not trigger the rate limiter if a huge number of requests are sent.
+The read data is cached for 5 seconds to not trigger the rate limiter for the API. Each request is delayed by 500ms to
+not trigger the rate limiter if a huge number of requests are sent.
 
-The timers are not included because you can accomplish similar results by using Home App's Automation or the Shortcuts app
+The timers are not included because you can accomplish similar results by using Home App's Automation or the Shortcuts
+app
 
 ### Configuration
 
@@ -38,9 +50,11 @@ The timers are not included because you can accomplish similar results by using 
 - Setup the platform plugin as a child bridge for better performance
 - Save and restart Homebridge.
 
-This plugin requires your VeSync credentials as it communicates with the VeSync devices via VeSync's own API. Your credentials are only stored in the Homebridge config and not sent to any server except VeSync's.
+This plugin requires your VeSync credentials as it communicates with the VeSync devices via VeSync's own API. Your
+credentials are only stored in the Homebridge config and not sent to any server except VeSync's.
 
-You can also do this directly via the homebridge config by adding your credentials to the config file under platforms. Replace the values of `username` and `password` by your credentials.
+You can also do this directly via the homebridge config by adding your credentials to the config file under platforms.
+Replace the values of `username` and `password` by your credentials.
 
 ```json
 {
