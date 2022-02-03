@@ -4,7 +4,7 @@
   ],
   "ext": "ts",
   "ignore": [],
-  "exec": "tsc && DEBUG=* homebridge -I",
+  "exec": "rm -rf ~/.homebridge/accessories/cachedAccessories && tsc && DEBUG=* homebridge -I",
   "signal": "SIGTERM",
   "env": {
     "NODE_OPTIONS": "--trace-warnings"

@@ -13,6 +13,7 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
+    // @ts-ignore
     const { HUMIDIFIER, AUTO } =
       this.platform.Characteristic.TargetHumidifierDehumidifierState;
 

@@ -14,7 +14,8 @@ export enum BypassMethod {
     DISPLAY = 'setDisplay',
     SWITCH = 'setSwitch',
     HUMIDITY = 'setTargetHumidity',
-    MIST_LEVEL = 'setVirtualLevel'
+    MIST_LEVEL = 'setVirtualLevel',
+    WARM_LEVEL = 'setLevel'
 }
 
 const lock = new AsyncLock();
