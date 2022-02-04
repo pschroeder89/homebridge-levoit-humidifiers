@@ -24,10 +24,18 @@ for the Levoit humidifers.
 2. Mode Change
     - Auto
     - Manual
+    - Off
 
 3. Sleep Mode Switch
    - This switches the device between Sleep Mode (On) and Manual Mode (Off)
    - Sleep Mode humidity threshold should be adjusted within the VeSync app. 
+
+4. Night Light
+   - Supported on LV600S and Classic300s
+   - 4 brightness levels
+
+5. Display Toggle
+   - Toggle the display on/off
 
 ### TODOs
 
