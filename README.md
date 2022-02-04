@@ -21,13 +21,16 @@ for the Levoit humidifers.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
     - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
 
-2. Mode change
+2. Mode Change
     - Auto
     - Manual
 
+3. Sleep Mode Switch
+   - This switches the device between Sleep Mode (On) and Manual Mode (Off)
+   - Sleep Mode humidity threshold should be adjusted within the VeSync app. 
+
 ### TODOs
 
-* Add Sleep Mode
 * Add LV600S Warm Mode
 * Improve Auto Mode to specify target humidity
 

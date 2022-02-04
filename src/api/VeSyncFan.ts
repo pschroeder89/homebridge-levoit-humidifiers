@@ -2,6 +2,7 @@ import AsyncLock from 'async-lock';
 import deviceTypes, {DeviceType} from './deviceTypes';
 
 import VeSync, {BypassMethod} from './VeSync';
+import {CharacteristicValue} from "homebridge";
 
 export enum Mode {
     Manual = 'manual',
@@ -26,6 +27,10 @@ export default class VeSyncFan {
         return this._screenVisible;
     }
 
+    public get brightnessLevel() {
+        return this._brightnessLevel;
+    }
+
     public get mistLevel() {
         return this._mistLevel;
     }
@@ -43,6 +48,7 @@ export default class VeSyncFan {
         public readonly name: string,
         private _mode: Mode,
         private _mistLevel: number,
+        private _brightnessLevel: number,
         public readonly uuid: string,
         private _isOn: boolean,
         private _humidityLevel: number,
@@ -56,6 +62,8 @@ export default class VeSyncFan {
     }
 
     public async setPower(power: boolean): Promise<boolean> {
+        this.client.log.info("Setting Power to " + power);
+
         const success = await this.client.sendCommand(this, BypassMethod.SWITCH, {
             enabled: power,
             id: 0
@@ -69,13 +77,39 @@ export default class VeSyncFan {
     }
 
     public async changeMode(mode: Mode): Promise<boolean> {
-
+        this.client.log.info("Changing Mode to " + mode);
         const success = await this.client.sendCommand(this, BypassMethod.MODE, {
             mode: mode.toString()
         });
 
         if (success) {
             this._mode = mode;
+        }
+
+        return success;
+    }
+
+    public async setBrightness(brightness: number): Promise<boolean> {
+        this.client.log.info("Setting Night Light to " + brightness);
+        const success = await this.client.sendCommand(this, BypassMethod.NIGHT, {
+            night_light_brightness: brightness
+        });
+
+        if (success) {
+            this._brightnessLevel = brightness;
+        }
+
+        return success;
+    }
+
+    public async setDisplay(power: boolean): Promise<boolean> {
+        this.client.log.info("Setting Display to " + power);
+        const success = await this.client.sendCommand(this, BypassMethod.DISPLAY, {
+            state: power
+        });
+
+        if (success) {
+            this._screenVisible = power;
         }
 
         return success;
@@ -121,6 +155,7 @@ export default class VeSyncFan {
                 this._isOn = result.enabled;
                 this._mistLevel = result.mist_virtual_level;
                 this._mode = result.mode;
+                this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
                 this.client.log.error(err?.message);
             }
@@ -133,6 +168,7 @@ export default class VeSyncFan {
                  deviceStatus,
                  deviceName,
                  mistLevel,
+                 brightnessLevel,
                  mode,
                  extension,
                  uuid,
@@ -147,6 +183,7 @@ export default class VeSyncFan {
                     deviceName,
                     mode,
                     parseInt(mistLevel ?? '0', 10),
+                    brightnessLevel,
                     uuid,
                     deviceStatus === 'on',
                     extension,

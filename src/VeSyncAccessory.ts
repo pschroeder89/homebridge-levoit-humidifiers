@@ -7,6 +7,9 @@ import Active from './characteristics/Active';
 import VeSyncFan from './api/VeSyncFan';
 import MistLevel from "./characteristics/MistLevel";
 import TargetState from "./characteristics/TargetState";
+import SleepState from "./characteristics/SleepState";
+import LightState from "./characteristics/LightState";
+import DisplayState from "./characteristics/DisplayState";
 
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
@@ -17,6 +20,9 @@ export type AccessoryThisType = ThisType<{
 export default class VeSyncAccessory {
     private humiditySensorService: Service;
     private humidifierService: Service;
+    private nightLight: Service | undefined;
+    private sleepSwitch: Service;
+    private displaySwitch: Service;
 
     public get UUID() {
         return this.device.uuid.toString();
@@ -36,6 +42,7 @@ export default class VeSyncAccessory {
         const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
         return arr;
     }
+
     constructor(
         private readonly platform: Platform,
         private readonly accessory: VeSyncPlatformAccessory
@@ -53,13 +60,22 @@ export default class VeSyncAccessory {
 
         this.humidifierService =
             this.accessory.getService(this.platform.Service.HumidifierDehumidifier) ||
-            this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
+            this.accessory.addService(this.platform.Service.HumidifierDehumidifier, "Humidifier", "Humidifier");
+
+        this.sleepSwitch =
+            this.accessory.getService("Sleep Mode") ||
+            this.accessory.addService(this.platform.Service.Switch, "Sleep Mode", "Sleep Mode");
+
+        this.displaySwitch =
+            this.accessory.getService("Display") ||
+            this.accessory.addService(this.platform.Service.Switch, "Display", "Display");
 
         this.humiditySensorService =
-            this.accessory.getService(this.platform.Service.HumiditySensor) ||
-            this.accessory.addService(this.platform.Service.HumiditySensor);
+            this.accessory.getService("Humidity Sensor") ||
+            this.accessory.addService(this.platform.Service.HumiditySensor, "Humidity Sensor", "Humidity Sensor");
 
         this.humidifierService.setPrimaryService(true);
+        this.humidifierService.addLinkedService(this.sleepSwitch);
         this.humidifierService.addLinkedService(this.humiditySensorService);
 
         this.humidifierService
@@ -93,6 +109,16 @@ export default class VeSyncAccessory {
             .onGet(MistLevel.get.bind(this))
             .onSet(MistLevel.set.bind(this));
 
+        this.sleepSwitch
+            .getCharacteristic(this.platform.Characteristic.On)
+            .onGet(SleepState.get.bind(this))
+            .onSet(SleepState.set.bind(this));
+
+        this.displaySwitch
+            .getCharacteristic(this.platform.Characteristic.On)
+            .onGet(DisplayState.get.bind(this))
+            .onSet(DisplayState.set.bind(this));
+
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
@@ -101,5 +127,23 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
 
+        if (this.device.deviceType.hasLight) {
+            this.nightLight =
+                this.accessory.getService("Night Light") ||
+                this.accessory.addService(this.platform.Service.Lightbulb, "Night Light", "Night Light");
+
+            this.humidifierService.addLinkedService(this.nightLight);
+
+            this.nightLight
+                .getCharacteristic(this.platform.Characteristic.Brightness)
+                .setProps({
+                    minStep: 25,
+                    minValue: 0,
+                    maxValue: 100,
+                    validValues: [0, 25, 50, 75, 100]
+                })
+                .onGet(LightState.get.bind(this))
+                .onSet(LightState.set.bind(this));
+        }
     }
 }

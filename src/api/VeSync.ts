@@ -10,7 +10,7 @@ import VeSyncFan from './VeSyncFan';
 export enum BypassMethod {
     STATUS = 'getHumidifierStatus',
     MODE = 'setHumidityMode',
-    NIGHT = 'setNightLight',
+    NIGHT = 'setNightLightBrightness',
     DISPLAY = 'setDisplay',
     SWITCH = 'setSwitch',
     HUMIDITY = 'setTargetHumidity',
