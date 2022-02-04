@@ -59,7 +59,7 @@ export default class VeSyncAccessory {
             .setCharacteristic(this.platform.Characteristic.SerialNumber, mac);
 
         this.humidifierService =
-            this.accessory.getService(this.platform.Service.HumidifierDehumidifier) ||
+            this.accessory.getService("Humidifier") ||
             this.accessory.addService(this.platform.Service.HumidifierDehumidifier, "Humidifier", "Humidifier");
 
         this.sleepSwitch =
