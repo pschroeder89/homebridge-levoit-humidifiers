@@ -17,18 +17,17 @@ for the Levoit humidifers.
 
 ### Features
 
-1. Set Mist Level
+1. Target Humidity
+    - Sets humidifier to Auto and sets the Target Humidity to the desired level.
+    
+2. Mist Level
+    - Sets humidifier to Manual and sets the Mist Level to the desired level.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
     - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
 
-2. Mode Change
-    - Auto
-    - Manual
-    - Off
-
-3. Sleep Mode Switch
-   - This switches the device between Sleep Mode (On) and Manual Mode (Off)
-   - Sleep Mode humidity threshold should be adjusted within the VeSync app. 
+3. Sleep Mode
+   - This switches the device between Sleep Mode (On) and Auto Mode (Off)
+   - Sleep Mode Target Humidity is controlled by the Target Humidity slider, too.
 
 4. Night Light
    - Supported on LV600S and Classic300s
@@ -37,10 +36,12 @@ for the Levoit humidifers.
 5. Display Toggle
    - Toggle the display on/off
 
+6. Humidity Sensor
+   - Sensor that displays current Humidity %
+
 ### TODOs
 
 * Add LV600S Warm Mode
-* Improve Auto Mode to specify target humidity
 
 ### Details
 

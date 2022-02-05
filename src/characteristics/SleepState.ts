@@ -28,7 +28,7 @@ const characteristic: {
                 await this.device.changeMode(Mode.Sleep);
                 break;
             case false:
-                await this.device.changeMode(Mode.Manual);
+                await this.device.changeMode(Mode.Auto);
                 break;
         }
     }
