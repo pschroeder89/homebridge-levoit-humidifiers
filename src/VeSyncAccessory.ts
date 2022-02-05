@@ -4,7 +4,7 @@ import Platform, {VeSyncPlatformAccessory} from './platform';
 import CurrentState from './characteristics/CurrentState';
 import Humidity from './characteristics/Humidity';
 import Active from './characteristics/Active';
-import VeSyncFan, {Mode} from './api/VeSyncFan';
+import VeSyncFan from './api/VeSyncFan';
 import MistLevel from "./characteristics/MistLevel";
 import TargetState from "./characteristics/TargetState";
 import SleepState from "./characteristics/SleepState";

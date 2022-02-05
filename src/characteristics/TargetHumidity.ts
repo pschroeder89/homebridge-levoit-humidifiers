@@ -17,7 +17,7 @@ const characteristic: {
         if (this.device.mode == Mode.Auto) {
             return this.device.targetHumidity;
         } else {
-            return 0
+            return 0;
         }
     },
     set: async function (humidity: CharacteristicValue): Promise<Nullable<CharacteristicValue>> {

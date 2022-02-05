@@ -1,10 +1,8 @@
 import {
   CharacteristicGetHandler,
-  CharacteristicSetHandler,
   CharacteristicValue,
   Nullable
 } from 'homebridge';
-import { Mode } from '../api/VeSyncFan';
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 

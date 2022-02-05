@@ -17,7 +17,7 @@ const characteristic: {
 
         // If device is off, set the mode to null so the switch displays Off
         if (!this.device.isOn) {
-            return false
+            return false;
         }
 
         return this.device.mode === Mode.Sleep;

@@ -2,9 +2,6 @@ import AsyncLock from 'async-lock';
 import deviceTypes, {DeviceType} from './deviceTypes';
 
 import VeSync, {BypassMethod} from './VeSync';
-import {CharacteristicValue} from "homebridge";
-import targetHumidity from "../characteristics/TargetHumidity";
-import humidity from "../characteristics/Humidity";
 
 export enum Mode {
     Manual = 'manual',
@@ -92,7 +89,7 @@ export default class VeSyncFan {
         this.client.log.info("Setting Target Humidity to " + level);
 
         const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, {
-            target_humidity: level,
+            "target_humidity": level,
             id: 0
         });
 
@@ -119,7 +116,7 @@ export default class VeSyncFan {
     public async setBrightness(brightness: number): Promise<boolean> {
         this.client.log.info("Setting Night Light to " + brightness);
         const success = await this.client.sendCommand(this, BypassMethod.NIGHT, {
-            night_light_brightness: brightness
+            "night_light_brightness": brightness
         });
 
         if (success) {
@@ -178,7 +175,7 @@ export default class VeSyncFan {
                 const result = data?.result?.result;
                 this._humidityLevel = result.humidity;
                 this._targetHumidity = result.configuration.auto_target_humidity;
-                this._targetReached = result.automatic_stop_reach_target
+                this._targetReached = result.automatic_stop_reach_target;
                 this._displayOn = result.display;
                 this._isOn = result.enabled;
                 this._mistLevel = result.mist_virtual_level;
