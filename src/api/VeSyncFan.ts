@@ -3,6 +3,8 @@ import deviceTypes, {DeviceType} from './deviceTypes';
 
 import VeSync, {BypassMethod} from './VeSync';
 import {CharacteristicValue} from "homebridge";
+import targetHumidity from "../characteristics/TargetHumidity";
+import humidity from "../characteristics/Humidity";
 
 export enum Mode {
     Manual = 'manual',
@@ -15,7 +17,7 @@ export default class VeSyncFan {
     public readonly deviceType: DeviceType;
     private lastCheck = 0;
 
-    private _screenVisible = true;
+    private _displayOn = true;
 
     public readonly manufacturer = 'Levoit';
 
@@ -23,8 +25,12 @@ export default class VeSyncFan {
         return this._humidityLevel;
     }
 
-    public get screenVisible() {
-        return this._screenVisible;
+    public get targetHumidity() {
+        return this._targetHumidity;
+    }
+
+    public get displayOn() {
+        return this._displayOn;
     }
 
     public get brightnessLevel() {
@@ -37,6 +43,10 @@ export default class VeSyncFan {
 
     public get mode() {
         return this._mode;
+    }
+
+    public get targetReached() {
+        return this._targetReached;
     }
 
     public get isOn() {
@@ -52,6 +62,8 @@ export default class VeSyncFan {
         public readonly uuid: string,
         private _isOn: boolean,
         private _humidityLevel: number,
+        private _targetHumidity: number,
+        private _targetReached: boolean,
         public readonly configModule: string,
         public readonly cid: string,
         public readonly region: string,
@@ -71,6 +83,21 @@ export default class VeSyncFan {
 
         if (success) {
             this._isOn = power;
+        }
+
+        return success;
+    }
+
+    public async setTargetHumidity(level: number): Promise<boolean> {
+        this.client.log.info("Setting Target Humidity to " + level);
+
+        const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, {
+            target_humidity: level,
+            id: 0
+        });
+
+        if (success) {
+            this._targetHumidity = level;
         }
 
         return success;
@@ -109,7 +136,7 @@ export default class VeSyncFan {
         });
 
         if (success) {
-            this._screenVisible = power;
+            this._displayOn = power;
         }
 
         return success;
@@ -149,9 +176,10 @@ export default class VeSyncFan {
                 }
 
                 const result = data?.result?.result;
-
                 this._humidityLevel = result.humidity;
-                this._screenVisible = result.display;
+                this._targetHumidity = result.configuration.auto_target_humidity;
+                this._targetReached = result.automatic_stop_reach_target
+                this._displayOn = result.display;
                 this._isOn = result.enabled;
                 this._mistLevel = result.mist_virtual_level;
                 this._mode = result.mode;
@@ -167,10 +195,12 @@ export default class VeSyncFan {
             ({
                  deviceStatus,
                  deviceName,
+                 mode,
                  mistLevel,
                  brightnessLevel,
-                 mode,
-                 extension,
+                 humidity,
+                 targetHumidity,
+                 targetReached,
                  uuid,
                  configModule,
                  cid,
@@ -186,7 +216,9 @@ export default class VeSyncFan {
                     brightnessLevel,
                     uuid,
                     deviceStatus === 'on',
-                    extension,
+                    humidity,
+                    targetHumidity,
+                    targetReached,
                     configModule,
                     cid,
                     deviceRegion,

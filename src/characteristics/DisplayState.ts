@@ -14,7 +14,7 @@ const characteristic: {
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
-        return this.device.screenVisible;
+        return this.device.displayOn;
     },
     set: async function (value: CharacteristicValue) {
         const boolValue = value == 1;

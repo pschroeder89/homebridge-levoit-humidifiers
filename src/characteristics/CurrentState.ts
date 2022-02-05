@@ -1,22 +1,27 @@
 import {
-  CharacteristicGetHandler,
-  CharacteristicValue,
-  Nullable
+    CharacteristicGetHandler,
+    CharacteristicValue,
+    Nullable
 } from 'homebridge';
 
-import { AccessoryThisType } from '../VeSyncAccessory';
+import {AccessoryThisType} from '../VeSyncAccessory';
+import {Mode} from "../api/VeSyncFan";
 
 const characteristic: {
-  get: CharacteristicGetHandler;
+    get: CharacteristicGetHandler;
 } & AccessoryThisType = {
-  get: async function (): Promise<Nullable<CharacteristicValue>> {
-    await this.device.updateInfo();
+    get: async function (): Promise<Nullable<CharacteristicValue>> {
+        await this.device.updateInfo();
 
-    const { HUMIDIFYING, IDLE } =
-      this.platform.Characteristic.CurrentHumidifierDehumidifierState;
+        const {HUMIDIFYING, IDLE} =
+            this.platform.Characteristic.CurrentHumidifierDehumidifierState;
 
-    return this.device.isOn ? HUMIDIFYING : IDLE;
-  }
+        if (this.device.targetReached || !this.device.isOn || this.device.mode == Mode.Manual) {
+            return IDLE;
+        } else {
+            return HUMIDIFYING;
+        }
+    }
 };
 
 export default characteristic;

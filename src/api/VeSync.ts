@@ -134,6 +134,7 @@ export default class VeSync {
             await delay(500);
 
             return isSuccess;
+
         });
     }
 

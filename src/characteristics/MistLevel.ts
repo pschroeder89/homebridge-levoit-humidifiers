@@ -4,7 +4,7 @@ import {
     CharacteristicValue,
     Nullable
 } from 'homebridge';
-import VeSyncFan from '../api/VeSyncFan';
+import VeSyncFan, {Mode} from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
 
@@ -26,6 +26,7 @@ const characteristic: {
         if (value == 0) {
             await this.device.setPower(false);
         } else {
+            await this.device.changeMode(Mode.Manual);
             await this.device.changeMistLevel(Number(value));
         }
     }

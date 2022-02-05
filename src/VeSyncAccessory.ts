@@ -4,12 +4,13 @@ import Platform, {VeSyncPlatformAccessory} from './platform';
 import CurrentState from './characteristics/CurrentState';
 import Humidity from './characteristics/Humidity';
 import Active from './characteristics/Active';
-import VeSyncFan from './api/VeSyncFan';
+import VeSyncFan, {Mode} from './api/VeSyncFan';
 import MistLevel from "./characteristics/MistLevel";
 import TargetState from "./characteristics/TargetState";
 import SleepState from "./characteristics/SleepState";
 import LightState from "./characteristics/LightState";
 import DisplayState from "./characteristics/DisplayState";
+import TargetHumidity from "./characteristics/TargetHumidity";
 
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
@@ -23,6 +24,7 @@ export default class VeSyncAccessory {
     private nightLight: Service | undefined;
     private sleepSwitch: Service;
     private displaySwitch: Service;
+    private mistService: Service;
 
     public get UUID() {
         return this.device.uuid.toString();
@@ -59,8 +61,13 @@ export default class VeSyncAccessory {
             .setCharacteristic(this.platform.Characteristic.SerialNumber, mac);
 
         this.humidifierService =
-            this.accessory.getService("Humidifier") ||
-            this.accessory.addService(this.platform.Service.HumidifierDehumidifier, "Humidifier", "Humidifier");
+            this.accessory.getService("Target Humidity") ||
+            this.accessory.addService(this.platform.Service.HumidifierDehumidifier, "Target Humidity", "Target Humidity");
+
+
+        this.mistService =
+            this.accessory.getService("Mist Level") ||
+            this.accessory.addService(this.platform.Service.Fan, "Mist Level", "Mist Level");
 
         this.sleepSwitch =
             this.accessory.getService("Sleep Mode") ||
@@ -74,10 +81,6 @@ export default class VeSyncAccessory {
             this.accessory.getService("Humidity Sensor") ||
             this.accessory.addService(this.platform.Service.HumiditySensor, "Humidity Sensor", "Humidity Sensor");
 
-        this.humidifierService.setPrimaryService(true);
-        this.humidifierService.addLinkedService(this.sleepSwitch);
-        this.humidifierService.addLinkedService(this.humiditySensorService);
-
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.Active)
             .onGet(Active.get.bind(this))
@@ -86,20 +89,33 @@ export default class VeSyncAccessory {
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
             .setProps({
-                validValues: [0, 1],
+                validValues: [1],
             })
-            .onGet(TargetState.get.bind(this))
-            .onSet(TargetState.set.bind(this));
+            .onGet(TargetState.get.bind(this));
 
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
             .setProps({
-                validValues: [0, 1, 2],
+                validValues: [1, 2],
             })
             .onGet(CurrentState.get.bind(this));
 
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
+            .setProps({
+                minStep: 1,
+                minValue: 0,
+                maxValue: 80, // 80 is the max humidity level in VeSync
+            })
+            .onGet(TargetHumidity.get.bind(this))
+            .onSet(TargetHumidity.set.bind(this));
+
+        this.humidifierService
+            .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+            .onGet(Humidity.get.bind(this));
+
+        this.mistService
+            .getCharacteristic(this.platform.Characteristic.RotationSpeed)
             .setProps({
                 minStep: 1,
                 minValue: 0,
@@ -119,10 +135,6 @@ export default class VeSyncAccessory {
             .onGet(DisplayState.get.bind(this))
             .onSet(DisplayState.set.bind(this));
 
-        this.humidifierService
-            .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-            .onGet(Humidity.get.bind(this));
-
         this.humiditySensorService
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
@@ -131,8 +143,6 @@ export default class VeSyncAccessory {
             this.nightLight =
                 this.accessory.getService("Night Light") ||
                 this.accessory.addService(this.platform.Service.Lightbulb, "Night Light", "Night Light");
-
-            this.humidifierService.addLinkedService(this.nightLight);
 
             this.nightLight
                 .getCharacteristic(this.platform.Characteristic.Brightness)
@@ -145,5 +155,15 @@ export default class VeSyncAccessory {
                 .onGet(LightState.get.bind(this))
                 .onSet(LightState.set.bind(this));
         }
+
+        // Link Services
+        this.humidifierService.setPrimaryService(true);
+        if (this.nightLight) {
+            this.humidifierService.addLinkedService(this.nightLight);
+        }
+        this.humidifierService.addLinkedService(this.sleepSwitch);
+        this.humidifierService.addLinkedService(this.mistService);
+        this.humidifierService.addLinkedService(this.displaySwitch);
+        this.humidifierService.addLinkedService(this.humiditySensorService);
     }
 }
