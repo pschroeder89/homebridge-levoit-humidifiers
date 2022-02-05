@@ -45,15 +45,17 @@ for the Levoit humidifers.
 
 ### Details
 
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services2.png?raw=true" width=25% height=25%></a>
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/auto.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/humidity.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/off.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/manual.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/display.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/light.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/sleep.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services.png?raw=true" width=25% height=25%></a>
+
 
 The read data is cached for 5 seconds to not trigger the rate limiter for the API. Each request is delayed by 500ms to
 not trigger the rate limiter if a huge number of requests are sent.
-
-The timers are not included because you can accomplish similar results by using Home App's Automation or the Shortcuts
-app
 
 ### Configuration
 
@@ -101,13 +103,13 @@ In the config file, add `enableDebugMode: true`
 
 ### Local Development
 
-To setup the local project clone the files and inside the root directory of the project run:
+To setup the local project, clone this repo and run the following from the root directory:
 
 ```
 yarn install
 ```
 
-After that to start the local server use
+To run locally, make sure to install Homebridge locally, and then run:
 
 ```
 yarn watch
