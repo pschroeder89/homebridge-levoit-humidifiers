@@ -2,14 +2,14 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
-| Supported Versions   | Tested                           |
-|----------------------| -------------------------------- |
-| Classic 300S         | ✅                               |
-| Classic 200S         | ✅                               |
-| Dual 200S            | ✅                               |
-| Dual 200S (EU model) | ✅                               |
-| Dual 200S (UK model) | ✅                               |
-| LV600S (cool mode only) | ✅                               |
+| Supported Versions      | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode   |
+|-------------------------|-----------|-----------|------------|-------------|----------------|-----------------|-------------|
+| Classic 300S            | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌           |
+| Classic 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S               | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S (EU model)    | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S (UK model)    | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| LV600S (cool mode only) | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | Coming Soon |
 
 This plugin was forked
 from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
@@ -19,25 +19,26 @@ for the Levoit Humidifers.
 
 1. Target Humidity
     - Sets humidifier to Auto and sets the Target Humidity to the desired level.
-    
+    - Can also change Target Humidity in Sleep Mode.
+
 2. Mist Level
     - Sets humidifier to Manual and sets the Mist Level to the desired level.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
     - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
 
 3. Sleep Mode
-   - This switches the device between Sleep Mode (On) and Auto Mode (Off)
-   - Sleep Mode Target Humidity is controlled by the Target Humidity slider, too.
+    - This switches the device between Sleep Mode (On) and Auto Mode (Off)
+    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, too.
 
 4. Night Light
-   - Supported on LV600S and Classic300s
-   - 4 brightness levels
+    - Supported on LV600S and Classic300s
+    - 4 brightness levels
 
 5. Display Toggle
-   - Toggle the display on/off
+    - Toggles the display on/off
 
 6. Humidity Sensor
-   - Sensor that displays current Humidity %
+    - Sensor that displays current Humidity %
 
 ### TODOs
 
@@ -52,10 +53,6 @@ for the Levoit Humidifers.
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/light.png?raw=true" width=25% height=25%></a>
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/sleep.png?raw=true" width=25% height=25%></a>
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services.png?raw=true" width=25% height=25%></a>
-
-
-The read data is cached for 5 seconds to not trigger the rate limiter for the API. Each request is delayed by 500ms to
-not trigger the rate limiter if a huge number of requests are sent.
 
 ### Configuration
 
