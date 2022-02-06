@@ -8,9 +8,10 @@ import VeSyncFan from './api/VeSyncFan';
 import MistLevel from "./characteristics/MistLevel";
 import TargetState from "./characteristics/TargetState";
 import SleepState from "./characteristics/SleepState";
-import LightState from "./characteristics/LightState";
+import LightBrightness from "./characteristics/LightBrightness";
 import DisplayState from "./characteristics/DisplayState";
 import TargetHumidity from "./characteristics/TargetHumidity";
+import LightState from "./characteristics/LightState";
 
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
@@ -147,6 +148,11 @@ export default class VeSyncAccessory {
                 this.accessory.addService(this.platform.Service.Lightbulb, "Night Light", "Night Light");
 
             this.nightLight
+                .getCharacteristic(this.platform.Characteristic.On)
+                .onGet(LightState.get.bind(this))
+                .onSet(LightState.set.bind(this));
+
+            this.nightLight
                 .getCharacteristic(this.platform.Characteristic.Brightness)
                 .setProps({
                     minStep: 25,
@@ -154,9 +160,10 @@ export default class VeSyncAccessory {
                     maxValue: 100,
                     validValues: [0, 25, 50, 75, 100]
                 })
-                .onGet(LightState.get.bind(this))
-                .onSet(LightState.set.bind(this));
+                .onGet(LightBrightness.get.bind(this))
+                .onSet(LightBrightness.set.bind(this));
         }
+
 
         // Link Services
         this.humidifierService.setPrimaryService(true);

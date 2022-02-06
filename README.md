@@ -23,6 +23,7 @@ for the Levoit Humidifers.
 
 2. Mist Level
     - Sets humidifier to Manual and sets the Mist Level to the desired level.
+    - When set to Level 0, turns the device off.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
     - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
 
