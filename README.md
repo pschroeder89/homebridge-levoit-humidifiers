@@ -13,7 +13,7 @@ This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platfor
 
 This plugin was forked
 from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
-for the Levoit humidifers.
+for the Levoit Humidifers.
 
 ### Features
 

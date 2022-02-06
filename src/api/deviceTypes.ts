@@ -13,6 +13,7 @@ export interface DeviceType {
     mistLevels: number;
     mistMinLevel: number;
     hasLight: boolean;
+    hasSleepMode: boolean;
 }
 
 const deviceTypes: DeviceType[] = [
@@ -22,7 +23,8 @@ const deviceTypes: DeviceType[] = [
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 9,
-        hasLight: true
+        hasLight: true,
+        hasSleepMode: true
     },
     {
         isValid: (input: string) =>
@@ -30,28 +32,32 @@ const deviceTypes: DeviceType[] = [
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 9,
-        hasLight: false
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 2,
-        hasLight: false
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 2,
-        hasLight: false
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_UK),
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 2,
-        hasLight: false
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) =>
@@ -59,7 +65,8 @@ const deviceTypes: DeviceType[] = [
         hasAutoMode: true,
         mistMinLevel: 1,
         mistLevels: 9,
-        hasLight: true
+        hasLight: true,
+        hasSleepMode: true
     },
 ];
 

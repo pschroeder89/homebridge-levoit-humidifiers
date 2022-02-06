@@ -19,8 +19,6 @@ export enum BypassMethod {
 
 const lock = new AsyncLock();
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default class VeSync {
     private api?: AxiosInstance;
     private accountId?: string;
@@ -131,8 +129,6 @@ export default class VeSync {
                 );
             }
 
-            await delay(500);
-
             return isSuccess;
 
         });
@@ -159,8 +155,6 @@ export default class VeSync {
                     JSON.stringify(response)
                 );
             }
-
-            await delay(500);
 
             return response.data;
         });
@@ -242,7 +236,6 @@ export default class VeSync {
                 }
             });
 
-            await delay(500);
             return true;
         });
     }
@@ -296,8 +289,6 @@ export default class VeSync {
                         type === 'wifi-air'
                 )
                 .map(VeSyncFan.fromResponse(this));
-
-            await delay(500);
 
             return devices;
         });
