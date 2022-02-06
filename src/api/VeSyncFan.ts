@@ -101,11 +101,16 @@ export default class VeSyncFan {
     }
 
     public async changeMode(mode: Mode): Promise<boolean> {
-        this.client.log.info("Changing Mode to " + mode);
-        const success = await this.client.sendCommand(this, BypassMethod.MODE, {
-            mode: mode.toString()
-        });
-
+        // Don't change the mode if we are already in that mode
+        let success: boolean;
+        if (this._mode == mode){
+            success = true;
+        } else {
+            this.client.log.info("Changing Mode to " + mode);
+            success = await this.client.sendCommand(this, BypassMethod.MODE, {
+                mode: mode.toString()
+            });
+        }
         if (success) {
             this._mode = mode;
         }

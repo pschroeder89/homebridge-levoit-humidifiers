@@ -13,6 +13,7 @@ const characteristic: {
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
+
         // If not in auto or sleep modes, don't display the target humidity in the slider
         if (this.device.mode == Mode.Auto || this.device.mode == Mode.Sleep) {
             return this.device.targetHumidity;
@@ -20,10 +21,18 @@ const characteristic: {
             return 0;
         }
     },
-    set: async function (humidity: CharacteristicValue): Promise<Nullable<CharacteristicValue>> {
+    set: async function (humidity: CharacteristicValue) {
         if (this.device.mode == Mode.Manual)
             await this.device.changeMode(Mode.Auto);
-        return await this.device.setTargetHumidity(Number(humidity));
+        switch (true) {
+            case (humidity < 30):
+                humidity = 30;
+                break;
+            case (humidity > 80):
+                humidity = 80;
+                break;
+        }
+        await this.device.setTargetHumidity(Number(humidity));
     }
 };
 

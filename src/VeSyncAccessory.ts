@@ -38,10 +38,10 @@ export default class VeSyncAccessory {
         /*
         Determines the number of mist level values to slide through in the Mist Level slider.
         Returns an array that contains the range of values between 1 and (mistLevels + 1).
-        Example: The Classic300s has 9 mist levels, so this function returns [1,2,3,4,5,6,7,8,9].
+        We add 1 to mistLevels to account for 0 as a potential level.
+        Example: The Classic300s has 9 mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
          */
         const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
-        arr.shift(); // Remove 0 from the array
         return arr;
     }
 
@@ -67,7 +67,7 @@ export default class VeSyncAccessory {
 
         this.mistService =
             this.accessory.getService("Mist Level") ||
-            this.accessory.addService(this.platform.Service.Fanv2, "Mist Level", "Mist Level");
+            this.accessory.addService(this.platform.Service.Fan, "Mist Level", "Mist Level");
 
         this.displaySwitch =
             this.accessory.getService("Display") ||
@@ -100,8 +100,8 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
             .setProps({
                 minStep: 1,
-                minValue: 30,
-                maxValue: 80, // 80 is the max humidity level in VeSync
+                minValue: 0,
+                maxValue: 100,
             })
             .onGet(TargetHumidity.get.bind(this))
             .onSet(TargetHumidity.set.bind(this));
@@ -114,7 +114,7 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.RotationSpeed)
             .setProps({
                 minStep: 1,
-                minValue: this.getValues[0],
+                minValue: 0,
                 maxValue: this.device.deviceType.mistLevels,
                 validValues: this.getValues
             })
