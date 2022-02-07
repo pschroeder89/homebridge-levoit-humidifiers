@@ -108,7 +108,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[SEND COMMAND]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
             }
 
@@ -118,7 +118,7 @@ export default class VeSync {
                     '[SEND COMMAND]',
                     `Failed to send command ${method} to ${fan.name}`,
                     `with (${JSON.stringify(body)})!`,
-                    `Response: ${JSON.stringify(response)}`
+                    `Response: ${JSON.stringify(response?.data)}`
                 );
             } else {
                 this.debugMode.debug(
@@ -152,7 +152,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[GET DEVICE INFO]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
             }
 
@@ -201,7 +201,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[LOGIN]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
                 return false;
             }
@@ -258,7 +258,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[GET DEVICES]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
 
                 return [];

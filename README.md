@@ -2,14 +2,14 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
-| Supported Versions      | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode   |
-|-------------------------|-----------|-----------|------------|-------------|----------------|-----------------|-------------|
-| Classic 300S            | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌           |
-| Classic 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S               | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S (EU model)    | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S (UK model)    | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| LV600S (cool mode only) | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | Coming Soon |
+| Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode   |
+|----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-------------|
+| Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌           |
+| Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S (EU model) | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| Dual 200S (UK model) | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
+| LV600S               | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | Coming Soon |
 
 This plugin was forked
 from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
