@@ -14,7 +14,7 @@ export default class VeSyncFan {
     public readonly deviceType: DeviceType;
     private lastCheck = 0;
 
-    private _screenVisible = true;
+    private _displayOn = true;
 
     public readonly manufacturer = 'Levoit';
 
@@ -22,8 +22,16 @@ export default class VeSyncFan {
         return this._humidityLevel;
     }
 
-    public get screenVisible() {
-        return this._screenVisible;
+    public get targetHumidity() {
+        return this._targetHumidity;
+    }
+
+    public get displayOn() {
+        return this._displayOn;
+    }
+
+    public get brightnessLevel() {
+        return this._brightnessLevel;
     }
 
     public get mistLevel() {
@@ -32,6 +40,10 @@ export default class VeSyncFan {
 
     public get mode() {
         return this._mode;
+    }
+
+    public get targetReached() {
+        return this._targetReached;
     }
 
     public get isOn() {
@@ -43,9 +55,12 @@ export default class VeSyncFan {
         public readonly name: string,
         private _mode: Mode,
         private _mistLevel: number,
+        private _brightnessLevel: number,
         public readonly uuid: string,
         private _isOn: boolean,
         private _humidityLevel: number,
+        private _targetHumidity: number,
+        private _targetReached: boolean,
         public readonly configModule: string,
         public readonly cid: string,
         public readonly region: string,
@@ -56,6 +71,8 @@ export default class VeSyncFan {
     }
 
     public async setPower(power: boolean): Promise<boolean> {
+        this.client.log.info("Setting Power to " + power);
+
         const success = await this.client.sendCommand(this, BypassMethod.SWITCH, {
             enabled: power,
             id: 0
@@ -68,14 +85,60 @@ export default class VeSyncFan {
         return success;
     }
 
-    public async changeMode(mode: Mode): Promise<boolean> {
+    public async setTargetHumidity(level: number): Promise<boolean> {
+        this.client.log.info("Setting Target Humidity to " + level);
 
-        const success = await this.client.sendCommand(this, BypassMethod.MODE, {
-            mode: mode.toString()
+        const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, {
+            "target_humidity": level,
+            id: 0
         });
 
         if (success) {
+            this._targetHumidity = level;
+        }
+
+        return success;
+    }
+
+    public async changeMode(mode: Mode): Promise<boolean> {
+        // Don't change the mode if we are already in that mode
+        let success: boolean;
+        if (this._mode == mode){
+            success = true;
+        } else {
+            this.client.log.info("Changing Mode to " + mode);
+            success = await this.client.sendCommand(this, BypassMethod.MODE, {
+                mode: mode.toString()
+            });
+        }
+        if (success) {
             this._mode = mode;
+        }
+
+        return success;
+    }
+
+    public async setBrightness(brightness: number): Promise<boolean> {
+        this.client.log.info("Setting Night Light to " + brightness);
+        const success = await this.client.sendCommand(this, BypassMethod.NIGHT, {
+            "night_light_brightness": brightness
+        });
+
+        if (success) {
+            this._brightnessLevel = brightness;
+        }
+
+        return success;
+    }
+
+    public async setDisplay(power: boolean): Promise<boolean> {
+        this.client.log.info("Setting Display to " + power);
+        const success = await this.client.sendCommand(this, BypassMethod.DISPLAY, {
+            state: power
+        });
+
+        if (success) {
+            this._displayOn = power;
         }
 
         return success;
@@ -115,12 +178,14 @@ export default class VeSyncFan {
                 }
 
                 const result = data?.result?.result;
-
                 this._humidityLevel = result.humidity;
-                this._screenVisible = result.display;
+                this._targetHumidity = result.configuration.auto_target_humidity;
+                this._targetReached = result.automatic_stop_reach_target;
+                this._displayOn = result.display;
                 this._isOn = result.enabled;
                 this._mistLevel = result.mist_virtual_level;
                 this._mode = result.mode;
+                this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
                 this.client.log.error(err?.message);
             }
@@ -132,9 +197,12 @@ export default class VeSyncFan {
             ({
                  deviceStatus,
                  deviceName,
-                 mistLevel,
                  mode,
-                 extension,
+                 mistLevel,
+                 brightnessLevel,
+                 humidity,
+                 targetHumidity,
+                 targetReached,
                  uuid,
                  configModule,
                  cid,
@@ -147,9 +215,12 @@ export default class VeSyncFan {
                     deviceName,
                     mode,
                     parseInt(mistLevel ?? '0', 10),
+                    brightnessLevel,
                     uuid,
                     deviceStatus === 'on',
-                    extension,
+                    humidity,
+                    targetHumidity,
+                    targetReached,
                     configModule,
                     cid,
                     deviceRegion,

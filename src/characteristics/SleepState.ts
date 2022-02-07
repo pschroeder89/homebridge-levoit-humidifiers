@@ -4,14 +4,9 @@ import {
     CharacteristicValue,
     Nullable
 } from 'homebridge';
-import VeSyncFan, {Mode} from '../api/VeSyncFan';
+import {Mode} from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
-
-const calculateMistLevel = (device: VeSyncFan) => {
-    const currentMistLevel = device.mistLevel;
-    return device.isOn ? currentMistLevel : 1;
-};
 
 const characteristic: {
     get: CharacteristicGetHandler;
@@ -20,15 +15,21 @@ const characteristic: {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
 
-        return calculateMistLevel(this.device);
-    },
+        // If device is off, set the mode to null so the switch displays Off
+        if (!this.device.isOn) {
+            return false;
+        }
 
+        return this.device.mode === Mode.Sleep;
+    },
     set: async function (value: CharacteristicValue) {
-        if (value == 0) {
-            await this.device.setPower(false);
-        } else {
-            await this.device.changeMode(Mode.Manual);
-            await this.device.changeMistLevel(Number(value));
+        switch (value) {
+            case true:
+                await this.device.changeMode(Mode.Sleep);
+                break;
+            case false:
+                await this.device.changeMode(Mode.Auto);
+                break;
         }
     }
 };

@@ -12,6 +12,8 @@ export interface DeviceType {
     hasAutoMode: boolean;
     mistLevels: number;
     mistMinLevel: number;
+    hasLight: boolean;
+    hasSleepMode: boolean;
 }
 
 const deviceTypes: DeviceType[] = [
@@ -20,39 +22,51 @@ const deviceTypes: DeviceType[] = [
             input.includes(DeviceName.Classic300S),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 9
+        mistLevels: 9,
+        hasLight: true,
+        hasSleepMode: true
     },
     {
         isValid: (input: string) =>
             input.includes(DeviceName.Classic200S),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 9
+        mistLevels: 9,
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 2
+        mistLevels: 2,
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 2
+        mistLevels: 2,
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_UK),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 2
+        mistLevels: 2,
+        hasLight: false,
+        hasSleepMode: false
     },
     {
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S),
         hasAutoMode: true,
         mistMinLevel: 1,
-        mistLevels: 9
+        mistLevels: 9,
+        hasLight: true,
+        hasSleepMode: true
     },
 ];
 

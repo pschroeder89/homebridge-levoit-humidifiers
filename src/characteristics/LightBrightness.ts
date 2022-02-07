@@ -4,14 +4,8 @@ import {
     CharacteristicValue,
     Nullable
 } from 'homebridge';
-import VeSyncFan, {Mode} from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
-
-const calculateMistLevel = (device: VeSyncFan) => {
-    const currentMistLevel = device.mistLevel;
-    return device.isOn ? currentMistLevel : 1;
-};
 
 const characteristic: {
     get: CharacteristicGetHandler;
@@ -20,15 +14,13 @@ const characteristic: {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
 
-        return calculateMistLevel(this.device);
+        return this.device.brightnessLevel;
     },
-
     set: async function (value: CharacteristicValue) {
-        if (value == 0) {
-            await this.device.setPower(false);
-        } else {
-            await this.device.changeMode(Mode.Manual);
-            await this.device.changeMistLevel(Number(value));
+        // If light is on, and we are applying a non-zero value, change brightness to that level.
+        // Otherwise, LightState will handle on / off switching.
+        if (this.device.brightnessLevel > 0 && value > 0) {
+            await this.device.setBrightness(Number(value));
         }
     }
 };

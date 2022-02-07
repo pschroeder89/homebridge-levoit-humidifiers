@@ -10,7 +10,7 @@ import VeSyncFan from './VeSyncFan';
 export enum BypassMethod {
     STATUS = 'getHumidifierStatus',
     MODE = 'setHumidityMode',
-    NIGHT = 'setNightLight',
+    NIGHT = 'setNightLightBrightness',
     DISPLAY = 'setDisplay',
     SWITCH = 'setSwitch',
     HUMIDITY = 'setTargetHumidity',
@@ -18,8 +18,6 @@ export enum BypassMethod {
 }
 
 const lock = new AsyncLock();
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default class VeSync {
     private api?: AxiosInstance;
@@ -106,11 +104,17 @@ export default class VeSync {
                 ...this.generateBody(true)
             });
 
+            // Explicitly fail if device is offline
+            if (response.data.msg == "device offline") {
+                this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
+                return false;
+            }
+
             if (!response?.data) {
                 this.debugMode.debug(
                     '[SEND COMMAND]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
             }
 
@@ -120,7 +124,7 @@ export default class VeSync {
                     '[SEND COMMAND]',
                     `Failed to send command ${method} to ${fan.name}`,
                     `with (${JSON.stringify(body)})!`,
-                    `Response: ${JSON.stringify(response)}`
+                    `Response: ${JSON.stringify(response?.data)}`
                 );
             } else {
                 this.debugMode.debug(
@@ -131,9 +135,8 @@ export default class VeSync {
                 );
             }
 
-            await delay(500);
-
             return isSuccess;
+
         });
     }
 
@@ -151,15 +154,19 @@ export default class VeSync {
                 ...this.generateBody(true)
             });
 
+            // Explicitly fail if device is offline
+            if (response.data.msg == "device offline") {
+                this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
+                return false;
+            }
+
             if (!response?.data) {
                 this.debugMode.debug(
                     '[GET DEVICE INFO]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
             }
-
-            await delay(500);
 
             return response.data;
         });
@@ -206,7 +213,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[LOGIN]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
                 return false;
             }
@@ -241,7 +248,6 @@ export default class VeSync {
                 }
             });
 
-            await delay(500);
             return true;
         });
     }
@@ -264,7 +270,7 @@ export default class VeSync {
                 this.debugMode.debug(
                     '[GET DEVICES]',
                     'No response data!! JSON:',
-                    JSON.stringify(response)
+                    JSON.stringify(response?.data)
                 );
 
                 return [];
@@ -295,8 +301,6 @@ export default class VeSync {
                         type === 'wifi-air'
                 )
                 .map(VeSyncFan.fromResponse(this));
-
-            await delay(500);
 
             return devices;
         });

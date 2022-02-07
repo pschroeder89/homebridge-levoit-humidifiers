@@ -17,7 +17,7 @@ const characteristic: {
     return this.device.isOn;
   },
   set: async function (value: CharacteristicValue) {
-    const boolValue = value === 1;
+    const boolValue = value == 1;
 
     if (boolValue !== this.device.isOn) {
       await this.device.setPower(boolValue);
