@@ -104,6 +104,12 @@ export default class VeSync {
                 ...this.generateBody(true)
             });
 
+            // Explicitly fail if device is offline
+            if (response.data.msg == "device offline") {
+                this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.")
+                return false
+            }
+
             if (!response?.data) {
                 this.debugMode.debug(
                     '[SEND COMMAND]',
@@ -147,6 +153,12 @@ export default class VeSync {
                 ...this.generateDetailBody(),
                 ...this.generateBody(true)
             });
+
+            // Explicitly fail if device is offline
+            if (response.data.msg == "device offline") {
+                this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.")
+                return false
+            }
 
             if (!response?.data) {
                 this.debugMode.debug(
