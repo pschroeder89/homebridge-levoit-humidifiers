@@ -42,10 +42,6 @@ for the Levoit Humidifers.
 7. Humidity Sensor
     - Sensor that displays current Humidity %
 
-### TODOs
-
-* Add LV600S Warm Mode
-
 ### Details
 
 <a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services2.png?raw=true" width=25% height=25%></a>
