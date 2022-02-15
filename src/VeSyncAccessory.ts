@@ -57,7 +57,7 @@ export default class VeSyncAccessory {
         Example: The LV600s has 3 warm mist levels, so this function returns [0,1,2,3].
          */
         if (!this.device.deviceType.warmMistLevels) {
-            return []
+            return [];
         }
         const arr = [...Array(this.device.deviceType.warmMistLevels + 1).keys()];
         return arr;
