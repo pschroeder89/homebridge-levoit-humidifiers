@@ -38,6 +38,10 @@ export default class VeSyncFan {
         return this._mistLevel;
     }
 
+    public get warmLevel() {
+        return this._warmLevel;
+    }
+
     public get mode() {
         return this._mode;
     }
@@ -55,6 +59,7 @@ export default class VeSyncFan {
         public readonly name: string,
         private _mode: Mode,
         private _mistLevel: number,
+        private _warmLevel: number,
         private _brightnessLevel: number,
         public readonly uuid: string,
         private _isOn: boolean,
@@ -144,20 +149,43 @@ export default class VeSyncFan {
         return success;
     }
 
-    public async changeMistLevel(mistLevel: number): Promise<boolean> {
-        this.client.log.info("Setting Mist Level to " + mistLevel);
-        if (mistLevel > this.deviceType.mistLevels || mistLevel < 1) {
+    public async changeCoolMistLevel(coolMistLevel: number): Promise<boolean> {
+        this.client.log.info("Setting Mist Level to " + coolMistLevel);
+        if (coolMistLevel > this.deviceType.coolMistLevels || coolMistLevel < 1) {
             return false;
         }
 
         const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, {
-            level: mistLevel,
+            level: coolMistLevel,
             type: 'mist',
             id: 0
         });
 
         if (success) {
-            this._mistLevel = mistLevel;
+            this._mistLevel = coolMistLevel;
+        }
+
+        return success;
+    }
+
+    public async changeWarmMistLevel(warmMistLevel: number): Promise<boolean> {
+        if (!this.deviceType.warmMistLevels) {
+            this.client.log.error("Error: Attempted to set warm level on device without warmMistLevels field.");
+            return false;
+        }
+        this.client.log.info("Setting Warm Level to " + warmMistLevel);
+        if (warmMistLevel > this.deviceType.warmMistLevels || warmMistLevel < 1) {
+            return false;
+        }
+
+        const success = await this.client.sendCommand(this, BypassMethod.WARM_LEVEL, {
+            level: warmMistLevel,
+            type: 'warm',
+            id: 0
+        });
+
+        if (success) {
+            this._warmLevel = warmMistLevel;
         }
 
         return success;
@@ -199,6 +227,7 @@ export default class VeSyncFan {
                  deviceName,
                  mode,
                  mistLevel,
+                warmLevel,
                  brightnessLevel,
                  humidity,
                  targetHumidity,
@@ -215,6 +244,7 @@ export default class VeSyncFan {
                     deviceName,
                     mode,
                     parseInt(mistLevel ?? '0', 10),
+                    parseInt(warmLevel ?? '0', 10),
                     brightnessLevel,
                     uuid,
                     deviceStatus === 'on',

@@ -10,10 +10,11 @@ export enum DeviceName {
 export interface DeviceType {
     isValid: (input: string) => boolean;
     hasAutoMode: boolean;
-    mistLevels: number;
-    mistMinLevel: number;
+    coolMistLevels: number;
     hasLight: boolean;
     hasSleepMode: boolean;
+    hasWarmMode: boolean;
+    warmMistLevels?: number;
 }
 
 const deviceTypes: DeviceType[] = [
@@ -21,52 +22,53 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.Classic300S),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 9,
+        coolMistLevels: 9,
         hasLight: true,
-        hasSleepMode: true
+        hasSleepMode: true,
+        hasWarmMode: false
     },
     {
         isValid: (input: string) =>
             input.includes(DeviceName.Classic200S),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 9,
+        coolMistLevels: 9,
         hasLight: false,
-        hasSleepMode: false
+        hasSleepMode: false,
+        hasWarmMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 2,
+        coolMistLevels: 2,
         hasLight: false,
-        hasSleepMode: false
+        hasSleepMode: false,
+        hasWarmMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 2,
+        coolMistLevels: 2,
         hasLight: false,
-        hasSleepMode: false
+        hasSleepMode: false,
+        hasWarmMode: false
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_UK),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 2,
+        coolMistLevels: 2,
         hasLight: false,
-        hasSleepMode: false
+        hasSleepMode: false,
+        hasWarmMode: false
     },
     {
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S),
         hasAutoMode: true,
-        mistMinLevel: 1,
-        mistLevels: 9,
+        coolMistLevels: 9,
         hasLight: true,
-        hasSleepMode: true
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3
     },
 ];
 
