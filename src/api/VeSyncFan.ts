@@ -227,7 +227,7 @@ export default class VeSyncFan {
                  deviceName,
                  mode,
                  mistLevel,
-                warmLevel,
+                 warmLevel,
                  brightnessLevel,
                  humidity,
                  targetHumidity,
