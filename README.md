@@ -1,4 +1,5 @@
 # Homebridge Levoit Humidifiers
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
 This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
