@@ -50,5 +50,15 @@
   ],
   "types": "./dist/index.d.ts",
   "homepage": "https://github.com/pschroeder89/homebridge-levoit-humidifiers#readme",
-  "author": "Paul Schroeder"
+  "author": "Paul Schroeder",
+  "funding": [
+    {
+      "type" : "github",
+      "url" : "https://github.com/sponsors/pschroeder89"
+    },
+    {
+      "type" : "paypal",
+      "url" : "https://www.paypal.me/pschroeder89"
+    }
+  ]
 }
