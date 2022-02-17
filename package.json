@@ -4,7 +4,7 @@
   "displayName": "Levoit Humidifiers",
   "main": "dist/index.js",
   "license": "Apache-2.0",
-  "version": "1.6.0-beta1",
+  "version": "1.6.0-beta3",
   "private": false,
   "bugs": {
     "url": "https://github.com/pschroeder89/homebridge-levoit-humidifiers/issues"
@@ -50,5 +50,15 @@
   ],
   "types": "./dist/index.d.ts",
   "homepage": "https://github.com/pschroeder89/homebridge-levoit-humidifiers#readme",
-  "author": "Paul Schroeder"
+  "author": "Paul Schroeder",
+  "funding": [
+    {
+      "type" : "github",
+      "url" : "https://github.com/sponsors/pschroeder89"
+    },
+    {
+      "type" : "paypal",
+      "url" : "https://www.paypal.me/pschroeder89"
+    }
+  ]
 }
