@@ -15,6 +15,8 @@ export interface DeviceType {
     hasSleepMode: boolean;
     hasWarmMode: boolean;
     warmMistLevels?: number;
+    minHumidityLevel: number;
+    maxHumidityLevel: number;
 }
 
 const deviceTypes: DeviceType[] = [
@@ -25,7 +27,9 @@ const deviceTypes: DeviceType[] = [
         coolMistLevels: 9,
         hasLight: true,
         hasSleepMode: true,
-        hasWarmMode: false
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
     },
     {
         isValid: (input: string) =>
@@ -34,7 +38,9 @@ const deviceTypes: DeviceType[] = [
         coolMistLevels: 9,
         hasLight: false,
         hasSleepMode: false,
-        hasWarmMode: false
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S),
@@ -42,7 +48,9 @@ const deviceTypes: DeviceType[] = [
         coolMistLevels: 2,
         hasLight: false,
         hasSleepMode: false,
-        hasWarmMode: false
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
@@ -50,7 +58,9 @@ const deviceTypes: DeviceType[] = [
         coolMistLevels: 2,
         hasLight: false,
         hasSleepMode: false,
-        hasWarmMode: false
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
     },
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_UK),
@@ -58,17 +68,21 @@ const deviceTypes: DeviceType[] = [
         coolMistLevels: 2,
         hasLight: false,
         hasSleepMode: false,
-        hasWarmMode: false
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
     },
     {
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S),
         hasAutoMode: true,
         coolMistLevels: 9,
-        hasLight: true,
+        hasLight: false,
         hasSleepMode: true,
         hasWarmMode: true,
-        warmMistLevels: 3
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
     },
 ];
 

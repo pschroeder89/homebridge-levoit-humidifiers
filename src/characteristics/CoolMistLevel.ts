@@ -27,7 +27,9 @@ const characteristic: {
         if (value == 0) {
             await this.device.setPower(false);
         } else {
-            await this.device.changeMode(Mode.Manual);
+            if (!this.device.deviceType.hasWarmMode) {
+                await this.device.changeMode(Mode.Manual);
+            }
             await this.device.changeCoolMistLevel(Number(value));
         }
     }

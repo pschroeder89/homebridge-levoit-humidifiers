@@ -10,7 +10,7 @@ import {AccessoryThisType} from '../VeSyncAccessory';
 
 const calculateWarmMistLevel = (device: VeSyncFan) => {
     const currentMistLevel = device.warmLevel;
-    return device.isOn ? currentMistLevel : 1;
+    return device.isOn ? currentMistLevel : 0;
 };
 
 const characteristic: {
@@ -23,7 +23,9 @@ const characteristic: {
     },
 
     set: async function (value: CharacteristicValue) {
-        await this.device.changeMode(Mode.Manual);
+        if (!this.device.deviceType.hasWarmMode) {
+            await this.device.changeMode(Mode.Manual);
+        }
         await this.device.changeWarmMistLevel(Number(value));
 
     }

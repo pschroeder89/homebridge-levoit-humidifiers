@@ -1,12 +1,13 @@
 import AsyncLock from 'async-lock';
-import deviceTypes, {DeviceType} from './deviceTypes';
+import deviceTypes, {DeviceName, DeviceType} from './deviceTypes';
 
 import VeSync, {BypassMethod} from './VeSync';
 
 export enum Mode {
     Manual = 'manual',
     Sleep = 'sleep',
-    Auto = 'auto'
+    Auto = 'auto',
+    Humidity = 'humidity'
 }
 
 export default class VeSyncFan {
@@ -42,6 +43,10 @@ export default class VeSyncFan {
         return this._warmLevel;
     }
 
+    public get warmEnabled() {
+        return this._warmEnabled;
+    }
+
     public get mode() {
         return this._mode;
     }
@@ -60,6 +65,7 @@ export default class VeSyncFan {
         private _mode: Mode,
         private _mistLevel: number,
         private _warmLevel: number,
+        private _warmEnabled: boolean,
         private _brightnessLevel: number,
         public readonly uuid: string,
         private _isOn: boolean,
@@ -107,6 +113,9 @@ export default class VeSyncFan {
 
     public async changeMode(mode: Mode): Promise<boolean> {
         // Don't change the mode if we are already in that mode
+        if (this.model == DeviceName.LV600S && mode == Mode.Auto) {
+            mode = Mode.Humidity
+        }
         let success: boolean;
         if (this._mode == mode){
             success = true;
@@ -150,10 +159,11 @@ export default class VeSyncFan {
     }
 
     public async changeCoolMistLevel(coolMistLevel: number): Promise<boolean> {
-        this.client.log.info("Setting Mist Level to " + coolMistLevel);
         if (coolMistLevel > this.deviceType.coolMistLevels || coolMistLevel < 1) {
             return false;
         }
+
+        this.client.log.info("Setting Mist Level to " + coolMistLevel);
 
         const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, {
             level: coolMistLevel,
@@ -173,12 +183,14 @@ export default class VeSyncFan {
             this.client.log.error("Error: Attempted to set warm level on device without warmMistLevels field.");
             return false;
         }
-        this.client.log.info("Setting Warm Level to " + warmMistLevel);
-        if (warmMistLevel > this.deviceType.warmMistLevels || warmMistLevel < 1) {
+
+        if (warmMistLevel > this.deviceType.warmMistLevels || warmMistLevel < 0) {
             return false;
         }
 
-        const success = await this.client.sendCommand(this, BypassMethod.WARM_LEVEL, {
+        this.client.log.info("Setting Warm Level to " + warmMistLevel);
+
+        const success = await this.client.sendCommand(this, BypassMethod.LEVEL, {
             level: warmMistLevel,
             type: 'warm',
             id: 0
@@ -212,6 +224,8 @@ export default class VeSyncFan {
                 this._displayOn = result.display;
                 this._isOn = result.enabled;
                 this._mistLevel = result.mist_virtual_level;
+                this._warmLevel = result.warm_level;
+                this._warmEnabled = result.warm_enabled;
                 this._mode = result.mode;
                 this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
@@ -228,6 +242,7 @@ export default class VeSyncFan {
                  mode,
                  mistLevel,
                  warmLevel,
+                warmEnabled,
                  brightnessLevel,
                  humidity,
                  targetHumidity,
@@ -245,6 +260,7 @@ export default class VeSyncFan {
                     mode,
                     parseInt(mistLevel ?? '0', 10),
                     parseInt(warmLevel ?? '0', 10),
+                    warmEnabled,
                     brightnessLevel,
                     uuid,
                     deviceStatus === 'on',
