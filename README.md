@@ -3,48 +3,50 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
-| Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode   |
-|----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-------------|
-| Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌           |
-| Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S (EU model) | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| Dual 200S (UK model) | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌           |
-| LV600S               | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | Coming Soon |
+| Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
+|----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
+| LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
+| Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         |
+| Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
+| Dual 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
 
-This plugin was forked
-from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
-for the Levoit Humidifers.
+This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic for the Levoit Humidifers.
 
 ### Features
 
-1. Target Humidity
-    - Sets humidifier to Auto and sets the Target Humidity to the desired level.
-    - Can also change Target Humidity in Sleep Mode.
+1. Humidifier / Auto Mode 
+    - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
+    - Can also change Target Humidity in Sleep Mode, except on LV600s.
+      - For LV600s, the Humidifier slider will be set to 0% when Sleep Mode is on.
+    - For LV600s, the Auto humidity range is 40-80%. All other models are 30-80%.
+      - Selecting values outside the Auto range will set the Target Humidity to the lowest or highest number in the range.
 
-2. Mist Level
-    - Sets humidifier to Manual and sets the Mist Level to the desired level.
+2. Cool Mist Level
+    - Sets humidifier to Manual mode (except on LV600s) and sets the Cool Mist Level to the desired level.
+      - Note: LV600s supports changing mist levels while in Auto mode.
     - When set to Level 0, turns the device off.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
-    - Levels 1-2 on Dual200s, Dual200S EU, and Dual200S UK
+    - Levels 1-2 on Dual200s
 
-3. Sleep Mode
+3. Warm Mist Level
+   - Sets Warm Mist Level to the desired level.
+   - Levels 0-3 on LV600s only.
+
+4. Sleep Mode
     - This switches the device between Sleep Mode (On) and Auto Mode (Off)
-    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, too.
+    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600s.
+    - On LV600s, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
+    - The LV600s turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm Mist slider.
 
-4. Night Light
-    - Supported on LV600S and Classic300s
+5. Night Light
+    - Supported on Classic300s
     - 4 brightness levels
 
-5. Display Toggle
+6. Display Toggle
     - Toggles the display on/off
 
-6. Humidity Sensor
+7. Humidity Sensor
     - Sensor that displays current Humidity %
-
-### TODOs
-
-* Add LV600S Warm Mode
 
 ### Details
 
