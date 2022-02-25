@@ -5,7 +5,7 @@ This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platfor
 
 | Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
 |----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
-| LV600S               | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ✅         |
+| LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         |
 | Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
 | Dual 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
