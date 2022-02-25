@@ -114,7 +114,7 @@ export default class VeSyncFan {
     public async changeMode(mode: Mode): Promise<boolean> {
         // Don't change the mode if we are already in that mode
         if (this.model == DeviceName.LV600S && mode == Mode.Auto) {
-            mode = Mode.Humidity
+            mode = Mode.Humidity;
         }
         let success: boolean;
         if (this._mode == mode){

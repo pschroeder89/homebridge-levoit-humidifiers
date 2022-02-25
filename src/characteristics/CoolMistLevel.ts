@@ -4,10 +4,9 @@ import {
     CharacteristicValue,
     Nullable
 } from 'homebridge';
-import VeSyncFan, {Mode} from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
-import {json} from "stream/consumers";
+import {Mode} from "../api/VeSyncFan";
 
 const characteristic: {
     get: CharacteristicGetHandler;
