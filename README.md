@@ -17,6 +17,8 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 1. Humidifier / Auto Mode 
     - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
     - Can also change Target Humidity in Sleep Mode, except on LV600s.
+    - For LV600s, the Auto humidity range is 40-80%. All other models are 30-80%.
+      - Selecting values outside the Auto range will set the Target Humidity to the lowest or highest number in the range.
 
 2. Cool Mist Level
     - Sets humidifier to Manual mode (except on LV600s) and sets the Cool Mist Level to the desired level.
