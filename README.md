@@ -15,25 +15,28 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 ### Features
 
 1. Humidifier / Auto Mode 
-    - Sets humidifier to Auto and sets the Target Humidity to the desired level.
-    - Can also change Target Humidity in Sleep Mode.
+    - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
+    - Can also change Target Humidity in Sleep Mode, except on LV600s.
 
 2. Cool Mist Level
-    - Sets humidifier to Manual and sets the Cool Mist Level to the desired level.
+    - Sets humidifier to Manual mode (except on LV600s) and sets the Cool Mist Level to the desired level.
+      - Note: LV600s supports changing mist levels while in Auto mode.
     - When set to Level 0, turns the device off.
     - Levels 1-9 on Classic300s, Classic200s, and LV600S
     - Levels 1-2 on Dual200s
 
 3. Warm Mist Level
-   - Sets humidifier to Manual and sets the Warm Mist Level to the desired level.
-   - Levels 0-3 on LV600s
+   - Sets Warm Mist Level to the desired level.
+   - Levels 0-3 on LV600s only.
 
 4. Sleep Mode
     - This switches the device between Sleep Mode (On) and Auto Mode (Off)
-    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, too.
+    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600s.
+    - On LV600s, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
+    - The LV600s turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm Mist slider.
 
 5. Night Light
-    - Supported on LV600S and Classic300s
+    - Supported on Classic300s
     - 4 brightness levels
 
 6. Display Toggle
