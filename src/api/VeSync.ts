@@ -98,7 +98,7 @@ export default class VeSync {
                 `Sending command ${method} to ${fan.name}`,
                 `with (${JSON.stringify(body)})...`
             );
-            console.log(JSON.stringify(body))
+
             const response = await this.api.put('cloud/v2/deviceManaged/bypassV2', {
                 ...this.generateV2Body(fan, method, body),
                 ...this.generateDetailBody(),
@@ -110,7 +110,6 @@ export default class VeSync {
                 this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
                 return false;
             }
-            console.log(JSON.stringify(response.data))
 
             if (!response?.data) {
                 this.debugMode.debug(
@@ -161,7 +160,7 @@ export default class VeSync {
                 this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
                 return false;
             }
-            console.log(JSON.stringify(response.data))
+
             if (!response?.data) {
                 this.debugMode.debug(
                     '[GET DEVICE INFO]',

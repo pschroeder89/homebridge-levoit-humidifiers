@@ -7,11 +7,7 @@ import {
 import VeSyncFan, {Mode} from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
-
-const calculateMistLevel = (device: VeSyncFan) => {
-    const currentMistLevel = device.mistLevel;
-    return device.isOn ? currentMistLevel : 1;
-};
+import {json} from "stream/consumers";
 
 const characteristic: {
     get: CharacteristicGetHandler;
@@ -19,8 +15,7 @@ const characteristic: {
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
-
-        return calculateMistLevel(this.device);
+        return this.device.isOn ? this.device.mistLevel : 0;
     },
 
     set: async function (value: CharacteristicValue) {

@@ -124,6 +124,7 @@ export default class VeSyncFan {
             success = await this.client.sendCommand(this, BypassMethod.MODE, {
                 mode: mode.toString()
             });
+
         }
         if (success) {
             this._mode = mode;
@@ -258,7 +259,7 @@ export default class VeSyncFan {
                     client,
                     deviceName,
                     mode,
-                    parseInt(mistLevel ?? '0', 10),
+                    parseInt(mistLevel ?? '1', 10),
                     parseInt(warmLevel ?? '0', 10),
                     warmEnabled,
                     brightnessLevel,
