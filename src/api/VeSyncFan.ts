@@ -195,7 +195,6 @@ export default class VeSyncFan {
             return false;
         }
 
-        // if from slider and value 0, return. if from off and
         if (warmMistLevel > this.deviceType.warmMistLevels || warmMistLevel < 0) {
             return false;
         }
