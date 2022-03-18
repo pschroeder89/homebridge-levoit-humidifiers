@@ -22,6 +22,47 @@
         "type": "string",
         "required": true,
         "description": "VeSync's account password"
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "description": "VeSync's account password"
+      },
+      "accessories": {
+        "type": "object",
+        "properties": {
+          "cool_mist": {
+            "title": "Cool Mist Fan",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable fan for the Cool Mist"
+          },
+          "warm_mist": {
+            "title": "Warm Mist Fan",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable fan for Warm Mist"
+          },
+          "sleep_mode": {
+            "title": "Sleep Mode Switch",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable switch for Sleep Mode"
+          },
+          "display": {
+            "title": "Display Switch",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable switch for the Display"
+          },
+          "night_light": {
+            "title": "Night Light Slider",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable brightness slider / switch for the Night Light"
+          }
+        }
       }
     }
   }
