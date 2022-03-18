@@ -68,8 +68,11 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 This plugin requires your VeSync credentials as it communicates with the VeSync devices via VeSync's own API. Your
 credentials are only stored in the Homebridge config and not sent to any server except VeSync's.
 
-You can also do this directly via the homebridge config by adding your credentials to the config file under platforms.
-Replace the values of `username` and `password` by your credentials.
+You can also do this directly via the Homebridge config by adding your credentials to the config file under platforms.
+Replace the values of `username` and `password` with your credentials.
+
+You can turn off optional controls via the `accessories` section of the config.
+The Humidifier (Auto mode) slider and the Humidity sensor cannot be turned off and will always be exposed.
 
 ```json
 {
@@ -78,7 +81,14 @@ Replace the values of `username` and `password` by your credentials.
       "name": "Levoit Humidifiers",
       "email": "email",
       "password": "password",
-      "platform": "LevoitHumidifiers"
+      "platform": "LevoitHumidifiers",
+      "accessories": {
+         "display": false, 
+         "sleep_mode": false, 
+         "cool_mist": false, 
+         "warm_mist": false,
+         "night_light": false
+      }
     }
   ]
 }

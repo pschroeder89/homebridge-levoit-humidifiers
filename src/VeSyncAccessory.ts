@@ -15,6 +15,14 @@ import LightState from "./characteristics/LightState";
 import WarmMistLevel from "./characteristics/WarmMistLevel";
 import WarmActive from "./characteristics/WarmActive";
 
+const HumidifierName = "Humidifier";
+const HumiditySensorName= "Humidity Sensor";
+const CoolMistName = "Cool Mist";
+const WarmMistName = "Warm Mist";
+const NightLightName="Night Light";
+const SleepModeName="Sleep Mode";
+const DisplayName="Display";
+
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
     platform: Platform;
@@ -24,12 +32,11 @@ export type AccessoryThisType = ThisType<{
 export default class VeSyncAccessory {
     private humidifierService: Service;
     private humiditySensorService: Service;
-    private nightLight: Service | undefined;
-    private sleepSwitch: Service | undefined;
-    private displaySwitch: Service;
-    private coolMistService: Service;
+    private lightService: Service | undefined;
+    private sleepService: Service | undefined;
+    private displayService: Service | undefined;
+    private coolMistService: Service | undefined;
     private warmMistService: Service | undefined;
-
 
     public get UUID() {
         return this.device.uuid.toString();
@@ -69,6 +76,13 @@ export default class VeSyncAccessory {
         private readonly accessory: VeSyncPlatformAccessory
     ) {
         const {manufacturer, model, mac} = this.device;
+        const config = platform.config;
+        const accessories = config.accessories ? config.accessories : {};
+        const coolMistAccessory = (accessories.cool_mist != false);
+        const warmMistAccessory = (accessories.warm_mist != false);
+        const nightLightAccessory = (accessories.night_light != false);
+        const sleepModeAccessory = (accessories.sleep_mode != false);
+        const displayAccessory = (accessories.display != false);
 
         // Accessory info
         this.accessory
@@ -82,8 +96,8 @@ export default class VeSyncAccessory {
 
         // Humidifier service
         this.humidifierService =
-            this.accessory.getService("Humidifier") ||
-            this.accessory.addService(this.platform.Service.HumidifierDehumidifier, "Humidifier", "Humidifier");
+            this.accessory.getService(HumidifierName) ||
+            this.accessory.addService(this.platform.Service.HumidifierDehumidifier, HumidifierName, HumidifierName);
 
         this.humidifierService.setPrimaryService(true);
 
@@ -121,45 +135,60 @@ export default class VeSyncAccessory {
             .onGet(Humidity.get.bind(this));
 
         // Cool Mist service
-        this.coolMistService =
-            this.accessory.getService("Cool Mist") ||
-            this.accessory.addService(this.platform.Service.Fan, "Cool Mist", "Cool Mist");
+        if (coolMistAccessory) {
+            this.coolMistService =
+                this.accessory.getService(CoolMistName) ||
+                this.accessory.addService(this.platform.Service.Fan, CoolMistName, CoolMistName);
 
-        this.coolMistService
-            .getCharacteristic(this.platform.Characteristic.On)
-            .onGet(Active.get.bind(this))
-            .onSet(Active.set.bind(this));
+            this.coolMistService
+                .getCharacteristic(this.platform.Characteristic.On)
+                .onGet(Active.get.bind(this))
+                .onSet(Active.set.bind(this));
 
-        this.coolMistService
-            .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-            .setProps({
-                minStep: 1,
-                minValue: 0,
-                maxValue: this.device.deviceType.coolMistLevels,
-                validValues: this.getCoolMistValues,
+            this.coolMistService
+                .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+                .setProps({
+                    minStep: 1,
+                    minValue: 0,
+                    maxValue: this.device.deviceType.coolMistLevels,
+                    validValues: this.getCoolMistValues,
 
-            })
-            .onGet(MistLevel.get.bind(this))
-            .onSet(MistLevel.set.bind(this));
-        this.humidifierService.addLinkedService(this.coolMistService);
-
+                })
+                .onGet(MistLevel.get.bind(this))
+                .onSet(MistLevel.set.bind(this));
+            this.humidifierService.addLinkedService(this.coolMistService);
+        } else {
+            this.coolMistService = this.accessory.getService(CoolMistName);
+            if (this.coolMistService) {
+                this.platform.log.info(`Removing ${CoolMistName} service.`);
+                this.accessory.removeService(this.coolMistService);
+            }
+        }
 
         // Display Switch service
-        this.displaySwitch =
-            this.accessory.getService("Display") ||
-            this.accessory.addService(this.platform.Service.Switch, "Display", "Display");
+        if (displayAccessory) {
+            this.displayService =
+                this.accessory.getService(DisplayName) ||
+                this.accessory.addService(this.platform.Service.Switch, DisplayName, DisplayName);
 
-        this.humidifierService.addLinkedService(this.displaySwitch);
+            this.humidifierService.addLinkedService(this.displayService);
 
-        this.displaySwitch
-            .getCharacteristic(this.platform.Characteristic.On)
-            .onGet(DisplayState.get.bind(this))
-            .onSet(DisplayState.set.bind(this));
+            this.displayService
+                .getCharacteristic(this.platform.Characteristic.On)
+                .onGet(DisplayState.get.bind(this))
+                .onSet(DisplayState.set.bind(this));
+        } else {
+            this.displayService = this.accessory.getService(DisplayName);
+            if (this.displayService) {
+                this.platform.log.info(`Removing ${DisplayName} service.`);
+                this.accessory.removeService(this.displayService);
+            }
+        }
 
         // Humidity Sensor service
         this.humiditySensorService =
-            this.accessory.getService("Humidity Sensor") ||
-            this.accessory.addService(this.platform.Service.HumiditySensor, "Humidity Sensor", "Humidity Sensor");
+            this.accessory.getService(HumiditySensorName) ||
+            this.accessory.addService(this.platform.Service.HumiditySensor, HumiditySensorName,HumiditySensorName);
 
         this.humidifierService.addLinkedService(this.humiditySensorService);
 
@@ -168,10 +197,10 @@ export default class VeSyncAccessory {
             .onGet(Humidity.get.bind(this));
 
         // Warm Mist service
-        if (this.device.deviceType.hasWarmMode) {
+        if (this.device.deviceType.hasWarmMode && warmMistAccessory) {
             this.warmMistService =
-                this.accessory.getService("Warm Mist") ||
-                this.accessory.addService(this.platform.Service.Fan, "Warm Mist", "Warm Mist");
+                this.accessory.getService(WarmMistName) ||
+                this.accessory.addService(this.platform.Service.Fan, WarmMistName, WarmMistName);
 
             this.humidifierService.addLinkedService(this.warmMistService);
 
@@ -190,36 +219,48 @@ export default class VeSyncAccessory {
                 })
                 .onGet(WarmMistLevel.get.bind(this))
                 .onSet(WarmMistLevel.set.bind(this));
+        }  else {
+            this.warmMistService = this.accessory.getService(WarmMistName);
+            if (this.warmMistService) {
+                this.platform.log.info(`Removing ${WarmMistName} service.`);
+                this.accessory.removeService(this.warmMistService);
+            }
         }
 
         // Sleep Mode service
-        if (this.device.deviceType.hasSleepMode) {
-            this.sleepSwitch =
-                this.accessory.getService("Sleep Mode") ||
-                this.accessory.addService(this.platform.Service.Switch, "Sleep Mode", "Sleep Mode");
+        if (this.device.deviceType.hasSleepMode && sleepModeAccessory) {
+            this.sleepService =
+                this.accessory.getService(SleepModeName) ||
+                this.accessory.addService(this.platform.Service.Switch, SleepModeName, SleepModeName);
 
-            this.humidifierService.addLinkedService(this.sleepSwitch);
+            this.humidifierService.addLinkedService(this.sleepService);
 
-            this.sleepSwitch
+            this.sleepService
                 .getCharacteristic(this.platform.Characteristic.On)
                 .onGet(SleepState.get.bind(this))
                 .onSet(SleepState.set.bind(this));
+        }  else {
+            this.sleepService = this.accessory.getService(SleepModeName);
+            if (this.sleepService) {
+                this.platform.log.info(`Removing ${SleepModeName} service.`);
+                this.accessory.removeService(this.sleepService);
+            }
         }
 
         // Night Light service
-        if (this.device.deviceType.hasLight) {
-            this.nightLight =
-                this.accessory.getService("Night Light") ||
-                this.accessory.addService(this.platform.Service.Lightbulb, "Night Light", "Night Light");
+        if (this.device.deviceType.hasLight && nightLightAccessory) {
+            this.lightService =
+                this.accessory.getService(NightLightName) ||
+                this.accessory.addService(this.platform.Service.Lightbulb, NightLightName,NightLightName);
 
-            this.humidifierService.addLinkedService(this.nightLight);
+            this.humidifierService.addLinkedService(this.lightService);
 
-            this.nightLight
+            this.lightService
                 .getCharacteristic(this.platform.Characteristic.On)
                 .onGet(LightState.get.bind(this))
                 .onSet(LightState.set.bind(this));
 
-            this.nightLight
+            this.lightService
                 .getCharacteristic(this.platform.Characteristic.Brightness)
                 .setProps({
                     minStep: 25,
@@ -229,6 +270,12 @@ export default class VeSyncAccessory {
                 })
                 .onGet(LightBrightness.get.bind(this))
                 .onSet(LightBrightness.set.bind(this));
+        }  else {
+            this.lightService = this.accessory.getService(NightLightName);
+            if (this.lightService) {
+                this.platform.log.info(`Removing ${NightLightName} service.`);
+                this.accessory.removeService(this.lightService);
+            }
         }
     }
 }
