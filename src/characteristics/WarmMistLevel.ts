@@ -4,7 +4,7 @@ import {
     CharacteristicValue,
     Nullable
 } from 'homebridge';
-import VeSyncFan, {Mode} from '../api/VeSyncFan';
+import VeSyncFan from '../api/VeSyncFan';
 
 import {AccessoryThisType} from '../VeSyncAccessory';
 
@@ -23,9 +23,16 @@ const characteristic: {
     },
 
     set: async function (value: CharacteristicValue) {
-        if (!this.device.deviceType.hasWarmMode) {
-            await this.device.changeMode(Mode.Manual);
+        this.device.expectedWarmLevel = value;
+        if (!this.device.warmEnabled && value > 0){
+            // if from Off state and level is greater than 0, return immediately
+            return;
         }
+        if (this.device.warmEnabled && value == 0){
+            // if from On state and level is less than 0, return immediately
+            return;
+        }
+
         await this.device.changeWarmMistLevel(Number(value));
 
     }

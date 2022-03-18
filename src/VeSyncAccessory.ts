@@ -177,7 +177,8 @@ export default class VeSyncAccessory {
 
             this.warmMistService
                 .getCharacteristic(this.platform.Characteristic.On)
-                .onGet(WarmActive.get.bind(this));
+                .onGet(WarmActive.get.bind(this))
+                .onSet(WarmActive.set.bind(this));
 
             this.warmMistService
                 .getCharacteristic(this.platform.Characteristic.RotationSpeed)

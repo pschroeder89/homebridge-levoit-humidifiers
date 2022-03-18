@@ -19,6 +19,8 @@ export default class VeSyncFan {
 
     public readonly manufacturer = 'Levoit';
 
+    public expectedWarmLevel: any;
+
     public get humidityLevel() {
         return this._humidityLevel;
     }
@@ -91,6 +93,14 @@ export default class VeSyncFan {
 
         if (success) {
             this._isOn = power;
+            if (!this._isOn) {
+                this._humidityLevel = 0;
+                this._targetHumidity = 0;
+                this._displayOn = false;
+                this._mistLevel = 0;
+                this._warmLevel = 0;
+                this._brightnessLevel = 0;
+            }
         }
 
         return success;
@@ -117,7 +127,7 @@ export default class VeSyncFan {
             mode = Mode.Humidity;
         }
         let success: boolean;
-        if (this._mode == mode){
+        if (this._mode == mode) {
             success = true;
         } else {
             this.client.log.info("Changing Mode to " + mode);
@@ -199,6 +209,13 @@ export default class VeSyncFan {
 
         if (success) {
             this._warmLevel = warmMistLevel;
+            if (this._warmLevel == 0) {
+                this._warmEnabled = false;
+                this.expectedWarmLevel = this.deviceType.warmMistLevels;
+            }
+            {
+                this._warmEnabled = true;
+            }
         }
 
         return success;
@@ -230,6 +247,13 @@ export default class VeSyncFan {
                 this._mode = result.mode;
                 this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
+                this._isOn = false;
+                this._humidityLevel = 0;
+                this._targetHumidity = 0;
+                this._displayOn = false;
+                this._mistLevel = 0;
+                this._warmLevel = 0;
+                this._brightnessLevel = 0;
                 this.client.log.error(err?.message);
             }
         });
@@ -243,7 +267,7 @@ export default class VeSyncFan {
                  mode,
                  mistLevel,
                  warmLevel,
-                warmEnabled,
+                 warmEnabled,
                  brightnessLevel,
                  humidity,
                  targetHumidity,
