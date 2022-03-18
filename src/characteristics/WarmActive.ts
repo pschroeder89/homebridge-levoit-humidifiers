@@ -18,8 +18,10 @@ const characteristic: {
             const boolValue = value == 1;
             if (!boolValue) {
                 await this.device.changeWarmMistLevel(0);
-            } else {
-                await this.device.changeWarmMistLevel(3);
+                await this.device.updateInfo();
+            } else if (!this.device.warmEnabled && this.device.warmLevel == 0) {
+                await this.device.changeWarmMistLevel(this.device.expectedWarmLevel);
+                await this.device.updateInfo();
             }
         }
     }

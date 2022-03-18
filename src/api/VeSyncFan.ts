@@ -19,6 +19,8 @@ export default class VeSyncFan {
 
     public readonly manufacturer = 'Levoit';
 
+    public expectedWarmLevel: any;
+
     public get humidityLevel() {
         return this._humidityLevel;
     }
@@ -125,7 +127,7 @@ export default class VeSyncFan {
             mode = Mode.Humidity;
         }
         let success: boolean;
-        if (this._mode == mode){
+        if (this._mode == mode) {
             success = true;
         } else {
             this.client.log.info("Changing Mode to " + mode);
@@ -193,6 +195,7 @@ export default class VeSyncFan {
             return false;
         }
 
+        // if from slider and value 0, return. if from off and
         if (warmMistLevel > this.deviceType.warmMistLevels || warmMistLevel < 0) {
             return false;
         }
@@ -209,7 +212,9 @@ export default class VeSyncFan {
             this._warmLevel = warmMistLevel;
             if (this._warmLevel == 0) {
                 this._warmEnabled = false;
-            } {
+                this.expectedWarmLevel = this.deviceType.warmMistLevels;
+            }
+            {
                 this._warmEnabled = true;
             }
         }
