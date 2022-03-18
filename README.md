@@ -50,18 +50,19 @@ This plugin was forked from [RaresAil's Levoit Air Purifiers repo](https://githu
 
 ### Details
 
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services2.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/auto.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/manual.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/display.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/light.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/sleep.png?raw=true" width=25% height=25%></a>
-<a href="url"><img src="https://github.com/pschroeder89/homebridge-levoit-humidifiers/blob/main/images/services.png?raw=true" width=25% height=25%></a>
+<a href="url"><img src="images/services2.png" width=25% height=25%></a>
+<a href="url"><img src="images/auto.png" width=25% height=25%></a>
+<a href="url"><img src="images/manual.png" width=25% height=25%></a>
+<a href="url"><img src="images/display.png" width=25% height=25%></a>
+<a href="url"><img src="images/light.png" width=25% height=25%></a>
+<a href="url"><img src="images/sleep.png" width=25% height=25%></a>
+<a href="url"><img src="images/services.png" width=25% height=25%></a>
 
 ### Configuration
 
 - Via the Homebridge UI, enter the Homebridge VeSync Client plugin settings.
 - Enter your VeSync app credentials.
+- Select which controls you want exposed. Humidifier (Auto Mode) and the Humidity Sensor can not be hidden.
 - Setup the platform plugin as a child bridge for better performance
 - Save and restart Homebridge.
 
@@ -71,9 +72,14 @@ credentials are only stored in the Homebridge config and not sent to any server 
 You can also do this directly via the Homebridge config by adding your credentials to the config file under platforms.
 Replace the values of `username` and `password` with your credentials.
 
-You can turn off optional controls via the `accessories` section of the config.
+You can turn off optional controls via the `accessories` section of the config or through the plugin UI settings.
 The Humidifier (Auto mode) slider and the Humidity sensor cannot be turned off and will always be exposed.
 
+Via UI:
+
+<img src="images/homebridgeUI.png" width="500"/>
+
+Via config.json:
 ```json
 {
   "platforms": [
