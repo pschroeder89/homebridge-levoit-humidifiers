@@ -101,6 +101,14 @@ export default class VeSyncFan {
                 this._warmLevel = 0;
                 this._brightnessLevel = 0;
             }
+        } else {
+            this._isOn = false;
+            this._humidityLevel = 0;
+            this._targetHumidity = 0;
+            this._displayOn = false;
+            this._mistLevel = 0;
+            this._warmLevel = 0;
+            this._brightnessLevel = 0;
         }
 
         return success;
@@ -232,6 +240,13 @@ export default class VeSyncFan {
                 this.lastCheck = Date.now();
 
                 if (!data?.result?.result) {
+                    this._isOn = false;
+                    this._humidityLevel = 0;
+                    this._targetHumidity = 0;
+                    this._displayOn = false;
+                    this._mistLevel = 0;
+                    this._warmLevel = 0;
+                    this._brightnessLevel = 0;
                     return;
                 }
 
