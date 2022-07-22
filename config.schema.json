@@ -23,11 +23,11 @@
         "required": true,
         "description": "VeSync's account password"
       },
-      "password": {
-        "title": "Password",
-        "type": "string",
-        "required": true,
-        "description": "VeSync's account password"
+      "showOffWhenDisconnected": {
+        "title": "Show Off When Disconnected",
+        "type": "boolean",
+        "default": false,
+        "description": "When disconnected from WiFi, HomeKit will display devices as Off instead of Not Responding"
       },
       "accessories": {
         "type": "object",

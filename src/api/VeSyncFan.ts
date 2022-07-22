@@ -102,13 +102,18 @@ export default class VeSyncFan {
                 this._brightnessLevel = 0;
             }
         } else {
-            this._isOn = false;
-            this._humidityLevel = 0;
-            this._targetHumidity = 0;
-            this._displayOn = false;
-            this._mistLevel = 0;
-            this._warmLevel = 0;
-            this._brightnessLevel = 0;
+            this.client.log.error("Failed to setPower due to unreachable device.");
+            if (this.client.config.showOffWhenDisconnected) {
+                this._isOn = false;
+                this._humidityLevel = 0;
+                this._targetHumidity = 0;
+                this._displayOn = false;
+                this._mistLevel = 0;
+                this._warmLevel = 0;
+                this._brightnessLevel = 0;
+            } else {
+                return false;
+            }
         }
 
         return success;
@@ -238,8 +243,7 @@ export default class VeSyncFan {
 
                 const data = await this.client.getDeviceInfo(this);
                 this.lastCheck = Date.now();
-
-                if (!data?.result?.result) {
+                if (!data?.result?.result && this.client.config.showOffWhenDisconnected) {
                     this._isOn = false;
                     this._humidityLevel = 0;
                     this._targetHumidity = 0;
@@ -247,6 +251,8 @@ export default class VeSyncFan {
                     this._mistLevel = 0;
                     this._warmLevel = 0;
                     this._brightnessLevel = 0;
+                    return;
+                } else {
                     return;
                 }
 
@@ -262,14 +268,19 @@ export default class VeSyncFan {
                 this._mode = result.mode;
                 this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
-                this._isOn = false;
-                this._humidityLevel = 0;
-                this._targetHumidity = 0;
-                this._displayOn = false;
-                this._mistLevel = 0;
-                this._warmLevel = 0;
-                this._brightnessLevel = 0;
-                this.client.log.error(err?.message);
+                this.client.log.error("Failed to updateInfo due to unreachable device: " + err?.message);
+                if (this.client.config.showOffWhenDisconnected) {
+                    this._isOn = false;
+                    this._humidityLevel = 0;
+                    this._targetHumidity = 0;
+                    this._displayOn = false;
+                    this._mistLevel = 0;
+                    this._warmLevel = 0;
+                    this._brightnessLevel = 0;
+                }
+                else {
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                }
             }
         });
     }

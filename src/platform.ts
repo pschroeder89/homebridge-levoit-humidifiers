@@ -42,7 +42,7 @@ export default class Platform implements DynamicPlatformPlugin {
     this.debugger = new DebugMode(!!enableDebugMode, this.log);
     this.debugger.debug('[PLATFORM]', 'Debug mode enabled');
 
-    this.client = new VeSync(email, password, this.debugger, log);
+    this.client = new VeSync(email, password, this.config, this.debugger, log);
 
     this.api.on('didFinishLaunching', () => {
       this.discoverDevices();

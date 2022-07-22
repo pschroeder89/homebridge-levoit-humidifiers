@@ -1,5 +1,5 @@
 import axios, {AxiosInstance} from 'axios';
-import {Logger} from 'homebridge';
+import {Logger, PlatformConfig} from 'homebridge';
 import AsyncLock from 'async-lock';
 import crypto from 'crypto';
 
@@ -39,6 +39,7 @@ export default class VeSync {
     constructor(
         private readonly email: string,
         private readonly password: string,
+        readonly config: PlatformConfig,
         public readonly debugMode: DebugMode,
         public readonly log: Logger
     ) {
@@ -108,7 +109,11 @@ export default class VeSync {
             // Explicitly fail if device is offline
             if (response.data.msg == "device offline") {
                 this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
-                return false;
+                if (this.config.showOffWhenDisconnected) {
+                    return false;
+                } else {
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                }
             }
 
             if (!response?.data) {
@@ -158,7 +163,11 @@ export default class VeSync {
             // Explicitly fail if device is offline
             if (response.data.msg == "device offline") {
                 this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
-                return false;
+                if (this.config.showOffWhenDisconnected) {
+                    return false;
+                } else {
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                }
             }
 
             if (!response?.data) {
