@@ -103,7 +103,7 @@ export default class VeSyncFan {
             }
         } else {
             this.client.log.error("Failed to setPower due to unreachable device.");
-            if (this.client.config.showOffWhenDisconnected) {
+            if (this.client.config.options.showOffWhenDisconnected) {
                 this._isOn = false;
                 this._humidityLevel = 0;
                 this._targetHumidity = 0;
@@ -243,7 +243,7 @@ export default class VeSyncFan {
 
                 const data = await this.client.getDeviceInfo(this);
                 this.lastCheck = Date.now();
-                if (!data?.result?.result && this.client.config.showOffWhenDisconnected) {
+                if (!data?.result?.result && this.client.config.options.showOffWhenDisconnected) {
                     this._isOn = false;
                     this._humidityLevel = 0;
                     this._targetHumidity = 0;
@@ -269,7 +269,7 @@ export default class VeSyncFan {
                 this._brightnessLevel = result.night_light_brightness;
             } catch (err: any) {
                 this.client.log.error("Failed to updateInfo due to unreachable device: " + err?.message);
-                if (this.client.config.showOffWhenDisconnected) {
+                if (this.client.config.options.showOffWhenDisconnected) {
                     this._isOn = false;
                     this._humidityLevel = 0;
                     this._targetHumidity = 0;
