@@ -112,7 +112,7 @@ export default class VeSync {
                 if (this.config.options.showOffWhenDisconnected) {
                     return false;
                 } else {
-                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.");
                 }
             }
 
@@ -166,7 +166,7 @@ export default class VeSync {
                 if (this.config.options.showOffWhenDisconnected) {
                     return false;
                 } else {
-                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.");
                 }
             }
 

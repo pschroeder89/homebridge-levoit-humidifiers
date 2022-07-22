@@ -279,7 +279,7 @@ export default class VeSyncFan {
                     this._brightnessLevel = 0;
                 }
                 else {
-                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.")
+                    throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.");
                 }
             }
         });
