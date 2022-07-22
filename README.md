@@ -108,11 +108,11 @@ Via config.json:
 ```
 
 ### Note to Seasonal Humidifier Users:
+
 By default, if you disconnect a humidifier from WiFi, it will begin showing as "Not Responding" in HomeKit. Restarting
 Homebridge will remove the cached device from HomeKit. Once you've re-connected the humidifier, restart Homebridge again
-for it to display back in HomeKit.
-If you prefer the disconnected device to be visible in HomeKit at all times, set `showOffWhenDisconnected` to `true` in
-the config. The humidifiers will remain in HomeKit in an Off state.
+for it to display back in HomeKit. If you prefer the disconnected device to be visible in HomeKit at all times,
+set `showOffWhenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
 **Note: This will result in benign warnings in the Homebridge logs that the device returned undefined values.**
 
 ### Enabling Debug Mode
