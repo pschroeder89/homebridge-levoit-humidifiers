@@ -23,12 +23,6 @@
         "required": true,
         "description": "VeSync's account password"
       },
-      "showOffWhenDisconnected": {
-        "title": "Show Off When Disconnected",
-        "type": "boolean",
-        "default": false,
-        "description": "When disconnected from WiFi, HomeKit will display devices as Off instead of Not Responding"
-      },
       "accessories": {
         "type": "object",
         "properties": {
@@ -61,6 +55,17 @@
             "type": "boolean",
             "default": true,
             "description": "Enable brightness slider / switch for the Night Light"
+          }
+        }
+      },
+      "options": {
+        "type": "object",
+        "properties": {
+          "showOffWhenDisconnected": {
+            "title": "Show Off When Disconnected",
+            "type": "boolean",
+            "default": false,
+            "description": "When set to true, HomeKit will display unresponsive humidifiers as Off instead of Not Responding. Read the \"Note to Seasonal Humidifier Users\" in the README for more info."
           }
         }
       }

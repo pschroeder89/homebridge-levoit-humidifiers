@@ -77,10 +77,6 @@ credentials are only stored in the Homebridge config and not sent to any server 
 You can also do this directly via the Homebridge config by adding your credentials to the config file under platforms.
 Replace the values of `username` and `password` with your credentials.
 
-Set `showOffWhenDisconnected` to `true` if you'd like the humidifiers to display as `Off` instead of `Not Responding`
-when disconnected from WiFi. This is helpful if you only use your humidifiers during certain parts of the year. Warning:
-This setting may result in "Slow to Respond" warnings in the Homebridge logs.
-
 You can turn off optional controls via the `accessories` section of the config or through the plugin UI settings. The
 Humidifier (Auto mode) slider and the Humidity sensor cannot be turned off and will always be exposed.
 
@@ -110,6 +106,14 @@ Via config.json:
   ]
 }
 ```
+
+### Note to Seasonal Humidifier Users:
+By default, if you disconnect a humidifier from WiFi, it will begin showing as "Not Responding" in HomeKit. Restarting
+Homebridge will remove the cached device from HomeKit. Once you've re-connected the humidifier, restart Homebridge again
+for it to display back in HomeKit.
+If you prefer the disconnected device to be visible in HomeKit at all times, set `showOffWhenDisconnected` to `true` in
+the config. The humidifiers will remain in HomeKit in an Off state.
+**Note: This will result in benign warnings in the Homebridge logs that the device returned undefined values.**
 
 ### Enabling Debug Mode
 
