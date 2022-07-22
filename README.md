@@ -94,13 +94,15 @@ Via config.json:
       "email": "email",
       "password": "password",
       "platform": "LevoitHumidifiers",
-      "showOffWhenDisconnected": false,
       "accessories": {
         "display": false,
         "sleep_mode": false,
         "cool_mist": false,
         "warm_mist": false,
         "night_light": false
+      },
+      "options": {
+        "showOffWhenDisconnected": false
       }
     }
   ]
@@ -127,7 +129,6 @@ In the config file, add `enableDebugMode: true`
       "email": "email",
       "password": "password",
       "platform": "LevoitHumidifiers",
-      "showOffWhenDisconnected": false,
       "enableDebugMode": true
     }
   ]
