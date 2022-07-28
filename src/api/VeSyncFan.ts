@@ -252,7 +252,7 @@ export default class VeSyncFan {
                     this._warmLevel = 0;
                     this._brightnessLevel = 0;
                     return;
-                } else {
+                } else if (!data?.result?.result) {
                     return;
                 }
 
