@@ -117,7 +117,7 @@ for it to display back in HomeKit.
 
 If you prefer the disconnected device to be visible in HomeKit at all times,
 set `showOffWhenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
-**Note: This will result in benign warnings in the Homebridge logs that the device returned undefined values.**
+**Note: This will cause benign errors in the Homebridge logs that the device could not be contacted.**
 
 ### Enabling Debug Mode
 
