@@ -1,5 +1,6 @@
 export enum DeviceName {
     Classic300S = 'Classic300S',
+    Classic300S_US = "LUH-A601S-WUSB",
     Classic200S = "Classic200S",
     Dual200S = 'Dual200S',
     Dual200S_EU = 'LUH-D301S-WEU',
@@ -27,6 +28,17 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) =>
             input.includes(DeviceName.Classic300S),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: true,
+        hasSleepMode: true,
+        hasWarmMode: false,
+        minHumidityLevel: 30,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.Classic300S_US),
         hasAutoMode: true,
         coolMistLevels: 9,
         hasLight: true,
