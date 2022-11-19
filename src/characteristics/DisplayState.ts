@@ -16,8 +16,11 @@ const characteristic: {
         return this.device.displayOn;
     },
     set: async function (value: CharacteristicValue) {
+        const dispChar =  this.displayService.getCharacteristic(this.platform.Characteristic.On);
+
         const boolValue = value == 1;
         await this.device.setDisplay(boolValue);
+        dispChar.updateValue(boolValue);
     }
 };
 

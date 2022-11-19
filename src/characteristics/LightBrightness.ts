@@ -12,16 +12,17 @@ const characteristic: {
     set: CharacteristicSetHandler;
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
-        await this.device.updateInfo();
+        //await this.device.updateInfo();
 
         return this.device.brightnessLevel;
     },
     set: async function (value: CharacteristicValue) {
         // If light is on, and we are applying a non-zero value, change brightness to that level.
         // Otherwise, LightState will handle on / off switching.
-        if (this.device.brightnessLevel > 0 && value > 0) {
-            await this.device.setBrightness(Number(value));
-        }
+        await this.device.setBrightness(Number(value));
+        this.lightService.updateCharacteristic(this.platform.Characteristic.Brightness,Number(value));
+        this.lightService.updateCharacteristic(this.platform.Characteristic.On, true);
+
     }
 };
 

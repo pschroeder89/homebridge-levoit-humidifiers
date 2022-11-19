@@ -15,11 +15,16 @@ const characteristic: {
             return (this.device.isOn && this.device.warmEnabled);
         },
         set: async function (value: CharacteristicValue) {
+            const onChar = this.humidifierService.getCharacteristic(this.platform.Characteristic.On);
+            const warmChar = this.warmMistService
+                .getCharacteristic(this.platform.Characteristic.RotationSpeed);
+
             const boolValue = value == 1;
             if (!boolValue) {
                 await this.device.changeWarmMistLevel(0);
-                await this.device.updateInfo();
-            } else if (!this.device.warmEnabled && this.device.warmLevel == 0) {
+                warmChar.updateValue(0);
+
+            } else if (!this.device.warmEnabled && this.device.warmLevel == 0 && value > 0) {
                 /*
                 If turning on Warm Mode from Off state, we set it to the highest warmMistLevel value.
                  This is because we can't determine the selected slider number from the WarmMistLevel characteristic.
@@ -28,7 +33,9 @@ const characteristic: {
                  level selection.
                 */
                 await this.device.changeWarmMistLevel(Number(this.device.deviceType.warmMistLevels));
-                await this.device.updateInfo();
+                warmChar.updateValue(Number(this.device.deviceType.warmMistLevels));
+                onChar.updateValue(true);
+
             }
         }
     }

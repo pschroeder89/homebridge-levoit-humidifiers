@@ -23,12 +23,21 @@ const characteristic: {
         return this.device.mode === Mode.Sleep;
     },
     set: async function (value: CharacteristicValue) {
+        const sleepChar = this.sleepService
+            .getCharacteristic(this.platform.Characteristic.On);
+        const onChar = this.humidifierService
+            .getCharacteristic(this.platform.Characteristic.On);
+
         switch (value) {
             case true:
                 await this.device.changeMode(Mode.Sleep);
+                sleepChar.updateValue(true);
+                onChar.updateValue(true);
                 break;
             case false:
                 await this.device.changeMode(Mode.Auto);
+                sleepChar.updateValue(false);
+                onChar.updateValue(true);
                 break;
         }
     }

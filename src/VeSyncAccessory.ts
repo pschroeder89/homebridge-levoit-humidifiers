@@ -27,16 +27,21 @@ export type AccessoryThisType = ThisType<{
     humidifierService: Service;
     platform: Platform;
     device: VeSyncFan;
+    lightService: Service;
+    sleepService: Service;
+    displayService: Service;
+    coolMistService: Service;
+    warmMistService: Service;
 }>;
 
 export default class VeSyncAccessory {
     private humidifierService: Service;
-    private humiditySensorService: Service;
-    private lightService: Service | undefined;
-    private sleepService: Service | undefined;
-    private displayService: Service | undefined;
-    private coolMistService: Service | undefined;
-    private warmMistService: Service | undefined;
+    private readonly humiditySensorService: Service;
+    private readonly lightService: Service | undefined;
+    private readonly sleepService: Service | undefined;
+    private readonly displayService: Service | undefined;
+    private readonly coolMistService: Service | undefined;
+    private readonly warmMistService: Service | undefined;
 
     public get UUID() {
         return this.device.uuid.toString();
@@ -53,8 +58,7 @@ export default class VeSyncAccessory {
         We add 1 to coolMistLevels to account for 0 as a potential level.
         Example: The Classic300s has 9 cool mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
          */
-        const arr = [...Array(this.device.deviceType.coolMistLevels + 1).keys()];
-        return arr;
+        return [...Array(this.device.deviceType.coolMistLevels + 1).keys()];
     }
 
     private get getWarmMistValues() {
@@ -67,8 +71,7 @@ export default class VeSyncAccessory {
         if (!this.device.deviceType.warmMistLevels) {
             return [];
         }
-        const arr = [...Array(this.device.deviceType.warmMistLevels + 1).keys()];
-        return arr;
+        return [...Array(this.device.deviceType.warmMistLevels + 1).keys()];
     }
 
     constructor(
@@ -128,7 +131,7 @@ export default class VeSyncAccessory {
                 maxValue: 100,
             })
             .onGet(TargetHumidity.get.bind(this))
-            .onSet(TargetHumidity.set.bind(this));
+
 
         this.humidifierService
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
@@ -140,6 +143,7 @@ export default class VeSyncAccessory {
                 this.accessory.getService(CoolMistName) ||
                 this.accessory.addService(this.platform.Service.Fan, CoolMistName, CoolMistName);
 
+            // TODO: REMOVE?
             this.coolMistService
                 .getCharacteristic(this.platform.Characteristic.On)
                 .onGet(Active.get.bind(this))
@@ -268,7 +272,6 @@ export default class VeSyncAccessory {
                     maxValue: 100,
                     validValues: [0, 25, 50, 75, 100]
                 })
-                .onGet(LightBrightness.get.bind(this))
                 .onSet(LightBrightness.set.bind(this));
         }  else {
             this.lightService = this.accessory.getService(NightLightName);

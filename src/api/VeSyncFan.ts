@@ -116,6 +116,7 @@ export default class VeSyncFan {
             }
         }
 
+
         return success;
     }
 
@@ -238,9 +239,10 @@ export default class VeSyncFan {
         return this.lock.acquire('update-info', async () => {
             try {
                 if (Date.now() - this.lastCheck < 5 * 1000) {
+                    this.client.log.warn("Attempted to update info too soon after last request.");
                     return;
                 }
-
+                this.client.log.info("Updating info...");
                 const data = await this.client.getDeviceInfo(this);
                 this.lastCheck = Date.now();
                 if (!data?.result?.result && this.client.config.options.showOffWhenDisconnected) {

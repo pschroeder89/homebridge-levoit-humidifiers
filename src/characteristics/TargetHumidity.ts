@@ -22,11 +22,19 @@ const characteristic: {
         }
     },
     set: async function (humidity: CharacteristicValue) {
+        const onChar = this.humidifierService.getCharacteristic(this.platform.Characteristic.On);
+        const modeChar = this.humidifierService.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState);
+        const targetChar = this.humidifierService.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold);
+
         if (!this.device.isOn) {
             await this.device.setPower(true);
+            onChar.updateValue(true);
         }
         if (this.device.mode == Mode.Manual || (this.device.deviceType.hasWarmMode && this.device.mode == Mode.Sleep))
             await this.device.changeMode(Mode.Auto);
+            // modeChar.updateValue(Mode.Auto);
+
+        // If value outside of min / max values, use the min / max values
         switch (true) {
             case (humidity < this.device.deviceType.minHumidityLevel):
                 humidity = this.device.deviceType.minHumidityLevel;
@@ -36,6 +44,7 @@ const characteristic: {
                 break;
         }
         await this.device.setTargetHumidity(Number(humidity));
+        targetChar.updateValue(Number(humidity));
     }
 };
 
