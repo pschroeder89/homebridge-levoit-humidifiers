@@ -13,7 +13,7 @@ export enum DeviceName {
     OASIS = "LUH-O451S-WUS",
     OASIS_UK = "LUH-O451S-WUK",
     OASIS_EU = "LUH-O451S-WEU",
-    OASIS_JP = "LUH-0451S-WJP"
+    OASIS_JP = "LUH-O451S-WJP"
 }
 
 export interface DeviceType {
