@@ -9,7 +9,11 @@ export enum DeviceName {
     LV600S = "LUH-A602S-WUS",
     LV600S_EU = "LUH-A602S-WEU",
     LV600S_UK = "LUH-A602S-WUK",
-    LV600S_JP = "LUH-A602S-WJP"
+    LV600S_JP = "LUH-A602S-WJP",
+    OASIS = "LUH-O451S-WUS",
+    OASIS_UK = "LUH-O451S-WUK",
+    OASIS_EU = "LUH-O451S-WEU",
+    OASIS_JP = "LUH-O451S-WJP"
 }
 
 export interface DeviceType {
@@ -145,7 +149,55 @@ const deviceTypes: DeviceType[] = [
         warmMistLevels: 3,
         minHumidityLevel: 40,
         maxHumidityLevel: 80
-    }
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_UK),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_EU),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_JP),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
 ];
 
 export default deviceTypes;
