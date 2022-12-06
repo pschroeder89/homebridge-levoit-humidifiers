@@ -135,11 +135,12 @@ export default class VeSyncFan {
     }
 
     public async changeMode(mode: Mode): Promise<boolean> {
+        this.client.log.info("DEBUGGING: model is: " + this.model);
         // LV600s models use "Humidity" mode instead of "Auto"
         if (this.model in
             [
                 DeviceName.LV600S,
-                DeviceName.LV600S_USC,
+                DeviceName.LV600S_REMOTE,
                 DeviceName.LV600S_EU,
                 DeviceName.LV600S_UK,
                 DeviceName.LV600S_JP
