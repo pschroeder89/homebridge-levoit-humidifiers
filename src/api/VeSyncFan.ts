@@ -135,11 +135,20 @@ export default class VeSyncFan {
     }
 
     public async changeMode(mode: Mode): Promise<boolean> {
-        // Don't change the mode if we are already in that mode
-        if (this.model == DeviceName.LV600S && mode == Mode.Auto) {
+        // LV600s models use "Humidity" mode instead of "Auto"
+        if (this.model in
+            [
+                DeviceName.LV600S,
+                DeviceName.LV600S_USC,
+                DeviceName.LV600S_EU,
+                DeviceName.LV600S_UK,
+                DeviceName.LV600S_JP
+            ]
+            && mode == Mode.Auto) {
             mode = Mode.Humidity;
         }
         let success: boolean;
+        // Don't change the mode if we are already in that mode
         if (this._mode == mode) {
             success = true;
         } else {
@@ -277,8 +286,7 @@ export default class VeSyncFan {
                     this._mistLevel = 0;
                     this._warmLevel = 0;
                     this._brightnessLevel = 0;
-                }
-                else {
+                } else {
                     throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.");
                 }
             }

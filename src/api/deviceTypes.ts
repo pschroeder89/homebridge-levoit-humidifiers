@@ -7,13 +7,14 @@ export enum DeviceName {
     Dual200S_UK = 'LUH-D301S-WUK',
     Dual200S_JP = 'LUH-D301S-WJP',
     LV600S = "LUH-A602S-WUS",
+    LV600S_USC = "LUH-A602S-WUS",
     LV600S_EU = "LUH-A602S-WEU",
     LV600S_UK = "LUH-A602S-WUK",
     LV600S_JP = "LUH-A602S-WJP",
     OASIS = "LUH-O451S-WUS",
     OASIS_UK = "LUH-O451S-WUK",
     OASIS_EU = "LUH-O451S-WEU",
-    OASIS_JP = "LUH-O451S-WJP"
+    OASIS_JP = "LUH-O451S-WJP",
 }
 
 export interface DeviceType {
@@ -28,6 +29,9 @@ export interface DeviceType {
     maxHumidityLevel: number;
 }
 
+// All supported models.
+// TODO: Refactor this to look for a device prefix instead of the full device name.
+//  That will allow us to reduce this list size and cause less failures when new model variations pop up.
 const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) =>
@@ -105,6 +109,18 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasSleepMode: true,
+        hasWarmMode: true,
+        warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.LV600S_USC),
         hasAutoMode: true,
         coolMistLevels: 9,
         hasLight: false,
