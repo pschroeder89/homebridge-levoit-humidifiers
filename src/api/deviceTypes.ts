@@ -7,7 +7,7 @@ export enum DeviceName {
     Dual200S_UK = 'LUH-D301S-WUK',
     Dual200S_JP = 'LUH-D301S-WJP',
     LV600S = "LUH-A602S-WUS",
-    LV600S_USC= "LUH-A602S-WUS",
+    LV600S_USC = "LUH-A602S-WUS",
     LV600S_EU = "LUH-A602S-WEU",
     LV600S_UK = "LUH-A602S-WUK",
     LV600S_JP = "LUH-A602S-WJP",
