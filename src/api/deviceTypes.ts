@@ -82,7 +82,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) => input.includes(DeviceName.Dual200S_REMOTE),
         hasAutoMode: true,
         coolMistLevels: 2,
-        hasLight: false,
+        hasLight: true,
         hasSleepMode: false,
         hasWarmMode: false,
         minHumidityLevel: 30,
