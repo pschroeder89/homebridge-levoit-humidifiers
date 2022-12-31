@@ -250,6 +250,8 @@ export default class VeSyncFan {
                 }
 
                 const data = await this.client.getDeviceInfo(this);
+                
+                this.client.log.info("[UPDATED INFO RESPONSE]", JSON.stringify(data));
                 this.lastCheck = Date.now();
                 if (!data?.result?.result && this.client.config.options.showOffWhenDisconnected) {
                     this._isOn = false;
