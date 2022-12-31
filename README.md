@@ -1,17 +1,19 @@
 # Homebridge Levoit Humidifiers
 
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![Discord](https://camo.githubusercontent.com/a3c28cf032b15d45f7e2b08a8b1a0a764533a96003e117d0d99c9c3643c72383/68747470733a2f2f696d672e736869656c64732e696f2f646973636f72642f3433323636333333303238313232363237303f636f6c6f723d373238454435266c6f676f3d646973636f7264266c6162656c3d646973636f7264)](https://discord.com/channels/432663330281226270/1055705874460594247)
+[![downloads-via-npm](https://img.shields.io/npm/dt/homebridge-levoit-humidifiers)](https://www.npmjs.com/package/homebridge-levoit-humidifiers)
 
-[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/channels/432663330281226270/1055705874460594247)
 
 This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
 
 | Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
 |----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
+| OasisMist 450S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         |
 | Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
-| Dual 200S            | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
+| Dual 200S            | ✅         | ✅         | ❌          | ✅ (2022 models)| ✅              | ✅               | ❌         |
 
 This plugin was forked
 from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
@@ -21,28 +23,28 @@ for the Levoit Humidifers.
 
 1. Humidifier / Auto Mode
     - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
-    - Can also change Target Humidity in Sleep Mode, except on LV600s.
-        - For LV600s, the Humidifier slider will be set to 0% when Sleep Mode is on.
-    - For LV600s, the Auto humidity range is 40-80%. All other models are 30-80%.
+    - Can also change Target Humidity in Sleep Mode, except on LV600 / Oasis.
+        - For LV600s and Oasis, the Humidifier slider will be set to 0% when Sleep Mode is on.
+    - For LV600s and Oasis, the Auto humidity range is 40-80%. All other models are 30-80%.
         - Selecting values outside the Auto range will set the Target Humidity to the lowest or highest number in the
           range.
 
 2. Cool Mist Level
-    - Sets humidifier to Manual mode (except on LV600s) and sets the Cool Mist Level to the desired level.
-        - Note: LV600s supports changing mist levels while in Auto mode.
+    - Sets humidifier to Manual mode (except on LV600s / Oasis) and sets the Cool Mist Level to the desired level.
+        - Note: LV600s / Oasis supports changing mist levels while in Auto mode.
     - When set to Level 0, turns the device off.
-    - Levels 1-9 on Classic300s, Classic200s, and LV600S
+    - Levels 1-9 on Classic300s, Classic200s, LV600s, and Oasis
     - Levels 1-2 on Dual200s
 
 3. Warm Mist Level
     - Sets Warm Mist Level to the desired level.
-    - Levels 0-3 on LV600s only.
+    - Levels 0-3 on LV600s / Oasis only.
 
 4. Sleep Mode
     - This switches the device between Sleep Mode (On) and Auto Mode (Off)
-    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600s.
-    - On LV600s, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
-    - The LV600s turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm
+    - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600s / Oasis.
+    - On LV600s / Oasis, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
+    - The LV600s / Oasis turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm
       Mist slider.
 
 5. Night Light
