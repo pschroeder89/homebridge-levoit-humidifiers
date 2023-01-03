@@ -1,6 +1,6 @@
-import {Service} from 'homebridge';
+import { Service } from 'homebridge';
 
-import Platform, {VeSyncPlatformAccessory} from './platform';
+import Platform, { VeSyncPlatformAccessory } from './platform';
 import CurrentState from './characteristics/CurrentState';
 import Humidity from './characteristics/Humidity';
 import Active from './characteristics/Active';
@@ -16,12 +16,12 @@ import WarmMistLevel from "./characteristics/WarmMistLevel";
 import WarmActive from "./characteristics/WarmActive";
 
 const HumidifierName = "Humidifier";
-const HumiditySensorName= "Humidity Sensor";
+const HumiditySensorName = "Humidity Sensor";
 const CoolMistName = "Cool Mist";
 const WarmMistName = "Warm Mist";
-const NightLightName="Night Light";
-const SleepModeName="Sleep Mode";
-const DisplayName="Display";
+const NightLightName = "Night Light";
+const SleepModeName = "Sleep Mode";
+const DisplayName = "Display";
 
 export type AccessoryThisType = ThisType<{
     humidifierService: Service;
@@ -75,7 +75,7 @@ export default class VeSyncAccessory {
         private readonly platform: Platform,
         private readonly accessory: VeSyncPlatformAccessory
     ) {
-        const {manufacturer, model, mac} = this.device;
+        const { manufacturer, model, mac } = this.device;
         const config = platform.config;
         const accessories = config.accessories ? config.accessories : {};
         const coolMistAccessory = (accessories.cool_mist != false);
@@ -188,7 +188,7 @@ export default class VeSyncAccessory {
         // Humidity Sensor service
         this.humiditySensorService =
             this.accessory.getService(HumiditySensorName) ||
-            this.accessory.addService(this.platform.Service.HumiditySensor, HumiditySensorName,HumiditySensorName);
+            this.accessory.addService(this.platform.Service.HumiditySensor, HumiditySensorName, HumiditySensorName);
 
         this.humidifierService.addLinkedService(this.humiditySensorService);
 
@@ -219,7 +219,7 @@ export default class VeSyncAccessory {
                 })
                 .onGet(WarmMistLevel.get.bind(this))
                 .onSet(WarmMistLevel.set.bind(this));
-        }  else {
+        } else {
             this.warmMistService = this.accessory.getService(WarmMistName);
             if (this.warmMistService) {
                 this.platform.log.info(`Removing ${WarmMistName} service.`);
@@ -239,7 +239,7 @@ export default class VeSyncAccessory {
                 .getCharacteristic(this.platform.Characteristic.On)
                 .onGet(SleepState.get.bind(this))
                 .onSet(SleepState.set.bind(this));
-        }  else {
+        } else {
             this.sleepService = this.accessory.getService(SleepModeName);
             if (this.sleepService) {
                 this.platform.log.info(`Removing ${SleepModeName} service.`);
@@ -251,7 +251,7 @@ export default class VeSyncAccessory {
         if (this.device.deviceType.hasLight && nightLightAccessory) {
             this.lightService =
                 this.accessory.getService(NightLightName) ||
-                this.accessory.addService(this.platform.Service.Lightbulb, NightLightName,NightLightName);
+                this.accessory.addService(this.platform.Service.Lightbulb, NightLightName, NightLightName);
 
             this.humidifierService.addLinkedService(this.lightService);
 
@@ -270,7 +270,7 @@ export default class VeSyncAccessory {
                 })
                 .onGet(LightBrightness.get.bind(this))
                 .onSet(LightBrightness.set.bind(this));
-        }  else {
+        } else {
             this.lightService = this.accessory.getService(NightLightName);
             if (this.lightService) {
                 this.platform.log.info(`Removing ${NightLightName} service.`);

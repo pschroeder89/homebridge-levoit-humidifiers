@@ -10,12 +10,13 @@ import VeSyncFan from './VeSyncFan';
 export enum BypassMethod {
     STATUS = 'getHumidifierStatus',
     MODE = 'setHumidityMode',
-    NIGHT = 'setNightLightBrightness',
+    NIGHT_LIGHT_BRIGHTNESS = 'setNightLightBrightness',
     DISPLAY = 'setDisplay',
     SWITCH = 'setSwitch',
     HUMIDITY = 'setTargetHumidity',
     MIST_LEVEL = 'setVirtualLevel',
     LEVEL = 'setLevel',
+    LIGHT_STATUS = 'setLightStatus'
 }
 
 const lock = new AsyncLock();
@@ -160,6 +161,7 @@ export default class VeSync {
                 ...this.generateBody(true)
             });
 
+            this.debugMode.debug("[DEVICE INFO]", JSON.stringify(response?.data));
             // Explicitly fail if device is offline
             if (response.data.msg == "device offline") {
                 this.log.error("VeSync cannot communicate with humidifier! Check the VeSync App.");
@@ -240,7 +242,7 @@ export default class VeSync {
                 return false;
             }
 
-            this.debugMode.debug('[LOGIN]', 'The authentication success');
+            this.debugMode.debug('[LOGIN]', 'Authentication was successful');
 
             this.accountId = accountID;
             this.token = token;
@@ -275,6 +277,7 @@ export default class VeSync {
                 ...this.generateDetailBody(),
                 ...this.generateBody(true)
             });
+
 
             if (!response?.data) {
                 this.debugMode.debug(
@@ -316,3 +319,4 @@ export default class VeSync {
         });
     }
 }
+
