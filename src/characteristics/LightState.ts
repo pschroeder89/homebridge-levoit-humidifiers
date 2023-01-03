@@ -34,10 +34,13 @@ const characteristic: {
                 await this.device.setBrightness(50);
             }
         }
-        // If light is on and we are turning it off, turn it off
         if (this.device.brightnessLevel > 0 && bool == 0)
-            await this.device.setBrightness(0);
-
+            if (this.device.deviceType.hasColorMode) {
+                await this.device.setLightStatus("off", 50);
+            } else {
+                // If light is on and we are turning it off, set to 0
+                await this.device.setBrightness(0);
+            }
     }
 };
 

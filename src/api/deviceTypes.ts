@@ -42,7 +42,7 @@ const deviceTypes: DeviceType[] = [
         hasAutoMode: true,
         coolMistLevels: 9,
         hasLight: true,
-        hasColorMode: false,
+        hasColorMode: true,
         hasSleepMode: true,
         hasWarmMode: false,
         minHumidityLevel: 30,

@@ -298,10 +298,13 @@ export default class VeSyncFan {
 
         const success = await this.client.sendCommand(this, BypassMethod.LIGHT_STATUS, lightJson);
 
-
         if (success) {
             this._brightnessLevel = brightness;
-        }
+            if (action == "off" ) {
+                this._lightOn = false;
+            } else{
+                this._lightOn = true
+            }}
 
         return success;
     }
