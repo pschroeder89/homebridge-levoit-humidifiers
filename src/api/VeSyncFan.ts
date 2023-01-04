@@ -1,7 +1,7 @@
 import AsyncLock from 'async-lock';
-import deviceTypes, {DeviceName, DeviceType} from './deviceTypes';
+import deviceTypes, { DeviceName, DeviceType } from './deviceTypes';
 
-import VeSync, {BypassMethod} from './VeSync';
+import VeSync, { BypassMethod } from './VeSync';
 
 export enum Mode {
     Manual = 'manual',
@@ -49,6 +49,10 @@ export default class VeSyncFan {
         return this._warmEnabled;
     }
 
+    public get lightOn() {
+        return this._lightOn;
+    }
+
     public get mode() {
         return this._mode;
     }
@@ -61,26 +65,58 @@ export default class VeSyncFan {
         return this._isOn;
     }
 
+    public get getBlue() {
+        return this._blue;
+    }
+
+    public get getGreen() {
+        return this._green;
+    }
+
+    public get getColorMode() {
+        return this._colorMode;
+    }
+
+    public get getColorSliderLocation() {
+        return this._colorSliderLocation;
+    }
+
+    public get getLightSpeed() {
+        return this._lightSpeed;
+    }
+
+    public get getRed() {
+        return this._red;
+    }
+
     constructor(
         private readonly client: VeSync,
         public readonly name: string,
         private _mode: Mode,
+        private _isOn: boolean,
         private _mistLevel: number,
         private _warmLevel: number,
         private _warmEnabled: boolean,
         private _brightnessLevel: number,
-        public readonly uuid: string,
-        private _isOn: boolean,
         private _humidityLevel: number,
         private _targetHumidity: number,
         private _targetReached: boolean,
+        private _lightOn: boolean,
+        private _lightSpeed: number,
+        private _red: number,
+        private _blue: number,
+        private _green: number,
+        private _colorMode: string,
+        private _colorSliderLocation: number,
         public readonly configModule: string,
         public readonly cid: string,
         public readonly region: string,
         public readonly model: string,
-        public readonly mac: string
+        public readonly mac: string,
+        public readonly uuid: string,
+
     ) {
-        this.deviceType = deviceTypes.find(({isValid}) => isValid(this.model))!;
+        this.deviceType = deviceTypes.find(({ isValid }) => isValid(this.model))!;
     }
 
     public async setPower(power: boolean): Promise<boolean> {
@@ -96,10 +132,8 @@ export default class VeSyncFan {
             if (!this._isOn) {
                 this._humidityLevel = 0;
                 this._targetHumidity = 0;
-                this._displayOn = false;
                 this._mistLevel = 0;
                 this._warmLevel = 0;
-                this._brightnessLevel = 0;
             }
         } else {
             this.client.log.error("Failed to setPower due to unreachable device.");
@@ -111,6 +145,7 @@ export default class VeSyncFan {
                 this._mistLevel = 0;
                 this._warmLevel = 0;
                 this._brightnessLevel = 0;
+                this._lightOn = false;
             } else {
                 return false;
             }
@@ -170,9 +205,11 @@ export default class VeSyncFan {
 
     public async setBrightness(brightness: number): Promise<boolean> {
         this.client.log.info("Setting Night Light to " + brightness);
-        const success = await this.client.sendCommand(this, BypassMethod.NIGHT, {
+
+        const success = await this.client.sendCommand(this, BypassMethod.NIGHT_LIGHT_BRIGHTNESS, {
             "night_light_brightness": brightness
         });
+
 
         if (success) {
             this._brightnessLevel = brightness;
@@ -246,6 +283,32 @@ export default class VeSyncFan {
         return success;
     }
 
+    public async setLightStatus(action: string, brightness: number): Promise<boolean> {
+        const lightJson = {
+            "action": action,
+            "speed": this.getLightSpeed,
+            "green": this.getGreen,
+            "blue": this.getBlue,
+            "red": this.getRed,
+            "brightness": brightness,
+            "colorMode": this.getColorMode,
+            "colorSliderLocation": this.getColorSliderLocation
+        };
+        this.client.log.info("Setting Night Light Status to " + JSON.stringify(lightJson));
+
+        const success = await this.client.sendCommand(this, BypassMethod.LIGHT_STATUS, lightJson);
+
+        if (success) {
+            this._brightnessLevel = brightness;
+            if (action == "off" ) {
+                this._lightOn = false;
+            } else{
+                this._lightOn = true
+            }}
+
+        return success;
+    }
+
     public async updateInfo(): Promise<void> {
         return this.lock.acquire('update-info', async () => {
             try {
@@ -254,8 +317,7 @@ export default class VeSyncFan {
                 }
 
                 const data = await this.client.getDeviceInfo(this);
-                
-                this.client.log.info("[UPDATED INFO RESPONSE]", JSON.stringify(data));
+
                 this.lastCheck = Date.now();
                 if (!data?.result?.result && this.client.config.options.showOffWhenDisconnected) {
                     this._isOn = false;
@@ -280,7 +342,17 @@ export default class VeSyncFan {
                 this._warmLevel = result.warm_level;
                 this._warmEnabled = result.warm_enabled;
                 this._mode = result.mode;
-                this._brightnessLevel = result.night_light_brightness;
+                this._brightnessLevel = result.night_light_brightness ?? result.rgbNightLight?.brightness;
+                // RGB Light Devices Only:
+                this._lightOn = result.rgbNightLight?.action;
+                this._blue = result.rgbNightLight?.blue;
+                this._green = result.rgbNightLight?.green;
+                this._red = result.rgbNightLight?.red;
+                this._colorMode = result.rgbNightLight?.colorMode;
+                this._lightSpeed = result.rgbNightLight?.speed;
+                this._colorSliderLocation = result.rgbNightLight?.colorSliderLocation;
+
+
             } catch (err: any) {
                 this.client.log.error("Failed to updateInfo due to unreachable device: " + err?.message);
                 if (this.client.config.options.showOffWhenDisconnected) {
@@ -301,40 +373,56 @@ export default class VeSyncFan {
     public static fromResponse =
         (client: VeSync) =>
             ({
-                 deviceStatus,
-                 deviceName,
-                 mode,
-                 mistLevel,
-                 warmLevel,
-                 warmEnabled,
-                 brightnessLevel,
-                 humidity,
-                 targetHumidity,
-                 targetReached,
-                 uuid,
-                 configModule,
-                 cid,
-                 deviceRegion,
-                 deviceType,
-                 macID
-             }) =>
+                deviceName,
+                mode,
+                deviceStatus,
+                mistLevel,
+                warmLevel,
+                warmEnabled,
+                brightnessLevel,
+                humidity,
+                targetHumidity,
+                targetReached,
+                lightOn,
+                lightSpeed,
+                red,
+                blue,
+                green,
+                colorMode,
+                colorSliderLocation,
+                configModule,
+                cid,
+                deviceRegion,
+                deviceType,
+                macID,
+                uuid
+
+            }) =>
                 new VeSyncFan(
                     client,
                     deviceName,
                     mode,
-                    parseInt(mistLevel ?? '1', 10),
-                    parseInt(warmLevel ?? '0', 10),
+                    deviceStatus,
+                    mistLevel,
+                    warmLevel,
                     warmEnabled,
                     brightnessLevel,
-                    uuid,
-                    deviceStatus === 'on',
                     humidity,
                     targetHumidity,
                     targetReached,
+                    lightOn,
+                    lightSpeed,
+                    red,
+                    blue,
+                    green,
+                    colorMode,
+                    colorSliderLocation,
                     configModule,
                     cid,
                     deviceRegion,
                     deviceType,
-                    macID
+                    macID,
+                    uuid,
+
                 );
 }
