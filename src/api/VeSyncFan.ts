@@ -101,7 +101,7 @@ export default class VeSyncFan {
         private _humidityLevel: number,
         private _targetHumidity: number,
         private _targetReached: boolean,
-        private _lightOn: boolean,
+        private _lightOn: string,
         private _lightSpeed: number,
         private _red: number,
         private _blue: number,
@@ -145,7 +145,7 @@ export default class VeSyncFan {
                 this._mistLevel = 0;
                 this._warmLevel = 0;
                 this._brightnessLevel = 0;
-                this._lightOn = false;
+                this._lightOn = "off";
             } else {
                 return false;
             }
@@ -284,27 +284,47 @@ export default class VeSyncFan {
     }
 
     public async setLightStatus(action: string, brightness: number): Promise<boolean> {
+        // Get the current RGB values and brightness %
+        let red = this._red;
+        let green = this._green;
+        let blue = this._blue;
+        let currentBrightness = this.brightnessLevel;
+        let newRed;
+        let newBlue;
+        let newGreen;
+
+        // If we're changing brightness, calculate the RGB values to adjust to
+        if (brightness !== this._brightnessLevel) {
+            newRed = Math.round(red * (brightness/currentBrightness));
+            newGreen = Math.round(green  * (brightness/currentBrightness));
+            newBlue = Math.round(blue * (brightness/currentBrightness));
+        }
+
         const lightJson = {
             "action": action,
             "speed": this.getLightSpeed,
-            "green": this.getGreen,
-            "blue": this.getBlue,
-            "red": this.getRed,
+            "green": newGreen || this.getGreen,
+            "blue": newBlue || this.getBlue,
+            "red": newRed || this.getRed,
             "brightness": brightness,
             "colorMode": this.getColorMode,
             "colorSliderLocation": this.getColorSliderLocation
         };
-        this.client.log.info("Setting Night Light Status to " + JSON.stringify(lightJson));
+        this.client.log.debug("Setting Night Light Status to " + JSON.stringify(lightJson));
 
         const success = await this.client.sendCommand(this, BypassMethod.LIGHT_STATUS, lightJson);
 
         if (success) {
             this._brightnessLevel = brightness;
-            if (action == "off" ) {
-                this._lightOn = false;
-            } else{
-                this._lightOn = true
-            }}
+            this._blue = newBlue || this.getBlue
+            this._green = newGreen || this.getGreen
+            this._red = newRed || this.getRed
+            this._lightOn = action
+            // Not setting these for now, so don't set them
+            // this._lightSpeed = this.getLightSpeed
+            // this._colorMode = this.getColorMode
+            // this._colorSliderLocation = this._colorSliderLocation
+        }
 
         return success;
     }
@@ -352,7 +372,21 @@ export default class VeSyncFan {
                 this._lightSpeed = result.rgbNightLight?.speed;
                 this._colorSliderLocation = result.rgbNightLight?.colorSliderLocation;
 
+                if (result.rgbNightLight) {
+                    const lightJson = {
+                        "action": this._lightOn,
+                        "speed": this._lightSpeed,
+                        "green": this._green,
+                        "blue": this._blue,
+                        "red": this._red,
+                        "brightness": this._brightnessLevel,
+                        "colorMode": this._colorMode,
+                        "colorSliderLocation": this._colorSliderLocation
+                    };
 
+                    this.client.log.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
+
+                }
             } catch (err: any) {
                 this.client.log.error("Failed to updateInfo due to unreachable device: " + err?.message);
                 if (this.client.config.options.showOffWhenDisconnected) {
