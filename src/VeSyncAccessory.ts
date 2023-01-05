@@ -260,14 +260,24 @@ export default class VeSyncAccessory {
                 .onGet(LightState.get.bind(this))
                 .onSet(LightState.set.bind(this));
 
-            this.lightService
-                .getCharacteristic(this.platform.Characteristic.Brightness)
-                .setProps({
+            let props: object;
+            if (this.device.deviceType.hasColorMode) {
+                props = {
+                    minValue: 39,
+                    maxValue: 100,
+                };
+            } else {
+                props = {
                     minStep: 25,
                     minValue: 0,
                     maxValue: 100,
                     validValues: [0, 25, 50, 75, 100]
-                })
+                };
+            }
+
+            this.lightService
+                .getCharacteristic(this.platform.Characteristic.Brightness)
+                .setProps(props)
                 .onGet(LightBrightness.get.bind(this))
                 .onSet(LightBrightness.set.bind(this));
         } else {

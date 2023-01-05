@@ -21,13 +21,18 @@ const characteristic: {
             // If light is on, and we are applying a non-zero value, change brightness to that level.
             // Otherwise, LightState will handle on / off switching.
 
-            // Handle Color Mode (RGB) devices
+            // We allow 39 as a value so 40 doesn't turn off the device. 
+            // So never set the device to 39, since that's not actually supported
+            if (value === 39) {
+                value + 1
+            }
             let action: string;
-            if (value > 0) {
+            if (value >= 40) {
                 action = "on";
             } else {
                 action = "off";
             }
+            // Handle Color Mode (RGB) devices
             if (this.device.deviceType.hasColorMode) {
                 await this.device.setLightStatus(action, Number(value));
             } else {

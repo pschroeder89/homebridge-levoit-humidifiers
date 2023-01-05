@@ -13,7 +13,15 @@ const characteristic: {
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
-
+        // If there is a lightOn attribute, that's the source of truth (for RGB models)
+        // Otherwise, convert brightness to a bool
+        if (this.device.lightOn) {
+            if (this.device.lightOn === "on") {
+              return true;
+            } else {
+                return false;
+            }
+        }
         return !!this.device.brightnessLevel;
     },
     set: async function (bool: CharacteristicValue) {
@@ -24,9 +32,10 @@ const characteristic: {
             action = "off";
         }
 
+        const lightOnVal = this.device.lightOn;
         // If light is off and we are turning it on, turn it on to 50% brightness.
         // Note: Turning on the device will always make brightness 50%, even if you slide to 100% when turning it on.
-        if (this.device.brightnessLevel == 0 && bool == 1) {
+        if ((lightOnVal && lightOnVal == "off" || !lightOnVal && this.device.brightnessLevel == 0) && bool == 1) {
             // If device has color mode (RGB), set on / off and set brightness to 50
             if (this.device.deviceType.hasColorMode) {
                 await this.device.setLightStatus(action, 50);
@@ -34,7 +43,7 @@ const characteristic: {
                 await this.device.setBrightness(50);
             }
         }
-        if (this.device.brightnessLevel > 0 && bool == 0)
+        if ((lightOnVal && lightOnVal == "on" || !lightOnVal &&  this.device.brightnessLevel > 0) && bool == 0)
             if (this.device.deviceType.hasColorMode) {
                 await this.device.setLightStatus("off", 50);
             } else {
