@@ -310,7 +310,7 @@ export default class VeSyncFan {
             "colorMode": this.getColorMode,
             "colorSliderLocation": this.getColorSliderLocation
         };
-        this.client.log.info("Setting Night Light Status to " + JSON.stringify(lightJson));
+        this.client.log.debug("Setting Night Light Status to " + JSON.stringify(lightJson));
 
         const success = await this.client.sendCommand(this, BypassMethod.LIGHT_STATUS, lightJson);
 
@@ -384,7 +384,7 @@ export default class VeSyncFan {
                         "colorSliderLocation": this._colorSliderLocation
                     };
 
-                    this.client.log.info("[GET LIGHT JSON]", JSON.stringify(lightJson));
+                    this.client.log.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
 
                 }
             } catch (err: any) {
