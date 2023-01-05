@@ -170,17 +170,13 @@ export default class VeSyncFan {
     }
 
     public async changeMode(mode: Mode): Promise<boolean> {
-        // LV600s and Oasis models use "Humidity" mode instead of "Auto"
+        // LV600s models use "Humidity" mode instead of "Auto"
         const humidity_models = [
             DeviceName.LV600S,
             DeviceName.LV600S_REMOTE,
             DeviceName.LV600S_EU,
             DeviceName.LV600S_UK,
-            DeviceName.LV600S_JP,
-            DeviceName.OASIS,
-            DeviceName.OASIS_EU,
-            DeviceName.OASIS_JP,
-            DeviceName.OASIS_UK
+            DeviceName.LV600S_JP
         ];
         if (humidity_models.includes(<DeviceName>this.model) && mode == Mode.Auto) {
             mode = Mode.Humidity;
