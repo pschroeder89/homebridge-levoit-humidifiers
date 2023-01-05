@@ -5,7 +5,7 @@
 [![downloads-via-npm](https://img.shields.io/npm/dt/homebridge-levoit-humidifiers)](https://www.npmjs.com/package/homebridge-levoit-humidifiers)
 
 
-This is a Homebridge plugin to control Levoit Humidifiers via the VeSync Platform.
+This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 | Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
 |----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
