@@ -291,9 +291,9 @@ export default class VeSyncFan {
 
         // If we're changing brightness, calculate the RGB values to adjust to
         if (brightness !== this._brightnessLevel) {
-            newRed = Math.round(red * (brightness/currentBrightness));
-            newGreen = Math.round(green  * (brightness/currentBrightness));
-            newBlue = Math.round(blue * (brightness/currentBrightness));
+            newRed = Math.round(red * (brightness / currentBrightness));
+            newGreen = Math.round(green * (brightness / currentBrightness));
+            newBlue = Math.round(blue * (brightness / currentBrightness));
         }
 
         const lightJson = {
@@ -380,7 +380,7 @@ export default class VeSyncFan {
                         "colorSliderLocation": this._colorSliderLocation
                     };
 
-                    this.client.log.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
+                    this.client.debugMode.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
 
                 }
             } catch (err: any) {
