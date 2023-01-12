@@ -61,11 +61,17 @@
       "options": {
         "type": "object",
         "properties": {
-          "showOffWhenDisconnected": {
-            "title": "Show Off When Disconnected",
-            "type": "boolean",
-            "default": false,
-            "description": "When set to true, HomeKit will display unresponsive humidifiers as Off instead of Not Responding. Read the \"Note to Seasonal Humidifier Users\" in the README for more info."
+          "whenDisconnected": {
+            "title": "When humidifier is disconnected from WiFi, HomeKit should:",
+            "description": "Change how HomeKit handles a disconnected device. Read the \"Note to Seasonal Humidifier Users\" in the README for more info.",
+            "type": "string",
+            "default": "not_responding",
+            "required": true,
+            "oneOf": [
+              { "title": "Show device as \"off\"", "enum": ["off"] },
+              { "title": "Show device as \"Not Responding\"", "enum": ["not_responding"] },
+              { "title": "Remove the device", "enum": ["remove"] }
+            ]
           }
         }
       }

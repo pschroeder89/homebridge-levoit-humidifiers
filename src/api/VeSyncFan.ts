@@ -135,20 +135,6 @@ export default class VeSyncFan {
                 this._mistLevel = 0;
                 this._warmLevel = 0;
             }
-        } else {
-            this.client.log.error("Failed to setPower due to unreachable device.");
-            if (this.client.config.options.showOffWhenDisconnected) {
-                this._isOn = false;
-                this._humidityLevel = 0;
-                this._targetHumidity = 0;
-                this._displayOn = false;
-                this._mistLevel = 0;
-                this._warmLevel = 0;
-                this._brightnessLevel = 0;
-                this._lightOn = "off";
-            } else {
-                return false;
-            }
         }
 
         return success;
@@ -335,7 +321,7 @@ export default class VeSyncFan {
                 const data = await this.client.getDeviceInfo(this);
 
                 this.lastCheck = Date.now();
-                if (!data?.result?.result && this.client.config.options.showOffWhenDisconnected) {
+                if (!data?.result?.result && this.client.config.options.whenDisconnected === "off") {
                     this._isOn = false;
                     this._humidityLevel = 0;
                     this._targetHumidity = 0;
@@ -380,12 +366,12 @@ export default class VeSyncFan {
                         "colorSliderLocation": this._colorSliderLocation
                     };
 
-                    this.client.log.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
+                    this.client.debugMode.debug("[GET LIGHT JSON]", JSON.stringify(lightJson));
 
                 }
             } catch (err: any) {
                 this.client.log.error("Failed to updateInfo due to unreachable device: " + err?.message);
-                if (this.client.config.options.showOffWhenDisconnected) {
+                if (this.client.config.options.whenDisconnected === "off") {
                     this._isOn = false;
                     this._humidityLevel = 0;
                     this._targetHumidity = 0;
@@ -393,7 +379,7 @@ export default class VeSyncFan {
                     this._mistLevel = 0;
                     this._warmLevel = 0;
                     this._brightnessLevel = 0;
-                } else {
+                } else if (this.client.config.options.whenDisconnected === "remove") {
                     throw new Error("Device was unreachable. Ensure it is plugged in and connected to WiFi.");
                 }
             }

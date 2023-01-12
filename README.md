@@ -106,7 +106,7 @@ Via config.json:
         "night_light": false
       },
       "options": {
-        "showOffWhenDisconnected": false
+        "whenDisconnected": "off"
       }
     }
   ]
@@ -120,7 +120,7 @@ Homebridge will remove the cached device from HomeKit. Once you've re-connected 
 for it to display back in HomeKit. 
 
 If you prefer the disconnected device to be visible in HomeKit at all times,
-set `showOffWhenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
+set `whenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
 **Note: This will cause benign errors in the Homebridge logs that the device could not be contacted.**
 
 ### Enabling Debug Mode
