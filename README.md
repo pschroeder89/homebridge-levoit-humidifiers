@@ -9,11 +9,12 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 | Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
 |----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
+| OasisMist 1000S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ❌        |
 | OasisMist 450S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         |
 | Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
-| Dual 200S            | ✅         | ✅         | ❌          | ✅ (2022 models)| ✅              | ✅               | ❌         |
+| Dual 200S            | ✅         | ✅         | ❌          | ✅           | ✅              | ✅               | ❌         |
 
 This plugin was forked
 from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic

@@ -13,10 +13,13 @@ export enum DeviceName {
     LV600S_UK = "LUH-A602S-WUK",
     LV600S_JP = "LUH-A602S-WJP",
     OASIS = "LUH-O451S-WUS",
-    // OASIS_REMOTE = "LUH-O451S-WUSR", // Not necessary since OASIS currently covers this. Adding for later refactor
     OASIS_UK = "LUH-O451S-WUK",
     OASIS_EU = "LUH-O451S-WEU",
     OASIS_JP = "LUH-O451S-WJP",
+    OASIS_1000S = "LUH-M101S-WUS",
+    OASIS_1000S_UK = "LUH-M101S-WUK",
+    OASIS_1000S_EU = "LUH-M101S-WEU",
+    OASIS_1000S_JP = "LUH-M101S-WJP",
 }
 
 export interface DeviceType {
@@ -241,6 +244,54 @@ const deviceTypes: DeviceType[] = [
         hasSleepMode: true,
         hasWarmMode: true,
         warmMistLevels: 3,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_1000S),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasColorMode: false,
+        hasSleepMode: true,
+        hasWarmMode: false,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_1000S_UK),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasColorMode: false,
+        hasSleepMode: true,
+        hasWarmMode: false,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_1000S_EU),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasColorMode: false,
+        hasSleepMode: true,
+        hasWarmMode: false,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.OASIS_1000S_JP),
+        hasAutoMode: true,
+        coolMistLevels: 9,
+        hasLight: false,
+        hasColorMode: false,
+        hasSleepMode: true,
+        hasWarmMode: false,
         minHumidityLevel: 40,
         maxHumidityLevel: 80
     },
