@@ -349,15 +349,28 @@ export default class VeSyncFan {
                 }
 
                 const result = data?.result?.result;
+
                 this._humidityLevel = result.humidity;
-                this._targetHumidity = result.configuration.auto_target_humidity;
-                this._targetReached = result.automatic_stop_reach_target;
-                this._displayOn = result.display;
-                this._isOn = result.enabled;
-                this._mistLevel = result.mist_virtual_level;
+                // Fields are different on OasisMist 1000s
+                if (this.model.includes("LUH-M101S")) {
+                    this._targetHumidity = result.targetHumidity;
+                    this._displayOn = result.screenSwitch;
+                    this._mode = result.workMode;
+                    this._isOn = result.powerSwitch;
+                    this._targetReached = result.autoStopState;
+                    this._mistLevel = result.virtualLevel;
+                } else {
+                    this._targetHumidity = result.configuration?.auto_target_humidity;
+                    this._displayOn = result.display;
+                    this._mode = result.mode;
+                    this._isOn = result.enabled;
+                    this._targetReached = result.automatic_stop_reach_target;
+                    this._mistLevel = result.mist_virtual_level;
+                }
+                
                 this._warmLevel = result.warm_level;
                 this._warmEnabled = result.warm_enabled;
-                this._mode = result.mode;
+
                 this._brightnessLevel = result.night_light_brightness ?? result.rgbNightLight?.brightness;
                 // RGB Light Devices Only:
                 this._lightOn = result.rgbNightLight?.action;
