@@ -121,11 +121,20 @@ export default class VeSyncFan {
 
     public async setPower(power: boolean): Promise<boolean> {
         this.client.log.info("Setting Power to " + power);
-
-        const success = await this.client.sendCommand(this, BypassMethod.SWITCH, {
-            enabled: power,
-            id: 0
-        });
+        // Oasis 1000 uses a different field to set power
+        let switchJson;
+        if (this.model.includes("LUH-M101S")) {
+            switchJson = {
+                powerSwitch: power,
+                id: 0
+            }
+        } else {
+            switchJson = {
+                enabled: power,
+                id: 0
+            }
+        }
+        const success = await this.client.sendCommand(this, BypassMethod.SWITCH, switchJson);
 
         if (success) {
             this._isOn = power;
@@ -157,10 +166,21 @@ export default class VeSyncFan {
     public async setTargetHumidity(level: number): Promise<boolean> {
         this.client.log.info("Setting Target Humidity to " + level);
 
-        const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, {
-            "target_humidity": level,
-            id: 0
-        });
+        // Oasis 1000 uses camelcase instead of snakecase
+        let humidityJson;
+        if (this.model.includes("LUH-M101S")) {
+            humidityJson = {
+                "targetHumidity": level,
+                id: 0
+            }
+        } else {
+            humidityJson = {
+                "target_humidity": level,
+                id: 0
+            }
+        }
+
+        const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, humidityJson);
 
         if (success) {
             this._targetHumidity = level;
@@ -181,16 +201,26 @@ export default class VeSyncFan {
         if (humidity_models.includes(<DeviceName>this.model) && mode == Mode.Auto) {
             mode = Mode.Humidity;
         }
+
         let success: boolean;
+
+        // Oasis 1000 uses camelcase instead of snakecase
+        let modeJson;
+        if (this.model.includes("LUH-M101S")) {
+            modeJson = {
+                "workMode": mode.toString(),
+            }
+        } else {
+            modeJson = {
+                "mode": mode.toString(),
+            }
+        }
         // Don't change the mode if we are already in that mode
         if (this._mode == mode) {
             success = true;
         } else {
             this.client.log.info("Changing Mode to " + mode);
-            success = await this.client.sendCommand(this, BypassMethod.MODE, {
-                mode: mode.toString()
-            });
-
+            success = await this.client.sendCommand(this, BypassMethod.MODE, modeJson);
         }
         if (success) {
             this._mode = mode;
@@ -216,9 +246,22 @@ export default class VeSyncFan {
 
     public async setDisplay(power: boolean): Promise<boolean> {
         this.client.log.info("Setting Display to " + power);
-        const success = await this.client.sendCommand(this, BypassMethod.DISPLAY, {
-            state: power
-        });
+
+        // Oasis 1000 uses camelcase instead of snakecase
+        let displayJson;
+        if (this.model.includes("LUH-M101S")) {
+            displayJson = {
+                "screenSwitch": power,
+                id: 0
+            }
+        } else {
+            displayJson = {
+                "state": power,
+                id: 0
+            }
+        }
+
+        const success = await this.client.sendCommand(this, BypassMethod.DISPLAY, displayJson);
 
         if (success) {
             this._displayOn = power;
@@ -234,11 +277,23 @@ export default class VeSyncFan {
 
         this.client.log.info("Setting Mist Level to " + coolMistLevel);
 
-        const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, {
-            level: coolMistLevel,
-            type: 'mist',
-            id: 0
-        });
+        // Oasis 1000 uses camelcase instead of snakecase
+        let coolMistJson;
+        if (this.model.includes("LUH-M101S")) {
+            coolMistJson = {
+                virtualLevel: coolMistLevel,
+                type: 'mist',
+                id: 0
+            }
+        } else {
+            coolMistJson = {
+                level: coolMistLevel,
+                type: 'mist',
+                id: 0
+            }
+        }
+
+        const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, coolMistJson);
 
         if (success) {
             this._mistLevel = coolMistLevel;
@@ -367,7 +422,7 @@ export default class VeSyncFan {
                     this._targetReached = result.automatic_stop_reach_target;
                     this._mistLevel = result.mist_virtual_level;
                 }
-                
+
                 this._warmLevel = result.warm_level;
                 this._warmEnabled = result.warm_enabled;
 

@@ -13,8 +13,6 @@ const characteristic: {
 } & AccessoryThisType = {
     get: async function (): Promise<Nullable<CharacteristicValue>> {
         await this.device.updateInfo();
-        console.log("[TARGET HUMIDIDITY]: " + this.device.targetHumidity)
-
         // If not in auto or sleep modes, don't display the target humidity in the slider. If device is sleeping,
         // and it has Warm Mode, model does not support changing Sleep mode target humidity, so display 0.
         if ((this.device.isOn) && ((this.device.mode == Mode.Auto || (this.device.mode == Mode.Sleep && !this.device.deviceType.hasWarmMode) || this.device.mode == Mode.Humidity))) {
