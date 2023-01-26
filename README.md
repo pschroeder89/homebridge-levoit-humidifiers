@@ -4,21 +4,18 @@
 [![Discord](https://camo.githubusercontent.com/a3c28cf032b15d45f7e2b08a8b1a0a764533a96003e117d0d99c9c3643c72383/68747470733a2f2f696d672e736869656c64732e696f2f646973636f72642f3433323636333333303238313232363237303f636f6c6f723d373238454435266c6f676f3d646973636f7264266c6162656c3d646973636f7264)](https://discord.com/channels/432663330281226270/1055705874460594247)
 [![downloads-via-npm](https://img.shields.io/npm/dt/homebridge-levoit-humidifiers)](https://www.npmjs.com/package/homebridge-levoit-humidifiers)
 
-
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 | Supported Versions   | Auto Mode | Cool Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode |
 |----------------------|-----------|-----------|------------|-------------|----------------|-----------------|-----------|
-| OasisMist 1000S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ❌        |
+| OasisMist 1000S      | ✅         | ❌<sup>*</sup>         | ✅          | ❌           | ✅              | ✅               | ❌        |
 | OasisMist 450S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         |
 | Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         |
 | Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         |
 | Dual 200S            | ✅         | ✅         | ❌          | ✅           | ✅              | ✅               | ❌         |
 
-This plugin was forked
-from [RaresAil's Levoit Air Purifiers repo](https://github.com/RaresAil/homebridge-levoit-air-purifier) and adds logic
-for the Levoit Humidifers.
+<sup>*</sup> Controlling the OasisMist 1000S Cool Mode manually has not been figured out yet via the API. For now, this model can only use Sleep and Auto modes.
 
 ### Features
 
@@ -70,11 +67,11 @@ for the Levoit Humidifers.
 
 ### Configuration
 
-- Via the Homebridge UI, enter the Homebridge VeSync Client plugin settings.
-- Enter your VeSync app credentials.
-- Select which controls you want exposed. Humidifier (Auto Mode) and the Humidity Sensor can not be hidden.
-- Setup the platform plugin as a child bridge for better performance
-- Save and restart Homebridge.
+* Via the Homebridge UI, enter the Homebridge VeSync Client plugin settings.
+* Enter your VeSync app credentials.
+* Select which controls you want exposed. Humidifier (Auto Mode) and the Humidity Sensor can not be hidden.
+* Setup the platform plugin as a child bridge for better performance
+* Save and restart Homebridge.
 
 This plugin requires your VeSync credentials as it communicates with the VeSync devices via VeSync's own API. Your
 credentials are only stored in the Homebridge config and not sent to any server except VeSync's.
@@ -120,7 +117,7 @@ By default, if you disconnect a humidifier from WiFi, it will begin showing as "
 Homebridge will remove the cached device from HomeKit. Once you've re-connected the humidifier, restart Homebridge again
 for it to display back in HomeKit. 
 
-If you prefer the disconnected device to be visible in HomeKit at all times,
+If you prefer the disconnected device to be visible in HomeKit at all times, 
 set `showOffWhenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
 **Note: This will cause benign errors in the Homebridge logs that the device could not be contacted.**
 

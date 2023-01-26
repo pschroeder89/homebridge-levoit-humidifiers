@@ -134,8 +134,8 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
 
-        // Cool Mist service
-        if (coolMistAccessory) {
+        // Cool Mist service (not available for Oasis1000s)
+        if (!this.device.model.includes("LUH-M101S") && coolMistAccessory) {
             this.coolMistService =
                 this.accessory.getService(CoolMistName) ||
                 this.accessory.addService(this.platform.Service.Fan, CoolMistName, CoolMistName);

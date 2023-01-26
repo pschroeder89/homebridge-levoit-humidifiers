@@ -1,4 +1,5 @@
 import AsyncLock from 'async-lock';
+import { json } from 'stream/consumers';
 import deviceTypes, { DeviceName, DeviceType } from './deviceTypes';
 
 import VeSync, { BypassMethod } from './VeSync';
@@ -125,7 +126,7 @@ export default class VeSyncFan {
         let switchJson;
         if (this.model.includes("LUH-M101S")) {
             switchJson = {
-                powerSwitch: power,
+                powerSwitch: power ? 1 : 0,
                 id: 0
             }
         } else {
@@ -251,12 +252,12 @@ export default class VeSyncFan {
         let displayJson;
         if (this.model.includes("LUH-M101S")) {
             displayJson = {
-                "screenSwitch": power,
+                screenSwitch: power ? 1 : 0,
                 id: 0
             }
         } else {
             displayJson = {
-                "state": power,
+                state: power,
                 id: 0
             }
         }
@@ -279,13 +280,18 @@ export default class VeSyncFan {
 
         // Oasis 1000 uses camelcase instead of snakecase
         let coolMistJson;
+        let method;
+
         if (this.model.includes("LUH-M101S")) {
-            coolMistJson = {
-                virtualLevel: coolMistLevel,
-                type: 'mist',
-                id: 0
-            }
+            // We don't know the correct structure of the JSON, so this does not work. Cool Mist slider is removed from hhis model for now.
+            // method = BypassMethod.LEVEL
+            // coolMistJson = {
+            //     level: coolMistLevel,
+            //     type: 'mist',
+            //     id: 0
+            // }
         } else {
+            method = BypassMethod.MIST_LEVEL
             coolMistJson = {
                 level: coolMistLevel,
                 type: 'mist',
@@ -293,7 +299,7 @@ export default class VeSyncFan {
             }
         }
 
-        const success = await this.client.sendCommand(this, BypassMethod.MIST_LEVEL, coolMistJson);
+        const success = await this.client.sendCommand(this, method, coolMistJson);
 
         if (success) {
             this._mistLevel = coolMistLevel;
