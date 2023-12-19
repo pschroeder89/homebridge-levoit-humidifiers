@@ -5,7 +5,7 @@ import CurrentState from './characteristics/CurrentState';
 import Humidity from './characteristics/Humidity';
 import Active from './characteristics/Active';
 import VeSyncFan from './api/VeSyncFan';
-import MistLevel from "./characteristics/CoolMistLevel";
+import MistLevel from "./characteristics/MistLevel";
 import TargetState from "./characteristics/TargetState";
 import SleepState from "./characteristics/SleepState";
 import LightBrightness from "./characteristics/LightBrightness";
@@ -17,7 +17,7 @@ import WarmActive from "./characteristics/WarmActive";
 
 const HumidifierName = "Humidifier";
 const HumiditySensorName = "Humidity Sensor";
-const CoolMistName = "Cool Mist";
+const MistName = "Mist";
 const WarmMistName = "Warm Mist";
 const NightLightName = "Night Light";
 const SleepModeName = "Sleep Mode";
@@ -31,11 +31,11 @@ export type AccessoryThisType = ThisType<{
 
 export default class VeSyncAccessory {
     private humidifierService: Service;
-    private humiditySensorService: Service;
+    private humiditySensorService: Service | undefined;
     private lightService: Service | undefined;
     private sleepService: Service | undefined;
     private displayService: Service | undefined;
-    private coolMistService: Service | undefined;
+    private mistService: Service | undefined;
     private warmMistService: Service | undefined;
 
     public get UUID() {
@@ -46,14 +46,14 @@ export default class VeSyncAccessory {
         return this.accessory.context.device;
     }
 
-    private get getCoolMistValues() {
+    private get getMistValues() {
         /*
         Determines the number of mist level values to slide through in the Cool Mist Level slider.
-        Returns an array that contains the range of values between 1 and (coolMistLevels + 1).
-        We add 1 to coolMistLevels to account for 0 as a potential level.
+        Returns an array that contains the range of values between 1 and (mistLevels + 1).
+        We add 1 to mistLevels to account for 0 as a potential level.
         Example: The Classic300s has 9 cool mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
          */
-        const arr = [...Array(this.device.deviceType.coolMistLevels + 1).keys()];
+        const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
         return arr;
     }
 
@@ -78,11 +78,12 @@ export default class VeSyncAccessory {
         const { manufacturer, model, mac } = this.device;
         const config = platform.config;
         const accessories = config.accessories ? config.accessories : {};
-        const coolMistAccessory = (accessories.cool_mist != false);
+        const mistAccessory = (accessories.cool_mist != false);
         const warmMistAccessory = (accessories.warm_mist != false);
         const nightLightAccessory = (accessories.night_light != false);
         const sleepModeAccessory = (accessories.sleep_mode != false);
         const displayAccessory = (accessories.display != false);
+        const humiditySensor = (accessories.humidity_sensor != false);
 
         // Accessory info
         this.accessory
@@ -134,34 +135,34 @@ export default class VeSyncAccessory {
             .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
             .onGet(Humidity.get.bind(this));
 
-        // Cool Mist service (not available for Oasis1000s)
-        if (!this.device.model.includes("LUH-M101S") && coolMistAccessory) {
-            this.coolMistService =
-                this.accessory.getService(CoolMistName) ||
-                this.accessory.addService(this.platform.Service.Fan, CoolMistName, CoolMistName);
+        // Mist service
+        if (mistAccessory) {
+            this.mistService =
+                this.accessory.getService(MistName) ||
+                this.accessory.addService(this.platform.Service.Fan, MistName, MistName);
 
-            this.coolMistService
+            this.mistService
                 .getCharacteristic(this.platform.Characteristic.On)
                 .onGet(Active.get.bind(this))
                 .onSet(Active.set.bind(this));
 
-            this.coolMistService
+            this.mistService
                 .getCharacteristic(this.platform.Characteristic.RotationSpeed)
                 .setProps({
                     minStep: 1,
                     minValue: 0,
-                    maxValue: this.device.deviceType.coolMistLevels,
-                    validValues: this.getCoolMistValues,
+                    maxValue: this.device.deviceType.mistLevels,
+                    validValues: this.getMistValues,
 
                 })
                 .onGet(MistLevel.get.bind(this))
                 .onSet(MistLevel.set.bind(this));
-            this.humidifierService.addLinkedService(this.coolMistService);
+            this.humidifierService.addLinkedService(this.mistService);
         } else {
-            this.coolMistService = this.accessory.getService(CoolMistName);
-            if (this.coolMistService) {
-                this.platform.log.info(`Removing ${CoolMistName} service.`);
-                this.accessory.removeService(this.coolMistService);
+            this.mistService = this.accessory.getService(MistName);
+            if (this.mistService) {
+                this.platform.log.info(`Removing ${MistName} service.`);
+                this.accessory.removeService(this.mistService);
             }
         }
 
@@ -186,15 +187,17 @@ export default class VeSyncAccessory {
         }
 
         // Humidity Sensor service
-        this.humiditySensorService =
-            this.accessory.getService(HumiditySensorName) ||
-            this.accessory.addService(this.platform.Service.HumiditySensor, HumiditySensorName, HumiditySensorName);
+        if (humiditySensor) {
+            this.humiditySensorService =
+                this.accessory.getService(HumiditySensorName) ||
+                this.accessory.addService(this.platform.Service.HumiditySensor, HumiditySensorName, HumiditySensorName);
 
-        this.humidifierService.addLinkedService(this.humiditySensorService);
+            this.humidifierService.addLinkedService(this.humiditySensorService);
 
-        this.humiditySensorService
-            .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-            .onGet(Humidity.get.bind(this));
+            this.humiditySensorService
+                .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+                .onGet(Humidity.get.bind(this));
+        }
 
         // Warm Mist service
         if (this.device.deviceType.hasWarmMode && warmMistAccessory) {

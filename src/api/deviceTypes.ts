@@ -20,12 +20,22 @@ export enum DeviceName {
     OASIS_1000S_UK = "LUH-M101S-WUK",
     OASIS_1000S_EU = "LUH-M101S-WEU",
     OASIS_1000S_JP = "LUH-M101S-WJP",
+    LEH_S601S_WUS = "LEH-S601S-WUS"
 }
+
+export const NewDevices = [
+    // Devices with new response formats
+    DeviceName.OASIS_1000S, 
+    DeviceName.OASIS_1000S_EU, 
+    DeviceName.OASIS_1000S_JP, 
+    DeviceName.OASIS_1000S_UK, 
+    DeviceName.LEH_S601S_WUS
+];
 
 export interface DeviceType {
     isValid: (input: string) => boolean;
     hasAutoMode: boolean;
-    coolMistLevels: number;
+    mistLevels: number;
     hasLight: boolean;
     hasColorMode: boolean;
     hasSleepMode: boolean;
@@ -43,7 +53,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.Classic300S),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: true,
         hasColorMode: false,
         hasSleepMode: true,
@@ -55,7 +65,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.Classic300S_US),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: true,
         hasColorMode: false,
         hasSleepMode: true,
@@ -67,7 +77,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.Classic200S),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: false,
@@ -78,7 +88,7 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S),
         hasAutoMode: true,
-        coolMistLevels: 2,
+        mistLevels: 2,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: false,
@@ -89,7 +99,7 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_LIGHT),
         hasAutoMode: true,
-        coolMistLevels: 2,
+        mistLevels: 2,
         hasLight: true,
         hasColorMode: true,
         hasSleepMode: true,
@@ -100,7 +110,7 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_EU),
         hasAutoMode: true,
-        coolMistLevels: 2,
+        mistLevels: 2,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: false,
@@ -111,7 +121,7 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_UK),
         hasAutoMode: true,
-        coolMistLevels: 2,
+        mistLevels: 2,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: false,
@@ -122,7 +132,7 @@ const deviceTypes: DeviceType[] = [
     {
         isValid: (input: string) => input.includes(DeviceName.Dual200S_JP),
         hasAutoMode: true,
-        coolMistLevels: 2,
+        mistLevels: 2,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: false,
@@ -134,7 +144,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -147,7 +157,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S_REMOTE),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -160,7 +170,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S_EU),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -173,7 +183,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S_UK),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -186,7 +196,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.LV600S_JP),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -199,7 +209,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -212,7 +222,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_UK),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -225,7 +235,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_EU),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -238,7 +248,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_JP),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -251,7 +261,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_1000S),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -263,7 +273,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_1000S_UK),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -275,7 +285,7 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_1000S_EU),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,
@@ -287,7 +297,19 @@ const deviceTypes: DeviceType[] = [
         isValid: (input: string) =>
             input.includes(DeviceName.OASIS_1000S_JP),
         hasAutoMode: true,
-        coolMistLevels: 9,
+        mistLevels: 9,
+        hasLight: false,
+        hasColorMode: false,
+        hasSleepMode: true,
+        hasWarmMode: false,
+        minHumidityLevel: 40,
+        maxHumidityLevel: 80
+    },
+    {
+        isValid: (input: string) =>
+            input.includes(DeviceName.LEH_S601S_WUS),
+        hasAutoMode: true,
+        mistLevels: 9,
         hasLight: false,
         hasColorMode: false,
         hasSleepMode: true,

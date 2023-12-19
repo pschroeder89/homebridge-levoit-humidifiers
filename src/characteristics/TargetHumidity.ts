@@ -4,8 +4,9 @@ import {
     Nullable
 } from 'homebridge';
 
-import {AccessoryThisType} from '../VeSyncAccessory';
-import {Mode} from "../api/VeSyncFan";
+import { AccessoryThisType } from '../VeSyncAccessory';
+import { Mode } from "../api/VeSyncFan";
+import { DeviceName, NewDevices } from '../api/deviceTypes';
 
 const characteristic: {
     get: CharacteristicGetHandler;
@@ -25,13 +26,16 @@ const characteristic: {
         if (!this.device.isOn) {
             await this.device.setPower(true);
         }
-        if (this.device.mode == Mode.Manual || (this.device.deviceType.hasWarmMode && this.device.mode == Mode.Sleep))
+        if (NewDevices.includes(this.device.name as DeviceName)) {
+            await this.device.changeMode(Mode.Humidity);
+        } else if (this.device.mode == Mode.Manual || (this.device.deviceType.hasWarmMode && this.device.mode == Mode.Sleep)) {
             await this.device.changeMode(Mode.Auto);
+        }
         switch (true) {
-            case (humidity < this.device.deviceType.minHumidityLevel):
+            case (Number(humidity) < this.device.deviceType.minHumidityLevel):
                 humidity = this.device.deviceType.minHumidityLevel;
                 break;
-            case (humidity > this.device.deviceType.maxHumidityLevel):
+            case (Number(humidity) > this.device.deviceType.maxHumidityLevel):
                 humidity = this.device.deviceType.maxHumidityLevel;
                 break;
         }

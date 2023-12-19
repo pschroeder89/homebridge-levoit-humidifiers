@@ -1,6 +1,5 @@
 import AsyncLock from 'async-lock';
-import { json } from 'stream/consumers';
-import deviceTypes, { DeviceName, DeviceType } from './deviceTypes';
+import deviceTypes, { DeviceName, DeviceType, NewDevices } from './deviceTypes';
 
 import VeSync, { BypassMethod } from './VeSync';
 
@@ -8,6 +7,7 @@ export enum Mode {
     Manual = 'manual',
     Sleep = 'sleep',
     Auto = 'auto',
+    AutoPro = 'autoPro',
     Humidity = 'humidity'
 }
 
@@ -124,16 +124,16 @@ export default class VeSyncFan {
         this.client.log.info("Setting Power to " + power);
         // Oasis 1000 uses a different field to set power
         let switchJson;
-        if (this.model.includes("LUH-M101S")) {
+        if (NewDevices.includes(this.model as DeviceName)) {
             switchJson = {
                 powerSwitch: power ? 1 : 0,
                 id: 0
-            }
+            };
         } else {
             switchJson = {
                 enabled: power,
                 id: 0
-            }
+            };
         }
         const success = await this.client.sendCommand(this, BypassMethod.SWITCH, switchJson);
 
@@ -169,16 +169,16 @@ export default class VeSyncFan {
 
         // Oasis 1000 uses camelcase instead of snakecase
         let humidityJson;
-        if (this.model.includes("LUH-M101S")) {
+        if (NewDevices.includes(this.model as DeviceName)) {
             humidityJson = {
                 "targetHumidity": level,
                 id: 0
-            }
+            };
         } else {
             humidityJson = {
                 "target_humidity": level,
                 id: 0
-            }
+            };
         }
 
         const success = await this.client.sendCommand(this, BypassMethod.HUMIDITY, humidityJson);
@@ -199,22 +199,26 @@ export default class VeSyncFan {
             DeviceName.LV600S_UK,
             DeviceName.LV600S_JP
         ];
-        if (humidity_models.includes(<DeviceName>this.model) && mode == Mode.Auto) {
+        if (humidity_models.includes(this.model as DeviceName) && mode == Mode.Auto) {
             mode = Mode.Humidity;
+        }
+        // Some models use "AutoPro" mode instead of "Auto"
+        if ((this.model === DeviceName.LEH_S601S_WUS) && mode == Mode.Auto) {
+            mode = Mode.AutoPro;
         }
 
         let success: boolean;
 
         // Oasis 1000 uses camelcase instead of snakecase
         let modeJson;
-        if (this.model.includes("LUH-M101S")) {
+        if (NewDevices.includes(this.model as DeviceName)) {
             modeJson = {
-                "workMode": mode.toString(),
-            }
+                workMode: mode.toString(),
+            };
         } else {
             modeJson = {
-                "mode": mode.toString(),
-            }
+                mode: mode.toString(),
+            };
         }
         // Don't change the mode if we are already in that mode
         if (this._mode == mode) {
@@ -250,16 +254,16 @@ export default class VeSyncFan {
 
         // Oasis 1000 uses camelcase instead of snakecase
         let displayJson;
-        if (this.model.includes("LUH-M101S")) {
+        if (NewDevices.includes(this.model as DeviceName)) {
             displayJson = {
                 screenSwitch: power ? 1 : 0,
                 id: 0
-            }
+            };
         } else {
             displayJson = {
                 state: power,
                 id: 0
-            }
+            };
         }
 
         const success = await this.client.sendCommand(this, BypassMethod.DISPLAY, displayJson);
@@ -271,38 +275,34 @@ export default class VeSyncFan {
         return success;
     }
 
-    public async changeCoolMistLevel(coolMistLevel: number): Promise<boolean> {
-        if (coolMistLevel > this.deviceType.coolMistLevels || coolMistLevel < 1) {
+    public async changeMistLevel(mistLevel: number): Promise<boolean> {
+        if (mistLevel > this.deviceType.mistLevels || mistLevel < 1) {
             return false;
         }
 
-        this.client.log.info("Setting Mist Level to " + coolMistLevel);
+        this.client.log.info("Setting Mist Level to " + mistLevel);
 
         // Oasis 1000 uses camelcase instead of snakecase
-        let coolMistJson;
-        let method;
-
-        if (this.model.includes("LUH-M101S")) {
-            // We don't know the correct structure of the JSON, so this does not work. Cool Mist slider is removed from hhis model for now.
-            // method = BypassMethod.LEVEL
-            // coolMistJson = {
-            //     level: coolMistLevel,
-            //     type: 'mist',
-            //     id: 0
-            // }
+        let mistJson;
+        const method = BypassMethod.MIST_LEVEL;
+        if (NewDevices.includes(this.model as DeviceName)) {
+            mistJson = {
+                virtualLevel: mistLevel,
+                levelType: 'mist',
+                id: 0
+            };
         } else {
-            method = BypassMethod.MIST_LEVEL
-            coolMistJson = {
-                level: coolMistLevel,
+            mistJson = {
+                level: mistLevel,
                 type: 'mist',
                 id: 0
-            }
+            };
         }
 
-        const success = await this.client.sendCommand(this, method, coolMistJson);
+        const success = await this.client.sendCommand(this, method, mistJson);
 
         if (success) {
-            this._mistLevel = coolMistLevel;
+            this._mistLevel = mistLevel;
         }
 
         return success;
@@ -342,10 +342,10 @@ export default class VeSyncFan {
 
     public async setLightStatus(action: string, brightness: number): Promise<boolean> {
         // Get the current RGB values and brightness %
-        let red = this._red;
-        let green = this._green;
-        let blue = this._blue;
-        let currentBrightness = this.brightnessLevel;
+        const red = this._red;
+        const green = this._green;
+        const blue = this._blue;
+        const currentBrightness = this.brightnessLevel;
         let newRed;
         let newBlue;
         let newGreen;
@@ -373,10 +373,10 @@ export default class VeSyncFan {
 
         if (success) {
             this._brightnessLevel = brightness;
-            this._blue = newBlue || this.getBlue
-            this._green = newGreen || this.getGreen
-            this._red = newRed || this.getRed
-            this._lightOn = action
+            this._blue = newBlue || this.getBlue;
+            this._green = newGreen || this.getGreen;
+            this._red = newRed || this.getRed;
+            this._lightOn = action;
             // Not setting these for now, so don't set them
             // this._lightSpeed = this.getLightSpeed
             // this._colorMode = this.getColorMode
@@ -412,8 +412,8 @@ export default class VeSyncFan {
                 const result = data?.result?.result;
 
                 this._humidityLevel = result.humidity;
-                // Fields are different on OasisMist 1000s
-                if (this.model.includes("LUH-M101S")) {
+                // Fields are different on newer models
+                if (NewDevices.includes(this.model as DeviceName)) {
                     this._targetHumidity = result.targetHumidity;
                     this._displayOn = result.screenSwitch;
                     this._mode = result.workMode;

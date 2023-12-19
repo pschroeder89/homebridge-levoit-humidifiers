@@ -55,6 +55,12 @@
             "type": "boolean",
             "default": true,
             "description": "Enable brightness slider / switch for the Night Light"
+          },
+          "humidity_sensor": {
+            "title": "Humidity Sensor",
+            "type": "boolean",
+            "default": true,
+            "description": "Expose humidity sensor from device(s) to HomeKit"
           }
         }
       },

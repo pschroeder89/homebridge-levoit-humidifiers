@@ -16,7 +16,8 @@ export enum BypassMethod {
     HUMIDITY = 'setTargetHumidity',
     MIST_LEVEL = 'setVirtualLevel',
     LEVEL = 'setLevel',
-    LIGHT_STATUS = 'setLightStatus'
+    LIGHT_STATUS = 'setLightStatus',
+    DRYING_MODE = 'setDryingMode'
 }
 
 const lock = new AsyncLock();
@@ -34,7 +35,7 @@ export default class VeSync {
 
     private readonly AXIOS_OPTIONS = {
         baseURL: 'https://smartapi.vesync.com',
-        timeout: 15000
+        timeout: this.config.options.apiTimeout || 15000
     };
 
     constructor(
@@ -221,7 +222,7 @@ export default class VeSync {
                     ...this.AXIOS_OPTIONS
                 }
             );
-
+            
             if (!response?.data) {
                 this.debugMode.debug(
                     '[LOGIN]',

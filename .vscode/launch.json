@@ -2,7 +2,7 @@
   "version": "0.2.0",  
   "configurations": [
     {
-      "name": "Launch Extron Debugging",
+      "name": "Launch Debugging",
       "program": "node_modules/homebridge/bin/homebridge",
       "preLaunchTask": "npm: build",
       "request": "launch",
