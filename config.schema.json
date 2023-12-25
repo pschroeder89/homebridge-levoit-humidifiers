@@ -61,6 +61,12 @@
             "type": "boolean",
             "default": true,
             "description": "Expose humidity sensor from device(s) to HomeKit"
+          },
+          "auto_pro_switch": {
+            "title": "Auto Pro Mode Switch",
+            "type": "boolean",
+            "default": true,
+            "description": "Enables switch to turn on / off Auto Pro Mode on LEH_S601S_WUS model"
           }
         }
       },

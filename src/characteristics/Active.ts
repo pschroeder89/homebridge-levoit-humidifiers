@@ -2,10 +2,10 @@ import {
   CharacteristicGetHandler,
   CharacteristicSetHandler,
   CharacteristicValue,
-  Nullable
-} from 'homebridge';
+  Nullable,
+} from "homebridge";
 
-import { AccessoryThisType } from '../VeSyncAccessory';
+import { AccessoryThisType } from "../VeSyncAccessory";
 
 const characteristic: {
   get: CharacteristicGetHandler;
@@ -22,7 +22,7 @@ const characteristic: {
     if (boolValue !== this.device.isOn) {
       await this.device.setPower(boolValue);
     }
-  }
+  },
 };
 
 export default characteristic;

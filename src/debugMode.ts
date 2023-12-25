@@ -1,9 +1,9 @@
-import { Logger } from 'homebridge';
+import { Logger } from "homebridge";
 
 export default class DebugMode {
   constructor(
     private readonly _debugMode: boolean,
-    private readonly log: Logger
+    private readonly log: Logger,
   ) {}
 
   public debug(...message: any[]): void {
@@ -11,6 +11,6 @@ export default class DebugMode {
       return;
     }
 
-    this.log.info(`[DEBUG]: ${message.join(' ')}`);
+    this.log.info(`[DEBUG]: ${message.join(" ")}`);
   }
 }
