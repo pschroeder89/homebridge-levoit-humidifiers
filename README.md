@@ -98,7 +98,7 @@ Via config.json:
       "accessories": {
         "display": false,
         "sleep_mode": false,
-        "cool_mist": false,
+        "mist": false,
         "warm_mist": false,
         "night_light": false
       },

@@ -26,11 +26,17 @@
       "accessories": {
         "type": "object",
         "properties": {
-          "cool_mist": {
-            "title": "Cool Mist Fan",
+          "humidity_sensor": {
+            "title": "Humidity Sensor",
             "type": "boolean",
             "default": true,
-            "description": "Enable fan for the Cool Mist"
+            "description": "Expose humidity sensor from device(s) to HomeKit"
+          },
+          "mist": {
+            "title": "Mist Fan",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable fan for the Mist"
           },
           "warm_mist": {
             "title": "Warm Mist Fan",
@@ -56,13 +62,7 @@
             "default": true,
             "description": "Enable brightness slider / switch for the Night Light"
           },
-          "humidity_sensor": {
-            "title": "Humidity Sensor",
-            "type": "boolean",
-            "default": true,
-            "description": "Expose humidity sensor from device(s) to HomeKit"
-          },
-          "auto_pro_switch": {
+          "auto_pro": {
             "title": "Auto Pro Mode Switch",
             "type": "boolean",
             "default": true,
