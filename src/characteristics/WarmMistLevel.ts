@@ -3,10 +3,10 @@ import {
   CharacteristicSetHandler,
   CharacteristicValue,
   Nullable,
-} from "homebridge";
-import VeSyncFan from "../api/VeSyncFan";
+} from 'homebridge';
+import VeSyncFan from '../api/VeSyncFan';
 
-import { AccessoryThisType } from "../VeSyncAccessory";
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const calculateWarmMistLevel = (device: VeSyncFan) => {
   const currentMistLevel = device.warmLevel;

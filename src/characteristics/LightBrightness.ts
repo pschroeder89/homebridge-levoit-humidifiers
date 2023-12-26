@@ -3,9 +3,9 @@ import {
   CharacteristicSetHandler,
   CharacteristicValue,
   Nullable,
-} from "homebridge";
+} from 'homebridge';
 
-import { AccessoryThisType } from "../VeSyncAccessory";
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const characteristic: {
   get: CharacteristicGetHandler;
@@ -27,9 +27,9 @@ const characteristic: {
       }
       let action: string;
       if (value >= 40) {
-        action = "on";
+        action = 'on';
       } else {
-        action = "off";
+        action = 'off';
       }
       // Handle Color Mode (RGB) devices
       if (this.device.deviceType.hasColorMode) {

@@ -3,9 +3,9 @@ import {
   CharacteristicSetHandler,
   CharacteristicValue,
   Nullable,
-} from "homebridge";
+} from 'homebridge';
 
-import { AccessoryThisType } from "../VeSyncAccessory";
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const characteristic: {
   get: CharacteristicGetHandler;

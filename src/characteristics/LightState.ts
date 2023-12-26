@@ -3,9 +3,9 @@ import {
   CharacteristicSetHandler,
   CharacteristicValue,
   Nullable,
-} from "homebridge";
+} from 'homebridge';
 
-import { AccessoryThisType } from "../VeSyncAccessory";
+import { AccessoryThisType } from '../VeSyncAccessory';
 
 const characteristic: {
   get: CharacteristicGetHandler;
@@ -16,7 +16,7 @@ const characteristic: {
     // If there is a lightOn attribute, that's the source of truth (for RGB models)
     // Otherwise, convert brightness to a bool
     if (this.device.lightOn) {
-      if (this.device.lightOn === "on") {
+      if (this.device.lightOn === 'on') {
         return true;
       } else {
         return false;
@@ -27,16 +27,16 @@ const characteristic: {
   set: async function (bool: CharacteristicValue) {
     let action: string;
     if (bool) {
-      action = "on";
+      action = 'on';
     } else {
-      action = "off";
+      action = 'off';
     }
 
     const lightOnVal = this.device.lightOn;
     // If light is off and we are turning it on, turn it on to 50% brightness.
     // Note: Turning on the device will always make brightness 50%, even if you slide to 100% when turning it on.
     if (
-      ((lightOnVal && lightOnVal == "off") ||
+      ((lightOnVal && lightOnVal == 'off') ||
         (!lightOnVal && this.device.brightnessLevel == 0)) &&
       bool == 1
     ) {
@@ -48,12 +48,12 @@ const characteristic: {
       }
     }
     if (
-      ((lightOnVal && lightOnVal == "on") ||
+      ((lightOnVal && lightOnVal == 'on') ||
         (!lightOnVal && this.device.brightnessLevel > 0)) &&
       bool == 0
     )
       if (this.device.deviceType.hasColorMode) {
-        await this.device.setLightStatus("off", 50);
+        await this.device.setLightStatus('off', 50);
       } else {
         // If light is on and we are turning it off, set to 0
         await this.device.setBrightness(0);

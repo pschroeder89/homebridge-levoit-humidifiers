@@ -1,14 +1,14 @@
-import AsyncLock from "async-lock";
-import deviceTypes, { DeviceName, DeviceType, NewDevices } from "./deviceTypes";
+import AsyncLock from 'async-lock';
+import deviceTypes, { DeviceName, DeviceType, NewDevices } from './deviceTypes';
 
-import VeSync, { BypassMethod } from "./VeSync";
+import VeSync, { BypassMethod } from './VeSync';
 
 export enum Mode {
-  Manual = "manual",
-  Sleep = "sleep",
-  Auto = "auto",
-  AutoPro = "autoPro",
-  Humidity = "humidity",
+  Manual = 'manual',
+  Sleep = 'sleep',
+  Auto = 'auto',
+  AutoPro = 'autoPro',
+  Humidity = 'humidity',
 }
 
 export default class VeSyncFan {
@@ -18,7 +18,7 @@ export default class VeSyncFan {
 
   private _displayOn = true;
 
-  public readonly manufacturer = "Levoit";
+  public readonly manufacturer = 'Levoit';
 
   public get humidityLevel() {
     return this._humidityLevel;
@@ -118,7 +118,7 @@ export default class VeSyncFan {
   }
 
   public async setPower(power: boolean): Promise<boolean> {
-    this.client.log.info("Setting Power to " + power);
+    this.client.log.info('Setting Power to ' + power);
     let switchJson;
     if (NewDevices.includes(this.model as DeviceName)) {
       switchJson = {
@@ -146,7 +146,7 @@ export default class VeSyncFan {
         this._warmLevel = 0;
       }
     } else {
-      this.client.log.error("Failed to setPower due to unreachable device.");
+      this.client.log.error('Failed to setPower due to unreachable device.');
       if (this.client.config.options.showOffWhenDisconnected) {
         this._isOn = false;
         this._humidityLevel = 0;
@@ -155,7 +155,7 @@ export default class VeSyncFan {
         this._mistLevel = 0;
         this._warmLevel = 0;
         this._brightnessLevel = 0;
-        this._lightOn = "off";
+        this._lightOn = 'off';
       } else {
         return false;
       }
@@ -165,7 +165,7 @@ export default class VeSyncFan {
   }
 
   public async setTargetHumidity(level: number): Promise<boolean> {
-    this.client.log.info("Setting Target Humidity to " + level);
+    this.client.log.info('Setting Target Humidity to ' + level);
 
     // Oasis 1000 uses camelcase instead of snakecase
     let humidityJson;
@@ -231,7 +231,7 @@ export default class VeSyncFan {
     if (this._mode == mode) {
       success = true;
     } else {
-      this.client.log.info("Changing Mode to " + mode);
+      this.client.log.info('Changing Mode to ' + mode);
       success = await this.client.sendCommand(
         this,
         BypassMethod.MODE,
@@ -246,7 +246,7 @@ export default class VeSyncFan {
   }
 
   public async setBrightness(brightness: number): Promise<boolean> {
-    this.client.log.info("Setting Night Light to " + brightness);
+    this.client.log.info('Setting Night Light to ' + brightness);
 
     const success = await this.client.sendCommand(
       this,
@@ -264,7 +264,7 @@ export default class VeSyncFan {
   }
 
   public async setDisplay(power: boolean): Promise<boolean> {
-    this.client.log.info("Setting Display to " + power);
+    this.client.log.info('Setting Display to ' + power);
 
     // Oasis 1000 uses camelcase instead of snakecase
     let displayJson;
@@ -298,7 +298,7 @@ export default class VeSyncFan {
       return false;
     }
 
-    this.client.log.info("Setting Mist Level to " + mistLevel);
+    this.client.log.info('Setting Mist Level to ' + mistLevel);
 
     // Oasis 1000 uses camelcase instead of snakecase
     let mistJson;
@@ -306,13 +306,13 @@ export default class VeSyncFan {
     if (NewDevices.includes(this.model as DeviceName)) {
       mistJson = {
         virtualLevel: mistLevel,
-        levelType: "mist",
+        levelType: 'mist',
         id: 0,
       };
     } else {
       mistJson = {
         level: mistLevel,
-        type: "mist",
+        type: 'mist',
         id: 0,
       };
     }
@@ -329,7 +329,7 @@ export default class VeSyncFan {
   public async changeWarmMistLevel(warmMistLevel: number): Promise<boolean> {
     if (!this.deviceType.warmMistLevels) {
       this.client.log.error(
-        "Error: Attempted to set warm level on device without warmMistLevels field.",
+        'Error: Attempted to set warm level on device without warmMistLevels field.',
       );
       return false;
     }
@@ -338,11 +338,11 @@ export default class VeSyncFan {
       return false;
     }
 
-    this.client.log.info("Setting Warm Level to " + warmMistLevel);
+    this.client.log.info('Setting Warm Level to ' + warmMistLevel);
 
     const success = await this.client.sendCommand(this, BypassMethod.LEVEL, {
       level: warmMistLevel,
-      type: "warm",
+      type: 'warm',
       id: 0,
     });
 
@@ -389,7 +389,7 @@ export default class VeSyncFan {
       colorSliderLocation: this.getColorSliderLocation,
     };
     this.client.log.debug(
-      "Setting Night Light Status to " + JSON.stringify(lightJson),
+      'Setting Night Light Status to ' + JSON.stringify(lightJson),
     );
 
     const success = await this.client.sendCommand(
@@ -410,7 +410,7 @@ export default class VeSyncFan {
   }
 
   public async updateInfo(): Promise<void> {
-    return this.lock.acquire("update-info", async () => {
+    return this.lock.acquire('update-info', async () => {
       try {
         if (Date.now() - this.lastCheck < 5 * 1000) {
           return;
@@ -482,13 +482,13 @@ export default class VeSyncFan {
           };
 
           this.client.debugMode.debug(
-            "[GET LIGHT JSON]",
+            '[GET LIGHT JSON]',
             JSON.stringify(lightJson),
           );
         }
       } catch (err: any) {
         this.client.log.error(
-          "Failed to updateInfo due to unreachable device: " + err?.message,
+          'Failed to updateInfo due to unreachable device: ' + err?.message,
         );
         if (this.client.config.options.showOffWhenDisconnected) {
           this._isOn = false;
@@ -500,7 +500,7 @@ export default class VeSyncFan {
           this._brightnessLevel = 0;
         } else {
           throw new Error(
-            "Device was unreachable. Ensure it is plugged in and connected to WiFi.",
+            'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
           );
         }
       }
