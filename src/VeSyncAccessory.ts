@@ -1,29 +1,29 @@
-import { Service } from "homebridge";
+import { Service } from 'homebridge';
 
-import Platform, { VeSyncPlatformAccessory } from "./platform";
-import CurrentState from "./characteristics/CurrentState";
-import Humidity from "./characteristics/Humidity";
-import Active from "./characteristics/Active";
-import VeSyncFan from "./api/VeSyncFan";
-import MistLevel from "./characteristics/MistLevel";
-import TargetState from "./characteristics/TargetState";
-import SleepState from "./characteristics/SleepState";
-import LightBrightness from "./characteristics/LightBrightness";
-import DisplayState from "./characteristics/DisplayState";
-import TargetHumidity from "./characteristics/TargetHumidity";
-import LightState from "./characteristics/LightState";
-import WarmMistLevel from "./characteristics/WarmMistLevel";
-import WarmActive from "./characteristics/WarmActive";
-import AutoProState from "./characteristics/AutoProState";
+import Platform, { VeSyncPlatformAccessory } from './platform';
+import CurrentState from './characteristics/CurrentState';
+import Humidity from './characteristics/Humidity';
+import Active from './characteristics/Active';
+import VeSyncFan from './api/VeSyncFan';
+import MistLevel from './characteristics/MistLevel';
+import TargetState from './characteristics/TargetState';
+import SleepState from './characteristics/SleepState';
+import LightBrightness from './characteristics/LightBrightness';
+import DisplayState from './characteristics/DisplayState';
+import TargetHumidity from './characteristics/TargetHumidity';
+import LightState from './characteristics/LightState';
+import WarmMistLevel from './characteristics/WarmMistLevel';
+import WarmActive from './characteristics/WarmActive';
+import AutoProState from './characteristics/AutoProState';
 
-const HumidifierName = "Humidifier";
-const HumiditySensorName = "Humidity Sensor";
-const MistName = "Mist";
-const WarmMistName = "Warm Mist";
-const NightLightName = "Night Light";
-const SleepModeName = "Sleep Mode";
-const DisplayName = "Display";
-const AutoProModeName = "AutoPro Mode";
+const HumidifierName = 'Humidifier';
+const HumiditySensorName = 'Humidity Sensor';
+const MistName = 'Mist';
+const WarmMistName = 'Warm Mist';
+const NightLightName = 'Night Light';
+const SleepModeName = 'Sleep Mode';
+const DisplayName = 'Display';
+const AutoProModeName = 'AutoPro Mode';
 
 export type AccessoryThisType = ThisType<{
   humidifierService: Service;

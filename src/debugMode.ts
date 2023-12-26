@@ -1,4 +1,4 @@
-import { Logger } from "homebridge";
+import { Logger } from 'homebridge';
 
 export default class DebugMode {
   constructor(
@@ -11,6 +11,6 @@ export default class DebugMode {
       return;
     }
 
-    this.log.info(`[DEBUG]: ${message.join(" ")}`);
+    this.log.info(`[DEBUG]: ${message.join(' ')}`);
   }
 }
