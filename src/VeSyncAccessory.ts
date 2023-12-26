@@ -51,10 +51,10 @@ export default class VeSyncAccessory {
 
   private get getMistValues() {
     /*
-        Determines the number of mist level values to slide through in the Cool Mist Level slider.
+        Determines the number of mist level values to slide through in the Mist Level slider.
         Returns an array that contains the range of values between 1 and (mistLevels + 1).
         We add 1 to mistLevels to account for 0 as a potential level.
-        Example: The Classic300s has 9 cool mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
+        Example: The Classic300s has 9 mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
          */
     const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
     return arr;

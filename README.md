@@ -16,7 +16,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 | Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         | ❌
 | Dual 200S            | ✅         | ✅         | ❌          | ✅           | ✅              | ✅               | ❌         | ❌
 
-### Features
+### Features (if supported by model)
 
 1. Humidifier / Auto Mode
     - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
@@ -26,16 +26,12 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
         - Selecting values outside the Auto range will set the Target Humidity to the lowest or highest number in the
           range.
 
-2. Cool Mist Level
-    - Sets humidifier to Manual mode (except on LV600s / Oasis) and sets the Cool Mist Level to the desired level.
-        - Note: LV600s / Oasis supports changing mist levels while in Auto mode.
+2. Mist Level
+    - Sets humidifier to Manual mode unless model supports changing mist levels in Auto / Humidity mode, and sets Mist level.
     - When set to Level 0, turns the device off.
-    - Levels 1-9 on Classic300s, Classic200s, LV600s, and Oasis
-    - Levels 1-2 on Dual200s
 
 3. Warm Mist Level
     - Sets Warm Mist Level to the desired level.
-    - Levels 0-3 on LV600s / Oasis only.
 
 4. Sleep Mode
     - This switches the device between Sleep Mode (On) and Auto Mode (Off)
@@ -45,7 +41,6 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
       Mist slider.
 
 5. Night Light
-    - Supported on Classic300s
     - 4 brightness levels
 
 6. Display Toggle
@@ -100,7 +95,9 @@ Via config.json:
         "sleep_mode": false,
         "mist": false,
         "warm_mist": false,
-        "night_light": false
+        "night_light": false,
+        "auto_pro": false,
+        "humidity_sensor": true
       },
       "options": {
         "showOffWhenDisconnected": false

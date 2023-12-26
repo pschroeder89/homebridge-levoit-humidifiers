@@ -9,7 +9,7 @@ assignees: pschroeder89
 
 **Model number:**
 
-**Number of cool mist levels:**
+**Number of mist levels:**
 
 **Number of warm mist levels:**
 
