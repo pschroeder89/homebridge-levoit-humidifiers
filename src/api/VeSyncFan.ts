@@ -210,7 +210,7 @@ export default class VeSyncFan {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
-    if ([DeviceName.LEH_S601S_WUS].includes(this.model as DeviceName)) {
+    if ([DeviceName.LEH_S601S_WUS].includes(this.model as DeviceName) && mode == Mode.Auto) {
       mode = Mode.AutoPro;
     }
 
