@@ -6,15 +6,16 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions   | Humidity Mode | Mist Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode | AutoPro Mode
-|----------------------|-----------|-----------|------------|-------------|----------|----------|---------|-----------|
-| Core 600S      | ✅         | ✅         | ✅          | ❌           | ✅              | ✅          | ❌        | ✅ 
-| OasisMist 1000S      | ✅         | ✅         | ✅          | ❌           | ✅              | ✅          | ❌        | ❌
-| OasisMist 450S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         | ❌
-| LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         | ❌
-| Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         | ❌
-| Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         | ❌
-| Dual 200S            | ✅         | ✅         | ❌          | ✅           | ✅              | ✅               | ❌         | ❌
+| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm |
+| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- |
+| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
+| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
+| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
+| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
+| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
+| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   |
+| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   |
+| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   |
 
 ### Features (if supported by model)
 
@@ -63,7 +64,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 * Via the Homebridge UI, enter the Homebridge VeSync Client plugin settings.
 * Enter your VeSync app credentials.
-* Select which controls you want exposed. Humidifier (Auto Mode) and the Humidity Sensor can not be hidden.
+* Select which controls you want exposed. Humidity / Auto Mode can not be hidden.
 * Setup the platform plugin as a child bridge for better performance
 * Save and restart Homebridge.
 
@@ -74,7 +75,7 @@ You can also do this directly via the Homebridge config by adding your credentia
 Replace the values of `username` and `password` with your credentials.
 
 You can turn off optional controls via the `accessories` section of the config or through the plugin UI settings. The
-Humidifier (Auto mode) slider and the Humidity sensor cannot be turned off and will always be exposed.
+Humidifier (Auto mode) slider cannot be turned off and will always be exposed.
 
 Via UI:
 

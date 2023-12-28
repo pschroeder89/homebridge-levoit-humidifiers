@@ -4,7 +4,7 @@
   "displayName": "Levoit Humidifiers",
   "main": "dist/index.js",
   "license": "Apache-2.0",
-  "version": "1.10.1",
+  "version": "1.11.0",
   "private": false,
   "bugs": {
     "url": "https://github.com/pschroeder89/homebridge-levoit-humidifiers/issues"
@@ -43,7 +43,7 @@
     "axios": "^0.24.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.1.1",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.21"
   },
   "keywords": [
     "homebridge-plugin",
