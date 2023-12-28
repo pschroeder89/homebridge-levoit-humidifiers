@@ -223,6 +223,13 @@ export default class VeSyncAccessory {
       this.humiditySensorService
         .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
         .onGet(Humidity.get.bind(this));
+    } else {
+      this.humiditySensorService =
+        this.accessory.getService(HumiditySensorName);
+      if (this.humiditySensorService) {
+        this.platform.log.info(`Removing ${HumiditySensorName} service.`);
+        this.accessory.removeService(this.humiditySensorService);
+      }
     }
 
     // Warm Mist service
