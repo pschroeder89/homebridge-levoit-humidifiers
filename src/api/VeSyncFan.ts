@@ -210,7 +210,7 @@ export default class VeSyncFan {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
-    if ([DeviceName.LEH_S601S_WUS].includes(this.model as DeviceName) && mode == Mode.Auto) {
+    if (this.deviceType.hasAutoProMode && mode == Mode.Auto) {
       mode = Mode.AutoPro;
     }
 
@@ -300,7 +300,7 @@ export default class VeSyncFan {
 
     this.client.log.info('Setting Mist Level to ' + mistLevel);
 
-    // Oasis 1000 uses camelcase instead of snakecase
+    // New models use different JSON keys
     let mistJson;
     const method = BypassMethod.MIST_LEVEL;
     if (NewDevices.includes(this.model as DeviceName)) {
