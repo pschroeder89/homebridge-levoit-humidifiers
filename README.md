@@ -6,15 +6,17 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions   | Humidity Mode | Mist Mode | Sleep Mode | Night Light | Display Toggle | Humidity Sensor | Warm Mode | AutoPro Mode
-|----------------------|-----------|-----------|------------|-------------|----------|----------|---------|-----------|
-| Core 600S      | ✅         | ✅         | ✅          | ❌           | ✅              | ✅          | ❌        | ✅ 
-| OasisMist 1000S      | ✅         | ✅         | ✅          | ❌           | ✅              | ✅          | ❌        | ❌
-| OasisMist 450S       | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         | ❌
-| LV600S               | ✅         | ✅         | ✅          | ❌           | ✅              | ✅               | ✅         | ❌
-| Classic 300S         | ✅         | ✅         | ✅          | ✅           | ✅              | ✅               | ❌         | ❌
-| Classic 200S         | ✅         | ✅         | ❌          | ❌           | ✅              | ✅               | ❌         | ❌
-| Dual 200S            | ✅         | ✅         | ❌          | ✅           | ✅              | ✅               | ❌         | ❌
+| Supported Versions | Auto | Mist | Sleep | Light | Display | Humidity Sensor | Warm | AutoPro |
+| ------------------ | ---- | ---- | ----- | ----- | ------- | --------------- | ---- | ------- |
+| Superior 6000S     | ✅   | ✅   | ✅    | ❌    | ✅      | ✅              | ❌   | ✅      |
+| OasisMist 1000S    | ✅   | ✅   | ✅    | ❌    | ✅      | ✅              | ❌   | ❌      |
+| OasisMist 600S     | ✅   | ✅   | ✅    | ❌    | ✅      | ✅              | ✅   | ✅      |
+| OasisMist 450S     | ✅   | ✅   | ✅    | ❌    | ✅      | ✅              | ✅   | ❌      |
+| LV600S             | ✅   | ✅   | ✅    | ❌    | ✅      | ✅              | ✅   | ❌      |
+| Classic 300S       | ✅   | ✅   | ✅    | ✅    | ✅      | ✅              | ❌   | ❌      |
+| Classic 200S       | ✅   | ✅   | ❌    | ❌    | ✅      | ✅              | ❌   | ❌      |
+| Dual 200S          | ✅   | ✅   | ❌    | ✅    | ✅      | ✅              | ❌   | ❌      |
+
 
 ### Features (if supported by model)
 
