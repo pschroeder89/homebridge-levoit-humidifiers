@@ -1,27 +1,32 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended" // uses the recommended rules from the @typescript-eslint/eslint-plugin
-  ],
-  "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module"
-  },
-  "ignorePatterns": ["dist"],
-  "rules": {
-    "semi": ["error", "always"],
-    "space-before-function-paren": "off",
-    "object-curly-newline": "off",
-    "comma-dangle": "off",
-    "no-console": "error",
-    "generator-star-spacing": "off",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/semi": ["warn"],
-    "@typescript-eslint/member-delimiter-style": ["warn"],
-    "@typescript-eslint/no-explicit-any": "off"
-  }
+    "root": true,
+    "ignorePatterns": [
+        "dist"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:prettier/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": [
+            "./tsconfig.json"
+        ]
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "prettier",
+        "unused-imports"
+    ],
+    "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "spaced-comment": [
+            "error",
+            "always"
+        ],
+        "@typescript-eslint/no-unused-vars": "error",
+        "prettier/prettier": "error"
+    }
 }

@@ -1,7 +1,7 @@
 import {
   CharacteristicGetHandler,
   CharacteristicValue,
-  Nullable
+  Nullable,
 } from 'homebridge';
 
 import { AccessoryThisType } from '../VeSyncAccessory';
@@ -13,7 +13,7 @@ const characteristic: {
     await this.device.updateInfo();
 
     return this.device.humidityLevel;
-  }
+  },
 };
 
 export default characteristic;

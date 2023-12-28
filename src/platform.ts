@@ -5,7 +5,7 @@ import {
   Characteristic,
   Service,
   Logger,
-  API
+  API,
 } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
@@ -35,7 +35,7 @@ export default class Platform implements DynamicPlatformPlugin {
   constructor(
     public readonly log: Logger,
     public readonly config: PlatformConfig,
-    public readonly api: API
+    public readonly api: API,
   ) {
     const { email, password, enableDebugMode } = this.config ?? {};
 
@@ -61,12 +61,12 @@ export default class Platform implements DynamicPlatformPlugin {
         this.debugger.debug(
           '[PLATFORM]',
           'Removing cached accessories because the email and password are not set (Count:',
-          `${this.cachedAccessories.length})`
+          `${this.cachedAccessories.length})`,
         );
         this.api.unregisterPlatformAccessories(
           PLUGIN_NAME,
           PLATFORM_NAME,
-          this.cachedAccessories
+          this.cachedAccessories,
         );
       }
 
@@ -89,22 +89,22 @@ export default class Platform implements DynamicPlatformPlugin {
       const { uuid, name } = device;
 
       const existingAccessory = this.cachedAccessories.find(
-        (accessory) => accessory.UUID === uuid
+        (accessory) => accessory.UUID === uuid,
       );
 
       if (existingAccessory) {
         this.log.info(
           'Restoring existing accessory from cache:',
-          existingAccessory.displayName
+          existingAccessory.displayName,
         );
 
         existingAccessory.context = {
           name,
-          device
+          device,
         };
 
         this.registeredDevices.push(
-          new VeSyncAccessory(this, existingAccessory)
+          new VeSyncAccessory(this, existingAccessory),
         );
 
         return;
@@ -113,20 +113,20 @@ export default class Platform implements DynamicPlatformPlugin {
       this.log.info('Adding new accessory:', name);
       const accessory = new this.api.platformAccessory<VeSyncContext>(
         name,
-        uuid
+        uuid,
       );
       accessory.context = {
         name,
-        device
+        device,
       };
 
       this.registeredDevices.push(new VeSyncAccessory(this, accessory));
       return this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-        accessory
+        accessory,
       ]);
     } catch (error: any) {
       this.log.error(
-        `Error for device: ${device.name}:${device.uuid} | ${error.message}`
+        `Error for device: ${device.name}:${device.uuid} | ${error.message}`,
       );
       return null;
     }
@@ -135,13 +135,13 @@ export default class Platform implements DynamicPlatformPlugin {
   private checkOldDevices() {
     this.cachedAccessories.map((accessory) => {
       const exists = this.registeredDevices.find(
-        (device) => device.UUID === accessory.UUID
+        (device) => device.UUID === accessory.UUID,
       );
 
       if (!exists) {
         this.log.info('Remove cached accessory:', accessory.displayName);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-          accessory
+          accessory,
         ]);
       }
     });

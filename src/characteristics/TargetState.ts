@@ -1,7 +1,7 @@
 import {
   CharacteristicGetHandler,
   CharacteristicValue,
-  Nullable
+  Nullable,
 } from 'homebridge';
 
 import { AccessoryThisType } from '../VeSyncAccessory';
@@ -14,7 +14,7 @@ const characteristic: {
       this.platform.Characteristic.TargetHumidifierDehumidifierState;
 
     return HUMIDIFIER;
-  }
+  },
 };
 
 export default characteristic;
