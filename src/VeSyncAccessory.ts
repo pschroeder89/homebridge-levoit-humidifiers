@@ -81,7 +81,8 @@ export default class VeSyncAccessory {
     const { manufacturer, model, mac } = this.device;
     const config = platform.config;
     const accessories = config.accessories ? config.accessories : {};
-    const mistAccessory = accessories.mist != false || accessories.cool_mist != false;
+    const mistAccessory =
+      accessories.mist != false || accessories.cool_mist != false;
     const warmMistAccessory = accessories.warm_mist != false;
     const nightLightAccessory = accessories.night_light != false;
     const sleepModeAccessory = accessories.sleep_mode != false;
