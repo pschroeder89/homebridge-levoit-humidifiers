@@ -70,7 +70,7 @@ export default class Platform implements DynamicPlatformPlugin {
         );
       }
 
-      return;
+      this.log.error('The email and password are not correct!');
     }
 
     this.log.info('Connecting to the servers...');

@@ -27,10 +27,12 @@ export default class VeSync {
   private accountId?: string;
   private token?: string;
 
-  private readonly VERSION = '1.1.1';
-  private readonly AGENT = `VeSync/VeSync 3.0.51(F5321;HomeBridge-VeSync ${this.VERSION})`;
+  private readonly VERSION = '4.1.70';
+  private readonly FULL_VERSION = `VeSync ${this.VERSION} build15`;
+  private readonly AGENT = `VeSync/${this.VERSION} (iPhone; iOS 17.2.1; Humidifier/5.00)`;
   private readonly TIMEZONE = 'America/New_York';
-  private readonly OS = 'HomeBridge-VeSync';
+  private readonly OS = 'iOS 17.2.1';
+  private readonly BRAND = 'iPhone 15 Pro';
   private readonly LANG = 'en';
 
   private readonly AXIOS_OPTIONS = {
@@ -48,8 +50,8 @@ export default class VeSync {
 
   private generateDetailBody() {
     return {
-      appVersion: this.VERSION,
-      phoneBrand: this.OS,
+      appVersion: this.FULL_VERSION,
+      phoneBrand: this.BRAND,
       traceId: Date.now(),
       phoneOS: this.OS,
     };
@@ -171,13 +173,13 @@ export default class VeSync {
         this.log.error(
           'VeSync cannot communicate with humidifier! Check the VeSync App.',
         );
-        if (this.config.options.showOffWhenDisconnected) {
-          return false;
-        } else {
-          throw new Error(
-            'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
-          );
-        }
+      }
+      if (this.config.options.showOffWhenDisconnected) {
+        return false;
+      } else {
+        throw new Error(
+          'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
+        );
       }
 
       if (!response?.data) {
@@ -262,7 +264,7 @@ export default class VeSync {
           'accept-language': this.LANG,
           accountid: this.accountId!,
           'user-agent': this.AGENT,
-          appversion: this.VERSION,
+          appversion: this.FULL_VERSION,
           tz: this.TIMEZONE,
           tk: this.token!,
         },
@@ -275,7 +277,8 @@ export default class VeSync {
   public async getDevices(): Promise<VeSyncFan[]> {
     return lock.acquire('api-call', async () => {
       if (!this.api) {
-        throw new Error('The user is not logged in!');
+        this.log.error('The user is not logged in!');
+        return [];
       }
 
       const response = await this.api.post('cloud/v2/deviceManaged/devices', {
