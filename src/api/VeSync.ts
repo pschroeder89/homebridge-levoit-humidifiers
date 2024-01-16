@@ -173,13 +173,13 @@ export default class VeSync {
         this.log.error(
           'VeSync cannot communicate with humidifier! Check the VeSync App.',
         );
-      }
-      if (this.config.options.showOffWhenDisconnected) {
-        return false;
-      } else {
-        throw new Error(
-          'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
-        );
+        if (this.config.options.showOffWhenDisconnected) {
+          return false;
+        } else {
+          throw new Error(
+            'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
+          );
+        }
       }
 
       if (!response?.data) {
