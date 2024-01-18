@@ -66,7 +66,7 @@
             "title": "Auto Pro Mode Switch",
             "type": "boolean",
             "default": true,
-            "description": "Enables switch to turn on / off Auto Pro Mode on LEH_S601S_WUS / LUH_O601S_WUS models"
+            "description": "Enables switch to turn on / off Auto Pro Mode on LEH_S601S / LUH_O601S models"
           }
         }
       },
