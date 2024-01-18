@@ -57,6 +57,7 @@ export default class VeSyncAccessory {
         Example: The Classic300s has 9 mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
          */
     const arr = [...Array(this.device.deviceType.mistLevels + 1).keys()];
+
     return arr;
   }
 
@@ -67,10 +68,10 @@ export default class VeSyncAccessory {
         We add 1 to warmMistLevels to account for 0 as a potential level.
         Example: The LV600s has 3 warm mist levels, so this function returns [0,1,2,3].
          */
-    if (!this.device.deviceType.warmMistLevels) {
-      return [];
-    }
-    const arr = [...Array(this.device.deviceType.warmMistLevels + 1).keys()];
+
+    const arr = [
+      ...Array((this.device.deviceType.warmMistLevels ?? 0) + 1).keys(),
+    ];
     return arr;
   }
 
