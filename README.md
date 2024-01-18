@@ -1,7 +1,7 @@
 # Homebridge Levoit Humidifiers
 
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-[![Discord](https://camo.githubusercontent.com/a3c28cf032b15d45f7e2b08a8b1a0a764533a96003e117d0d99c9c3643c72383/68747470733a2f2f696d672e736869656c64732e696f2f646973636f72642f3433323636333333303238313232363237303f636f6c6f723d373238454435266c6f676f3d646973636f7264266c6162656c3d646973636f7264)](https://discord.com/channels/432663330281226270/1055705874460594247)
+[![Discord](https://discordapp.com/api/guilds/432663330281226270/widget.png?style=shield)](https://discord.com/channels/432663330281226270/1055705874460594247)
 [![downloads-via-npm](https://img.shields.io/npm/dt/homebridge-levoit-humidifiers)](https://www.npmjs.com/package/homebridge-levoit-humidifiers)
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
