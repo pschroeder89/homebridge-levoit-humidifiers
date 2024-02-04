@@ -14,7 +14,11 @@ const characteristic: {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
 
-    return this.device.isOn;
+    if (this.device.isOn) {
+      return true;
+    } else {
+      return false;
+    }
   },
   set: async function (value: CharacteristicValue) {
     const boolValue = value == 1;

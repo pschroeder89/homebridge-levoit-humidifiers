@@ -16,6 +16,9 @@ const characteristic: {
     return this.device.brightnessLevel;
   },
   set: async function (value: CharacteristicValue) {
+    // Convert value to number
+    value = Number(value);
+
     if (this.device.brightnessLevel > 0 && value > 0) {
       // If light is on, and we are applying a non-zero value, change brightness to that level.
       // Otherwise, LightState will handle on / off switching.

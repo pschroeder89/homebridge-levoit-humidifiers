@@ -13,7 +13,11 @@ const characteristic: {
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
-    return this.device.displayOn;
+    if (this.device.displayOn) {
+      return true;
+    } else {
+      return false;
+    }
   },
   set: async function (value: CharacteristicValue) {
     const boolValue = value == 1;

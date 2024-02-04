@@ -11,7 +11,9 @@ const characteristic: {
 } & AccessoryThisType = {
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     await this.device.updateInfo();
-
+    if (typeof this.device.humidityLevel !== 'number') {
+      return 0;
+    }
     return this.device.humidityLevel;
   },
 };
