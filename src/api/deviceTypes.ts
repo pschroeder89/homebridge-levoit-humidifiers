@@ -32,8 +32,6 @@ export const NewDevices = [
   DeviceName.OASIS_1000S_JP,
   DeviceName.OASIS_1000S_UK,
   DeviceName.LEH_S601S_WUS,
-  DeviceName.LUH_O601S_WUS,
-  DeviceName.LUH_O601S_KUS,
 ];
 
 export interface DeviceType {
