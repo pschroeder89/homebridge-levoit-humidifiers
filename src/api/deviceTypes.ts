@@ -307,7 +307,7 @@ const deviceTypes: DeviceType[] = [
   {
     isValid: (input: string) => input.includes(DeviceName.LUH_O601S_WUS),
     hasAutoMode: true,
-    hasAutoProMode: true,
+    hasAutoProMode: false,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -320,7 +320,7 @@ const deviceTypes: DeviceType[] = [
   {
     isValid: (input: string) => input.includes(DeviceName.LUH_O601S_KUS),
     hasAutoMode: true,
-    hasAutoProMode: true,
+    hasAutoProMode: false,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,

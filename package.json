@@ -4,7 +4,7 @@
   "displayName": "Levoit Humidifiers",
   "main": "dist/index.js",
   "license": "Apache-2.0",
-  "version": "1.14.0-dev1",
+  "version": "1.14.0-dev2",
   "private": false,
   "bugs": {
     "url": "https://github.com/pschroeder89/homebridge-levoit-humidifiers/issues"
