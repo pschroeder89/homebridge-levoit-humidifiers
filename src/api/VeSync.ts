@@ -37,7 +37,7 @@ export default class VeSync {
 
   private readonly AXIOS_OPTIONS = {
     baseURL: 'https://smartapi.vesync.com',
-    timeout: this.config.options.apiTimeout || 15000,
+    timeout: this.config.options?.apiTimeout || 15000,
   };
 
   constructor(
@@ -114,7 +114,7 @@ export default class VeSync {
         this.log.error(
           'VeSync cannot communicate with humidifier! Check the VeSync App.',
         );
-        if (this.config.options.showOffWhenDisconnected) {
+        if (this.config.options?.showOffWhenDisconnected) {
           return false;
         } else {
           throw new Error(
@@ -173,7 +173,7 @@ export default class VeSync {
         this.log.error(
           'VeSync cannot communicate with humidifier! Check the VeSync App.',
         );
-        if (this.config.options.showOffWhenDisconnected) {
+        if (this.config.options?.showOffWhenDisconnected) {
           return false;
         } else {
           throw new Error(
