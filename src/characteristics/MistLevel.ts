@@ -21,7 +21,10 @@ const characteristic: {
     if (value == 0) {
       await this.device.setPower(false);
     } else {
-      if (!this.device.deviceType.hasWarmMode) {
+      if (
+        !this.device.deviceType.hasWarmMode ||
+        this.device.model.includes('LUH-O601S') // This model has a Warm Mode, but it doesn't support changing mist levels in sleep mode
+      ) {
         await this.device.changeMode(Mode.Manual);
       }
       await this.device.changeMistLevel(Number(value));

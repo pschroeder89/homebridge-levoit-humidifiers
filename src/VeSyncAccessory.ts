@@ -19,6 +19,7 @@ import AutoProState from './characteristics/AutoProState';
 const HumidifierName = 'Humidifier';
 const HumiditySensorName = 'Humidity Sensor';
 const MistName = 'Mist';
+const CoolMistName = 'Cool Mist';
 const WarmMistName = 'Warm Mist';
 const NightLightName = 'Night Light';
 const SleepModeName = 'Sleep Mode';
@@ -83,7 +84,7 @@ export default class VeSyncAccessory {
     const config = platform.config;
     const accessories = config.accessories ? config.accessories : {};
     const mistAccessory =
-      accessories.mist != false || accessories.cool_mist != false;
+      accessories.mist != false && accessories.cool_mist != false;
     const warmMistAccessory = accessories.warm_mist != false;
     const nightLightAccessory = accessories.night_light != false;
     const sleepModeAccessory = accessories.sleep_mode != false;
@@ -178,7 +179,9 @@ export default class VeSyncAccessory {
         .onSet(MistLevel.set.bind(this));
       this.humidifierService.addLinkedService(this.mistService);
     } else {
-      this.mistService = this.accessory.getService(MistName);
+      this.mistService =
+        this.accessory.getService(MistName) ||
+        this.accessory.getService(CoolMistName);
       if (this.mistService) {
         this.platform.log.info(`Removing ${MistName} service.`);
         this.accessory.removeService(this.mistService);
