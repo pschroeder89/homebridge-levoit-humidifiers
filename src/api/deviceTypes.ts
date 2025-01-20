@@ -303,7 +303,7 @@ const deviceTypes: DeviceType[] = [
     hasColorMode: false,
     hasSleepMode: true,
     hasWarmMode: false,
-    minHumidityLevel: 40,
+    minHumidityLevel: 30,
     maxHumidityLevel: 80,
   },
   {
