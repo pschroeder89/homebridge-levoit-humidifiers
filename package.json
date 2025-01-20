@@ -4,7 +4,7 @@
   "displayName": "Levoit Humidifiers",
   "main": "dist/index.js",
   "license": "Apache-2.0",
-  "version": "1.14.2",
+  "version": "1.14.4",
   "private": false,
   "bugs": {
     "url": "https://github.com/pschroeder89/homebridge-levoit-humidifiers/issues"
@@ -54,7 +54,8 @@
     "300s",
     "oasis",
     "lv600s",
-    "homebridge"
+    "homebridge",
+    "classic 300s"
   ],
   "types": "./dist/index.d.ts",
   "homepage": "https://github.com/pschroeder89/homebridge-levoit-humidifiers#readme",
