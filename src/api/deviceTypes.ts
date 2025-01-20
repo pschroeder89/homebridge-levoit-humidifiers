@@ -20,6 +20,7 @@ export enum DeviceName {
   OASIS_1000S = 'LUH-M101S-WUS',
   OASIS_1000S_UK = 'LUH-M101S-WUK',
   OASIS_1000S_EU = 'LUH-M101S-WEU',
+  OASIS_1000S_EUR = 'LUH-M101S-WEUR',
   OASIS_1000S_JP = 'LUH-M101S-WJP',
   LEH_S601S_WUS = 'LEH-S601S-WUS',
   LEH_S601S_WUSR = 'LEH-S601S-WUSR',
@@ -31,6 +32,7 @@ export const NewDevices = [
   // Devices with new response formats
   DeviceName.OASIS_1000S,
   DeviceName.OASIS_1000S_EU,
+  DeviceName.OASIS_1000S_EUR,
   DeviceName.OASIS_1000S_JP,
   DeviceName.OASIS_1000S_UK,
   DeviceName.LEH_S601S_WUS,
@@ -286,6 +288,17 @@ const deviceTypes: DeviceType[] = [
   },
   {
     isValid: (input: string) => input.includes(DeviceName.OASIS_1000S_EU),
+    hasAutoMode: true,
+    mistLevels: 9,
+    hasLight: false,
+    hasColorMode: false,
+    hasSleepMode: true,
+    hasWarmMode: false,
+    minHumidityLevel: 40,
+    maxHumidityLevel: 80,
+  },
+  {
+    isValid: (input: string) => input.includes(DeviceName.OASIS_1000S_EUR),
     hasAutoMode: true,
     mistLevels: 9,
     hasLight: false,
