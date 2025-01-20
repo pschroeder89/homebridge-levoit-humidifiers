@@ -295,7 +295,7 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    isValid: (input: string) => input.includes(DeviceName.LEH_S601S_WUS),
+    isValid: (input: string) => input.includes(DeviceName.LEH_S601S_WUSR),
     hasAutoMode: true,
     hasAutoProMode: true,
     mistLevels: 9,
@@ -307,7 +307,7 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    isValid: (input: string) => input.includes(DeviceName.LEH_S601S_WUSR),
+    isValid: (input: string) => input.includes(DeviceName.LEH_S601S_WUS),
     hasAutoMode: true,
     hasAutoProMode: true,
     mistLevels: 9,
