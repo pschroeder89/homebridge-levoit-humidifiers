@@ -23,7 +23,7 @@ const characteristic: {
   },
 
   set: async function (value: CharacteristicValue) {
-    if (!this.device.warmEnabled && value > 0) {
+    if (!this.device.warmEnabled && (value as number) > 0) {
       // if from Off state and level is greater than 0, return immediately.
       return;
     }

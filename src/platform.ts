@@ -6,6 +6,7 @@ import {
   Service,
   Logger,
   API,
+  UnknownContext,
 } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
@@ -19,7 +20,7 @@ export interface VeSyncContext {
   device: VeSyncFan;
 }
 
-export type VeSyncPlatformAccessory = PlatformAccessory<VeSyncContext>;
+export type VeSyncPlatformAccessory = PlatformAccessory<UnknownContext>;
 
 export default class Platform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
