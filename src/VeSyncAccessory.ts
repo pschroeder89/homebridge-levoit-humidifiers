@@ -32,6 +32,11 @@ export type AccessoryThisType = ThisType<{
   device: VeSyncFan;
 }>;
 
+/**
+ * VeSyncAccessory represents a single Levoit humidifier device in HomeKit.
+ * It manages all services and characteristics for the device, including background
+ * polling to keep device state synchronized without blocking HomeKit read requests.
+ */
 export default class VeSyncAccessory {
   private readonly humidifierService: Service;
   private readonly humiditySensorService: Service | undefined;
@@ -42,6 +47,14 @@ export default class VeSyncAccessory {
   private readonly warmMistService: Service | undefined;
   private readonly autoProService: Service | undefined;
 
+  /**
+   * Background polling interval to keep device state fresh.
+   * Polls every 10 seconds to ensure characteristics have current data
+   * without blocking HomeKit read handlers.
+   */
+  private pollingInterval: NodeJS.Timeout | null = null;
+  private readonly POLLING_INTERVAL_MS = 10000; // 10 seconds
+
   public get UUID() {
     return this.device.uuid.toString();
   }
@@ -50,30 +63,28 @@ export default class VeSyncAccessory {
     return this.accessory.context.device;
   }
 
+  /**
+   * Gets the valid mist level values for the device.
+   * Returns an array containing the range of values from 0 to mistLevels.
+   * We add 1 to mistLevels to account for 0 as a potential level.
+   *
+   * @example The Classic300s has 9 mist levels, so this returns [0,1,2,3,4,5,6,7,8,9]
+   */
   private get getMistValues() {
-    /*
-        Determines the number of mist level values to slide through in the Mist Level slider.
-        Returns an array that contains the range of values between 1 and (mistLevels + 1).
-        We add 1 to mistLevels to account for 0 as a potential level.
-        Example: The Classic300s has 9 mist levels, so this function returns [0,1,2,3,4,5,6,7,8,9].
-         */
-    const arr = [...new Array(this.device.deviceType.mistLevels + 1).keys()];
-
-    return arr;
+    return [...new Array(this.device.deviceType.mistLevels + 1).keys()];
   }
 
+  /**
+   * Gets the valid warm mist level values for the device.
+   * Returns an array containing the range of values from 0 to warmMistLevels.
+   * We add 1 to warmMistLevels to account for 0 as a potential level.
+   *
+   * @example The LV600s has 3 warm mist levels, so this returns [0,1,2,3]
+   */
   private get getWarmMistValues() {
-    /*
-        Determines the number of mist level values to slide through in the Warm Mist Level slider.
-        Returns an array that contains the range of values between 1 and (warmMistLevels + 1).
-        We add 1 to warmMistLevels to account for 0 as a potential level.
-        Example: The LV600s has 3 warm mist levels, so this function returns [0,1,2,3].
-         */
-
-    const arr = [
+    return [
       ...new Array((this.device.deviceType.warmMistLevels ?? 0) + 1).keys(),
     ];
-    return arr;
   }
 
   constructor(
@@ -361,6 +372,47 @@ export default class VeSyncAccessory {
         this.platform.log.info(`Removing ${AutoProModeName} service.`);
         this.accessory.removeService(this.autoProService);
       }
+    }
+
+    // Start background polling to keep device state fresh
+    // This prevents slow read handler warnings by ensuring data is cached
+    this.startPolling();
+  }
+
+  /**
+   * Starts background polling to periodically update device state.
+   * This ensures characteristics always have fresh data without blocking
+   * HomeKit read requests, which prevents "slow to respond" warnings.
+   */
+  private startPolling(): void {
+    // Initial update to populate cache
+    this.device.updateInfo().catch((err) => {
+      this.platform.log.debug(
+        `[${this.device.name}] Initial device update failed:`,
+        err instanceof Error ? err.message : String(err),
+      );
+    });
+
+    // Set up periodic polling
+    this.pollingInterval = setInterval(() => {
+      this.device.updateInfo().catch((err) => {
+        this.platform.log.debug(
+          `[${this.device.name}] Background polling update failed:`,
+          err instanceof Error ? err.message : String(err),
+        );
+      });
+    }, this.POLLING_INTERVAL_MS);
+  }
+
+  /**
+   * Stops background polling.
+   * Should be called when the accessory is removed to clean up resources.
+   * Note: Currently not automatically called, but available for future cleanup needs.
+   */
+  public stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
   }
 }
