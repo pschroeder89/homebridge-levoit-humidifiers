@@ -52,55 +52,58 @@ const characteristic: {
       device.uuid,
       humidity,
       async (finalValue) => {
-      try {
-        // Turn device on if it's currently off
-        if (!device.isOn) {
-          await device.setPower(true);
+        try {
+          // Turn device on if it's currently off
+          if (!device.isOn) {
+            await device.setPower(true);
+          }
+
+          // Clamp value to device-specific range
+          // LV600S/Oasis: 40-80%, Others: 30-80%
+          let h = finalValue;
+          if (h < device.deviceType.minHumidityLevel)
+            h = device.deviceType.minHumidityLevel;
+          if (h > device.deviceType.maxHumidityLevel)
+            h = device.deviceType.maxHumidityLevel;
+
+          // Determine correct auto-like mode based on device type
+          // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
+          let autoLikeMode: Mode;
+          if (device.model.startsWith(DevicePrefix.LV600S)) {
+            autoLikeMode = Mode.Humidity;
+          } else if (device.deviceType.hasAutoProMode) {
+            autoLikeMode = Mode.AutoPro;
+          } else {
+            autoLikeMode = Mode.Auto;
+          }
+
+          // LV600S / Oasis cannot change target humidity in Sleep mode
+          const canSetTargetHumidityInSleep =
+            !device.model.startsWith(DevicePrefix.LV600S) &&
+            !device.model.startsWith(DevicePrefix.OASIS) &&
+            !device.model.startsWith(DevicePrefix.OASIS_1000S);
+
+          // Switch to auto-like mode if currently in Manual or Sleep (for LV600S/Oasis)
+          const shouldSwitchToAutoLike =
+            device.mode === Mode.Manual ||
+            (device.mode === Mode.Sleep && !canSetTargetHumidityInSleep);
+
+          if (shouldSwitchToAutoLike) {
+            await device.changeMode(autoLikeMode);
+          }
+
+          // Apply the target humidity
+          await device.setTargetHumidity(h);
+
+          // Update all HomeKit characteristics immediately
+          this.updateAllCharacteristics();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.platform.log.debug(
+            `[HUMIDITY] debounced set failed: ${message}`,
+          );
         }
-
-        // Clamp value to device-specific range
-        // LV600S/Oasis: 40-80%, Others: 30-80%
-        let h = finalValue;
-        if (h < device.deviceType.minHumidityLevel)
-          h = device.deviceType.minHumidityLevel;
-        if (h > device.deviceType.maxHumidityLevel)
-          h = device.deviceType.maxHumidityLevel;
-
-        // Determine correct auto-like mode based on device type
-        // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
-        let autoLikeMode: Mode;
-        if (device.model.startsWith(DevicePrefix.LV600S)) {
-          autoLikeMode = Mode.Humidity;
-        } else if (device.deviceType.hasAutoProMode) {
-          autoLikeMode = Mode.AutoPro;
-        } else {
-          autoLikeMode = Mode.Auto;
-        }
-
-        // LV600S / Oasis cannot change target humidity in Sleep mode
-        const canSetTargetHumidityInSleep =
-          !device.model.startsWith(DevicePrefix.LV600S) &&
-          !device.model.startsWith(DevicePrefix.OASIS) &&
-          !device.model.startsWith(DevicePrefix.OASIS_1000S);
-
-        // Switch to auto-like mode if currently in Manual or Sleep (for LV600S/Oasis)
-        const shouldSwitchToAutoLike =
-          device.mode === Mode.Manual ||
-          (device.mode === Mode.Sleep && !canSetTargetHumidityInSleep);
-
-        if (shouldSwitchToAutoLike) {
-          await device.changeMode(autoLikeMode);
-        }
-
-        // Apply the target humidity
-        await device.setTargetHumidity(h);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        this.platform.log.debug(
-          `[HUMIDITY] debounced set failed: ${message}`,
-        );
-      }
-    },
+      },
       (message) => this.platform.log.debug(message),
     );
   },

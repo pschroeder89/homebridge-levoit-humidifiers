@@ -30,6 +30,8 @@ export type AccessoryThisType = ThisType<{
   humidifierService: Service;
   platform: Platform;
   device: VeSyncFan;
+  accessory: VeSyncPlatformAccessory;
+  updateAllCharacteristics: () => void;
 }>;
 
 /**
@@ -49,11 +51,12 @@ export default class VeSyncAccessory {
 
   /**
    * Background polling interval to keep device state fresh.
-   * Polls every 10 seconds to ensure characteristics have current data
-   * without blocking HomeKit read handlers.
+   * Polls every 30 seconds to balance freshness with API quota limits.
+   * The VeSync API has daily quotas (3200 + 1500 * device count), so we
+   * need to be conservative with polling frequency.
    */
   private pollingInterval: NodeJS.Timeout | null = null;
-  private readonly POLLING_INTERVAL_MS = 10000; // 10 seconds
+  private readonly POLLING_INTERVAL_MS = 30000; // 30 seconds
 
   public get UUID() {
     return this.device.uuid.toString();
@@ -165,13 +168,18 @@ export default class VeSyncAccessory {
 
     // Mist service
     if (mistAccessory) {
-      this.mistService =
-        this.accessory.getService(MistName) ||
-        this.accessory.addService(
+      this.mistService = this.accessory.getService(MistName);
+      if (!this.mistService) {
+        this.mistService = this.accessory.addService(
           this.platform.Service.Fan,
           MistName,
           MistName,
         );
+        this.mistService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          MistName,
+        );
+      }
 
       this.mistService
         .getCharacteristic(this.platform.Characteristic.On)
@@ -201,13 +209,18 @@ export default class VeSyncAccessory {
 
     // Display Switch service
     if (displayAccessory) {
-      this.displayService =
-        this.accessory.getService(DisplayName) ||
-        this.accessory.addService(
+      this.displayService = this.accessory.getService(DisplayName);
+      if (!this.displayService) {
+        this.displayService = this.accessory.addService(
           this.platform.Service.Switch,
           DisplayName,
           DisplayName,
         );
+        this.displayService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          DisplayName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.displayService);
 
@@ -226,12 +239,18 @@ export default class VeSyncAccessory {
     // Humidity Sensor service
     if (humiditySensor) {
       this.humiditySensorService =
-        this.accessory.getService(HumiditySensorName) ||
-        this.accessory.addService(
+        this.accessory.getService(HumiditySensorName);
+      if (!this.humiditySensorService) {
+        this.humiditySensorService = this.accessory.addService(
           this.platform.Service.HumiditySensor,
           HumiditySensorName,
           HumiditySensorName,
         );
+        this.humiditySensorService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          HumiditySensorName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.humiditySensorService);
 
@@ -249,13 +268,18 @@ export default class VeSyncAccessory {
 
     // Warm Mist service
     if (this.device.deviceType.hasWarmMode && warmMistAccessory) {
-      this.warmMistService =
-        this.accessory.getService(WarmMistName) ||
-        this.accessory.addService(
+      this.warmMistService = this.accessory.getService(WarmMistName);
+      if (!this.warmMistService) {
+        this.warmMistService = this.accessory.addService(
           this.platform.Service.Fan,
           WarmMistName,
           WarmMistName,
         );
+        this.warmMistService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          WarmMistName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.warmMistService);
 
@@ -284,13 +308,18 @@ export default class VeSyncAccessory {
 
     // Sleep Mode service
     if (this.device.deviceType.hasSleepMode && sleepModeAccessory) {
-      this.sleepService =
-        this.accessory.getService(SleepModeName) ||
-        this.accessory.addService(
+      this.sleepService = this.accessory.getService(SleepModeName);
+      if (!this.sleepService) {
+        this.sleepService = this.accessory.addService(
           this.platform.Service.Switch,
           SleepModeName,
           SleepModeName,
         );
+        this.sleepService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          SleepModeName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.sleepService);
 
@@ -308,13 +337,18 @@ export default class VeSyncAccessory {
 
     // Night Light service
     if (this.device.deviceType.hasLight && nightLightAccessory) {
-      this.lightService =
-        this.accessory.getService(NightLightName) ||
-        this.accessory.addService(
+      this.lightService = this.accessory.getService(NightLightName);
+      if (!this.lightService) {
+        this.lightService = this.accessory.addService(
           this.platform.Service.Lightbulb,
           NightLightName,
           NightLightName,
         );
+        this.lightService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          NightLightName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.lightService);
 
@@ -352,13 +386,18 @@ export default class VeSyncAccessory {
     }
     // AutoPro Switch service
     if (this.device.deviceType.hasAutoProMode && autoProAccessory) {
-      this.autoProService =
-        this.accessory.getService(AutoProModeName) ||
-        this.accessory.addService(
+      this.autoProService = this.accessory.getService(AutoProModeName);
+      if (!this.autoProService) {
+        this.autoProService = this.accessory.addService(
           this.platform.Service.Switch,
           AutoProModeName,
           AutoProModeName,
         );
+        this.autoProService.setCharacteristic(
+          this.platform.Characteristic.Name,
+          AutoProModeName,
+        );
+      }
 
       this.humidifierService.addLinkedService(this.autoProService);
 
@@ -413,6 +452,100 @@ export default class VeSyncAccessory {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
+    }
+  }
+
+  /**
+   * Updates all HomeKit characteristics to match current device state.
+   * Call this after any device command to immediately reflect changes in HomeKit.
+   * This ensures the Home app shows updated values without requiring a refresh.
+   */
+  public updateAllCharacteristics(): void {
+    const { device } = this;
+
+    // Update humidifier service characteristics
+    this.humidifierService
+      .getCharacteristic(this.platform.Characteristic.Active)
+      .updateValue(device.isOn ? 1 : 0);
+
+    this.humidifierService
+      .getCharacteristic(
+        this.platform.Characteristic.CurrentHumidifierDehumidifierState,
+      )
+      .updateValue(
+        device.isOn
+          ? this.platform.Characteristic.CurrentHumidifierDehumidifierState
+              .HUMIDIFYING
+          : this.platform.Characteristic.CurrentHumidifierDehumidifierState
+              .IDLE,
+      );
+
+    this.humidifierService
+      .getCharacteristic(
+        this.platform.Characteristic.RelativeHumidityHumidifierThreshold,
+      )
+      .updateValue(device.isOn ? device.targetHumidity : 0);
+
+    this.humidifierService
+      .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+      .updateValue(device.humidityLevel);
+
+    // Update humidity sensor if it exists
+    if (this.humiditySensorService) {
+      this.humiditySensorService
+        .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+        .updateValue(device.humidityLevel);
+    }
+
+    // Update mist service if it exists
+    if (this.mistService) {
+      this.mistService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.isOn);
+      this.mistService
+        .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        .updateValue(device.mistLevel);
+    }
+
+    // Update warm mist service if it exists
+    if (this.warmMistService) {
+      this.warmMistService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.warmEnabled);
+      this.warmMistService
+        .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        .updateValue(device.warmLevel);
+    }
+
+    // Update night light service if it exists
+    if (this.lightService) {
+      this.lightService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.lightOn === 'on');
+      this.lightService
+        .getCharacteristic(this.platform.Characteristic.Brightness)
+        .updateValue(device.brightnessLevel);
+    }
+
+    // Update display service if it exists
+    if (this.displayService) {
+      this.displayService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.isOn && device.displayOn);
+    }
+
+    // Update sleep mode service if it exists
+    if (this.sleepService) {
+      this.sleepService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.isOn && device.mode === 'sleep');
+    }
+
+    // Update AutoPro mode service if it exists
+    if (this.autoProService) {
+      this.autoProService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.isOn && device.mode === 'autoPro');
     }
   }
 }

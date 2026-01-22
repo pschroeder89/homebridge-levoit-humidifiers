@@ -80,19 +80,3 @@ export function debounceSet(
 
   timers.set(uuid, timer);
 }
-
-/**
- * Clears any pending debounce operation for a device.
- * Useful for cleanup when a device is removed.
- *
- * @param uuid - Device UUID to clear
- */
-export function clearDebounce(uuid: string): void {
-  const timer = timers.get(uuid);
-  if (timer) {
-    clearTimeout(timer);
-    timers.delete(uuid);
-  }
-  pendingValues.delete(uuid);
-}
-

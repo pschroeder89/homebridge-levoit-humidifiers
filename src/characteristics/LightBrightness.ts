@@ -49,35 +49,38 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
-      // Clamp to HomeKit brightness bounds (0-100)
-      let v = Math.max(0, Math.min(100, finalValue));
+        // Clamp to HomeKit brightness bounds (0-100)
+        let v = Math.max(0, Math.min(100, finalValue));
 
-      try {
-        // Only adjust brightness if the light is already on and target is non-zero.
-        // LightState handles on/off, so we don't change brightness when turning off.
-        if (!(device.brightnessLevel > 0 && v > 0)) return;
+        try {
+          // Only adjust brightness if the light is already on and target is non-zero.
+          // LightState handles on/off, so we don't change brightness when turning off.
+          if (!(device.brightnessLevel > 0 && v > 0)) return;
 
-        // RGB models: We allow 39 in UI so 40 doesn't turn off the device,
-        // but never send 39 to device - clamp to 40
-        if (v === 39) v = 40;
+          // RGB models: We allow 39 in UI so 40 doesn't turn off the device,
+          // but never send 39 to device - clamp to 40
+          if (v === 39) v = 40;
 
-        // Determine action based on brightness level
-        const action = v >= 40 ? 'on' : 'off';
+          // Determine action based on brightness level
+          const action = v >= 40 ? 'on' : 'off';
 
-        if (device.deviceType.hasColorMode) {
-          // RGB models use setLightStatus
-          await device.setLightStatus(action, v);
-        } else {
-          // Non-RGB models use setBrightness
-          await device.setBrightness(v);
+          if (device.deviceType.hasColorMode) {
+            // RGB models use setLightStatus
+            await device.setLightStatus(action, v);
+          } else {
+            // Non-RGB models use setBrightness
+            await device.setBrightness(v);
+          }
+
+          // Update all HomeKit characteristics immediately
+          this.updateAllCharacteristics();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.platform.log.debug(
+            `[LIGHT] debounced brightness set failed: ${message}`,
+          );
         }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        this.platform.log.debug(
-          `[LIGHT] debounced brightness set failed: ${message}`,
-        );
-      }
-    },
+      },
       (message) => this.platform.log.debug(message),
     );
   },

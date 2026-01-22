@@ -31,13 +31,19 @@ const characteristic: {
   /**
    * Sets the power state of the humidifier.
    * Only sends command if the state is actually changing to avoid unnecessary API calls.
+   * Immediately updates all HomeKit characteristics to reflect the new state.
    */
   set: async function (value: CharacteristicValue) {
     const boolValue = value == 1;
 
     // Only update if state is changing
     if (boolValue !== this.device.isOn) {
-      await this.device.setPower(boolValue);
+      const success = await this.device.setPower(boolValue);
+
+      if (success) {
+        // Update all characteristics immediately to reflect new state
+        this.updateAllCharacteristics();
+      }
     }
   },
 };

@@ -3,7 +3,7 @@
 export enum DevicePrefix {
   Classic300S = 'LUH-A601S-',
   Dual200S = 'LUH-D301S-',
-  LV600S = 'LUH-A602S-',
+  LV600S = 'LUH-A60',
   OASIS = 'LUH-O451S-',
   OASIS_1000S = 'LUH-M101S-',
   LEH_S601S = 'LEH-S601S-',
@@ -46,10 +46,12 @@ export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
  * New response format devices:
  * - Oasis 1000S family (LUH-M101S-*)
  * - LEH-S601S family (LEH-S601S-*)
+ * - LV600S newer variants (LUH-A603S-*)
  */
 export const isNewFormatDevice = (model: string): boolean =>
   model.includes(DevicePrefix.OASIS_1000S) ||
-  model.includes(DevicePrefix.LEH_S601S);
+  model.includes(DevicePrefix.LEH_S601S) ||
+  model.includes('LUH-A603S-');
 
 export interface DeviceType {
   isValid: (input: string) => boolean;
@@ -121,8 +123,11 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LV600S family (all LUH-A602S-* models)
-    isValid: (input: string) => input.includes(DevicePrefix.LV600S),
+    // LV600S family (LUH-A602S-* and LUH-A603S-* variants)
+    // Check Classic300S first to avoid matching LUH-A601S-*
+    isValid: (input: string) =>
+      !input.includes(DevicePrefix.Classic300S) &&
+      input.includes(DevicePrefix.LV600S),
     hasAutoMode: true,
     mistLevels: 9,
     hasLight: false,

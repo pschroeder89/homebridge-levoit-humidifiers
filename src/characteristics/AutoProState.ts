@@ -51,10 +51,12 @@ const characteristic: {
       case true:
         // Turn on AutoPro Mode
         await this.device.changeMode(Mode.AutoPro);
+        this.updateAllCharacteristics();
         break;
       case false:
         // Turn off AutoPro Mode - switch to Manual
         await this.device.changeMode(Mode.Manual);
+        this.updateAllCharacteristics();
         break;
     }
   },

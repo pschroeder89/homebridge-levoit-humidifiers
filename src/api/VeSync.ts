@@ -43,6 +43,17 @@ const DEVICE_OFFLINE_MSG = 'device offline';
 const DEVICE_UNREACHABLE_ERROR =
   'Device was unreachable. Ensure it is plugged in and connected to WiFi.';
 
+/**
+ * VeSync API error code for daily request quota exceeded.
+ * Quota formula: 3200 + 1500 * user owned device number
+ */
+const QUOTA_EXCEEDED_CODE = -16906086;
+
+/**
+ * VeSync API error code for expired authentication token.
+ */
+const TOKEN_EXPIRED_CODE = -11001022;
+
 // Start on US host for a small set of known non-EU regions – everyone else uses EU
 const EU_COUNTRY_CODES = new Set<string>([
   'AL',
@@ -511,6 +522,42 @@ export default class VeSync {
   }
 
   /**
+   * Checks if the current token is still valid.
+   * Validates JWT expiration if present, or checks token age against max age.
+   *
+   * @returns true if token is valid, false if expired or missing
+   */
+  private isTokenValid(): boolean {
+    if (!this.token) {
+      return false;
+    }
+
+    const now = Date.now();
+    const { iat, exp } = decodeJwtTimestamps(this.token);
+
+    // Check JWT expiration if present
+    if (exp && exp * 1000 <= now) {
+      this.debugMode.debug(
+        '[TOKEN]',
+        'Token expired according to JWT exp claim',
+      );
+      return false;
+    }
+
+    // If no exp claim, check against max age (25 days)
+    // We use iat from JWT or fall back to a conservative estimate
+    if (!exp) {
+      const issuedMs = iat ? iat * 1000 : now - this.TOKEN_MAX_AGE_MS;
+      if (now - issuedMs > this.TOKEN_MAX_AGE_MS) {
+        this.debugMode.debug('[TOKEN]', 'Token appears too old (no exp claim)');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Builds and configures the axios API client with authentication headers.
    * Sets up automatic token refresh on 401 errors.
    *
@@ -534,14 +581,44 @@ export default class VeSync {
       },
     });
 
-    // Automatic token refresh on 401 Unauthorized
+    // Automatic token refresh on 401 Unauthorized and token error codes
     this.api.interceptors.response.use(
-      (resp) => resp,
+      (resp) => {
+        // Check for token errors in successful responses (HTTP 200 with error code in body)
+        if (resp.status === 200 && resp.data?.code === TOKEN_EXPIRED_CODE) {
+          // Convert this into a rejection so the error handler below can retry
+          const error: any = new Error('Token expired');
+          error.response = resp;
+          error.config = resp.config;
+          error.isTokenExpired = true;
+          return Promise.reject(error);
+        }
+        return resp;
+      },
       async (err) => {
-        if (err?.response?.status === 401) {
-          this.debugMode.debug('[AUTH]', '401 detected, re-authenticating…');
+        const isTokenError =
+          err?.response?.status === 401 ||
+          err?.response?.status === 419 ||
+          err?.response?.data?.code === TOKEN_EXPIRED_CODE ||
+          err?.isTokenExpired;
+
+        if (isTokenError) {
+          // Prevent infinite retry loops
+          if (err.config?._retryAttempted) {
+            this.log.error(
+              'Token refresh failed after retry. Authentication may be broken.',
+            );
+            throw err;
+          }
+
+          this.debugMode.debug(
+            '[AUTH]',
+            'Token error detected, re-authenticating…',
+          );
           const ok = await this.login();
           if (ok && err.config && this.api) {
+            // Mark this request as already retried
+            err.config._retryAttempted = true;
             // Retry the original request with new token
             err.config.headers = err.config.headers || {};
             err.config.headers.tk = this.token!;
@@ -584,8 +661,59 @@ export default class VeSync {
   }
 
   /**
+   * Checks if the API response indicates quota exceeded error.
+   * Logs a warning and returns true if quota is exceeded.
+   *
+   * @param responseCode - The error code from the API response
+   * @param responseMsg - The error message from the API response
+   * @returns true if quota is exceeded, false otherwise
+   */
+  private handleQuotaExceeded(
+    responseCode: number | undefined,
+    responseMsg: string | undefined,
+  ): boolean {
+    if (responseCode === QUOTA_EXCEEDED_CODE) {
+      this.log.warn(
+        'VeSync API daily quota exceeded. The quota formula is "3200 + 1500 * user owned device number".',
+      );
+      this.log.warn(
+        'Polling frequency has been reduced to 30 seconds. Quota resets daily.',
+      );
+      if (responseMsg) {
+        this.debugMode.debug('[QUOTA]', responseMsg);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Ensures the authentication token is valid before making API calls.
+   * Proactively checks token expiration and refreshes if needed.
+   *
+   * @throws Error if token refresh fails or API client is unavailable
+   */
+  private async ensureValidToken(): Promise<void> {
+    if (!this.isTokenValid()) {
+      this.debugMode.debug(
+        '[TOKEN]',
+        'Token invalid, refreshing before API call',
+      );
+      const ok = await this.login();
+      if (!ok) {
+        throw new Error('Failed to refresh expired token');
+      }
+      // login() rebuilds the API client, but we need to ensure it's ready
+      if (!this.api) {
+        throw new Error('API client not available after token refresh');
+      }
+    }
+  }
+
+  /**
    * Sends a control command to a device.
    * Thread-safe: Uses AsyncLock to prevent concurrent API calls.
+   * Automatically refreshes token if expired before making the request.
    *
    * @param fan - The device to send command to
    * @param method - The bypass method to execute
@@ -603,6 +731,8 @@ export default class VeSync {
         throw new Error('The user is not logged in!');
       }
 
+      await this.ensureValidToken();
+
       this.debugMode.debug(
         '[SEND COMMAND]',
         `Sending command ${method} to ${fan.name}`,
@@ -615,10 +745,7 @@ export default class VeSync {
         ...this.generateBody(true),
       });
 
-      const offlineResult = this.handleDeviceOffline(
-        response.data?.msg,
-        false,
-      );
+      const offlineResult = this.handleDeviceOffline(response.data?.msg, false);
       if (offlineResult !== undefined) {
         return offlineResult;
       }
@@ -655,6 +782,7 @@ export default class VeSync {
   /**
    * Gets current device state/info from the VeSync API.
    * Thread-safe: Uses AsyncLock to prevent concurrent API calls.
+   * Automatically refreshes token if expired before making the request.
    *
    * @param fan - The device to get info for
    * @returns Device info response, or null if device is offline and showOffWhenDisconnected is enabled
@@ -668,6 +796,8 @@ export default class VeSync {
         throw new Error('The user is not logged in!');
       }
 
+      await this.ensureValidToken();
+
       this.debugMode.debug('[GET DEVICE INFO]', 'Getting device info...');
 
       const response = await this.api.post('cloud/v2/deviceManaged/bypassV2', {
@@ -678,10 +808,13 @@ export default class VeSync {
 
       this.debugMode.debug('[DEVICE INFO]', JSON.stringify(response.data));
 
-      const offlineResult = this.handleDeviceOffline(
-        response.data?.msg,
-        null,
-      );
+      // Check for quota exceeded error
+      if (this.handleQuotaExceeded(response.data?.code, response.data?.msg)) {
+        // Return null to indicate failure, but don't throw (allows graceful degradation)
+        return null;
+      }
+
+      const offlineResult = this.handleDeviceOffline(response.data?.msg, null);
       if (offlineResult !== undefined) {
         return offlineResult;
       }
@@ -1058,6 +1191,8 @@ export default class VeSync {
    * Filters devices to only include supported models (wifi-air type).
    * Thread-safe: Uses AsyncLock to prevent concurrent API calls.
    *
+   * Token expiration is handled automatically by the axios interceptor.
+   *
    * @returns Array of VeSyncFan instances for supported devices
    */
   public async getDevices(): Promise<VeSyncFan[]> {
@@ -1067,6 +1202,8 @@ export default class VeSync {
         return [];
       }
 
+      await this.ensureValidToken();
+
       const response = await this.api.post('cloud/v2/deviceManaged/devices', {
         method: 'devices',
         pageNo: 1,
@@ -1074,6 +1211,12 @@ export default class VeSync {
         ...this.generateDetailBody(),
         ...this.generateBody(true),
       });
+
+      // Check for quota exceeded error
+      if (this.handleQuotaExceeded(response.data?.code, response.data?.msg)) {
+        // Return empty array to indicate failure, but don't throw (allows graceful degradation)
+        return [];
+      }
 
       if (!response?.data) {
         this.debugMode.debug(

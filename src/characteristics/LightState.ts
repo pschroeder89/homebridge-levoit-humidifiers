@@ -66,6 +66,7 @@ const characteristic: {
         // Non-RGB models use setBrightness
         await this.device.setBrightness(50);
       }
+      this.updateAllCharacteristics();
     }
 
     // Turning off: set brightness to 0
@@ -75,6 +76,7 @@ const characteristic: {
       } else {
         await this.device.setBrightness(0);
       }
+      this.updateAllCharacteristics();
     }
   },
 };

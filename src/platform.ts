@@ -136,8 +136,11 @@ export default class Platform implements DynamicPlatformPlugin {
       const devices = await this.client.getDevices();
       await Promise.all(devices.map(this.loadDevice.bind(this)));
 
+      // Track which device UUIDs were successfully loaded
+      const loadedDeviceUUIDs = new Set(devices.map((device) => device.uuid));
+
       // Remove accessories for devices that no longer exist
-      this.checkOldDevices();
+      this.checkOldDevices(loadedDeviceUUIDs);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       this.log.error('Unexpected error during device discovery:', message);
@@ -214,19 +217,22 @@ export default class Platform implements DynamicPlatformPlugin {
    * Note: When accessories are unregistered, their polling intervals
    * will be cleaned up automatically when the VeSyncAccessory instances
    * are garbage collected.
+   *
+   * @param loadedDeviceUUIDs - Set of UUIDs for devices that were successfully loaded
    */
-  private checkOldDevices() {
+  private checkOldDevices(loadedDeviceUUIDs: Set<string>) {
     this.cachedAccessories.forEach((accessory) => {
-      const exists = this.registeredDevices.find(
-        (device) => device.UUID === accessory.UUID,
-      );
+      const exists = loadedDeviceUUIDs.has(accessory.UUID);
 
       if (!exists) {
-        // Device no longer exists - remove its accessory
-        this.log.info('Remove cached accessory:', accessory.displayName);
+        this.log.info('Removing accessory:', accessory.displayName);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
           accessory,
         ]);
+        const index = this.cachedAccessories.indexOf(accessory);
+        if (index > -1) {
+          this.cachedAccessories.splice(index, 1);
+        }
       }
     });
   }

@@ -56,20 +56,23 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
-      // Clamp to valid range
-      const max = device.deviceType.warmMistLevels ?? 0;
-      const clamped = Math.max(0, Math.min(max, finalValue));
+        // Clamp to valid range
+        const max = device.deviceType.warmMistLevels ?? 0;
+        const clamped = Math.max(0, Math.min(max, finalValue));
 
-      try {
-        // Avoid no-op - only update if value actually changed
-        if (device.warmLevel !== clamped) {
-          await device.changeWarmMistLevel(clamped);
+        try {
+          // Avoid no-op - only update if value actually changed
+          if (device.warmLevel !== clamped) {
+            await device.changeWarmMistLevel(clamped);
+          }
+
+          // Update all HomeKit characteristics immediately
+          this.updateAllCharacteristics();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.platform.log.debug(`[WARM] debounced set failed: ${message}`);
         }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        this.platform.log.debug(`[WARM] debounced set failed: ${message}`);
-      }
-    },
+      },
       (message) => this.platform.log.debug(message),
     );
   },

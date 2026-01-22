@@ -49,15 +49,18 @@ const characteristic: {
       case true:
         // Turn on Sleep Mode
         await this.device.changeMode(Mode.Sleep);
+        this.updateAllCharacteristics();
         break;
       case false:
         // Turn off Sleep Mode - revert to appropriate auto mode
         // LEH_S601S models have both Auto and Humidity modes, use Humidity since Auto has its own switch
         if (this.device.model.includes(DevicePrefix.LEH_S601S)) {
           await this.device.changeMode(Mode.Humidity);
+          this.updateAllCharacteristics();
           break;
         } else {
           await this.device.changeMode(Mode.Auto);
+          this.updateAllCharacteristics();
           break;
         }
     }

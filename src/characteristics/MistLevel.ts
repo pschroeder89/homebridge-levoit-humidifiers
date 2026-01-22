@@ -50,37 +50,41 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
-      // Clamp to valid range
-      const max = device.deviceType.mistLevels;
-      const clamped = Math.max(0, Math.min(max, finalValue));
+        // Clamp to valid range
+        const max = device.deviceType.mistLevels;
+        const clamped = Math.max(0, Math.min(max, finalValue));
 
-      try {
-        // Level 0 turns device off
-        if (clamped === 0) {
-          await device.setPower(false);
-          return;
+        try {
+          // Level 0 turns device off
+          if (clamped === 0) {
+            await device.setPower(false);
+            this.updateAllCharacteristics();
+            return;
+          }
+
+          // Most devices need Manual mode, but some (with warm mode, except O601S) can change in Auto
+          const needsManual =
+            (!device.deviceType.hasWarmMode ||
+              device.model.startsWith(DevicePrefix.O601S)) &&
+            device.mode !== Mode.Manual;
+
+          if (needsManual) {
+            await device.changeMode(Mode.Manual);
+          }
+
+          // Only update if value actually changed
+          if (device.mistLevel !== clamped) {
+            await device.changeMistLevel(clamped);
+          }
+
+          // Update all HomeKit characteristics immediately
+          this.updateAllCharacteristics();
+        } catch (err) {
+          // Don't crash the plugin on timer errors; log for debugging
+          const message = err instanceof Error ? err.message : String(err);
+          this.platform.log.debug(`[MIST] debounced set failed: ${message}`);
         }
-
-        // Most devices need Manual mode, but some (with warm mode, except O601S) can change in Auto
-        const needsManual =
-          (!device.deviceType.hasWarmMode ||
-            device.model.startsWith(DevicePrefix.O601S)) &&
-          device.mode !== Mode.Manual;
-
-        if (needsManual) {
-          await device.changeMode(Mode.Manual);
-        }
-
-        // Only update if value actually changed
-        if (device.mistLevel !== clamped) {
-          await device.changeMistLevel(clamped);
-        }
-      } catch (err) {
-        // Don't crash the plugin on timer errors; log for debugging
-        const message = err instanceof Error ? err.message : String(err);
-        this.platform.log.debug(`[MIST] debounced set failed: ${message}`);
-      }
-    },
+      },
       (message) => this.platform.log.debug(message),
     );
   },

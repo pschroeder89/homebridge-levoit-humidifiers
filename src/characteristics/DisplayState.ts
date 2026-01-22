@@ -19,11 +19,13 @@ const characteristic: {
 } & AccessoryThisType = {
   /**
    * Gets whether the display is currently on.
+   * Returns false if device is off, regardless of display state.
    * Uses cached state to ensure fast response times.
    */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     // Use cached state - background polling keeps this fresh
-    return this.device.displayOn;
+    // Display should show as off when device is off
+    return this.device.isOn && this.device.displayOn;
   },
 
   /**
@@ -32,6 +34,7 @@ const characteristic: {
   set: async function (value: CharacteristicValue) {
     const boolValue = value == 1;
     await this.device.setDisplay(boolValue);
+    this.updateAllCharacteristics();
   },
 };
 

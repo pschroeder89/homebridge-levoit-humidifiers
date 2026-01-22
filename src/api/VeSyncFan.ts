@@ -92,54 +92,6 @@ export default class VeSyncFan {
     return this._isOn;
   }
 
-  /**
-   * Gets the blue RGB value (0-255) for RGB-capable devices.
-   * @deprecated Use blue property directly if exposed, or access via getter
-   */
-  public get getBlue() {
-    return this._blue;
-  }
-
-  /**
-   * Gets the green RGB value (0-255) for RGB-capable devices.
-   * @deprecated Use green property directly if exposed, or access via getter
-   */
-  public get getGreen() {
-    return this._green;
-  }
-
-  /**
-   * Gets the color mode string for RGB-capable devices.
-   * @deprecated Use colorMode property directly if exposed, or access via getter
-   */
-  public get getColorMode() {
-    return this._colorMode;
-  }
-
-  /**
-   * Gets the color slider location for RGB-capable devices.
-   * @deprecated Use colorSliderLocation property directly if exposed, or access via getter
-   */
-  public get getColorSliderLocation() {
-    return this._colorSliderLocation;
-  }
-
-  /**
-   * Gets the light speed value for RGB-capable devices.
-   * @deprecated Use lightSpeed property directly if exposed, or access via getter
-   */
-  public get getLightSpeed() {
-    return this._lightSpeed;
-  }
-
-  /**
-   * Gets the red RGB value (0-255) for RGB-capable devices.
-   * @deprecated Use red property directly if exposed, or access via getter
-   */
-  public get getRed() {
-    return this._red;
-  }
-
   constructor(
     private readonly client: VeSync,
     public readonly name: string,
@@ -170,8 +122,15 @@ export default class VeSyncFan {
   }
 
   /**
+   * Stores the last non-zero target humidity to restore when device is turned back on.
+   * This preserves user preferences across power cycles.
+   */
+  private _lastTargetHumidity = 0;
+
+  /**
    * Sets the device power state (on/off).
    * When turning off, resets related state values to 0.
+   * When turning on, restores the last known target humidity from memory.
    *
    * @param power - true to turn on, false to turn off
    * @returns true if successful, false otherwise
@@ -199,11 +158,28 @@ export default class VeSyncFan {
     if (success) {
       this._isOn = power;
       if (!this._isOn) {
-        // When turning off, reset related state (but keep display state)
+        // When turning off, save current target and reset all state to match device behavior
+        if (this._targetHumidity > 0) {
+          this._lastTargetHumidity = this._targetHumidity;
+        }
         this._humidityLevel = 0;
         this._targetHumidity = 0;
         this._mistLevel = 0;
         this._warmLevel = 0;
+        this._warmEnabled = false;
+        this._brightnessLevel = 0;
+        this._lightOn = 'off';
+        this._displayOn = false;
+        // Note: mode is not reset as the device retains its last mode when powered back on
+      } else {
+        // When turning on, restore last known target from memory
+        // Background polling will sync with device's actual value within 30s
+        if (this._targetHumidity === 0 && this._lastTargetHumidity > 0) {
+          this._targetHumidity = this._lastTargetHumidity;
+        } else if (this._targetHumidity === 0) {
+          // Fallback default if no previous value exists
+          this._targetHumidity = 55;
+        }
       }
     } else {
       this.client.log.error('Failed to setPower due to unreachable device.');
@@ -511,9 +487,9 @@ export default class VeSyncFan {
 
   /**
    * Updates device state from the VeSync API.
-   * Implements a 5-second cache to prevent excessive API calls.
-   * This cache works in conjunction with background polling (10-second interval)
-   * to ensure fresh data while minimizing API load.
+   * Implements a 15-second cache to prevent excessive API calls.
+   * This cache works in conjunction with background polling (30-second interval)
+   * to ensure fresh data while minimizing API load and respecting quota limits.
    *
    * Thread-safe: Uses AsyncLock to prevent concurrent updates.
    *
@@ -522,9 +498,10 @@ export default class VeSyncFan {
   public async updateInfo(): Promise<void> {
     return this.lock.acquire('update-info', async () => {
       try {
-        // 5-second cache prevents excessive API calls
-        // Background polling (10s) ensures cache is refreshed regularly
-        if (Date.now() - this.lastCheck < 5 * 1000) {
+        // 15-second cache prevents excessive API calls
+        // Background polling (30s) ensures cache is refreshed regularly
+        // while respecting VeSync API quota limits
+        if (Date.now() - this.lastCheck < 15 * 1000) {
           return;
         }
 

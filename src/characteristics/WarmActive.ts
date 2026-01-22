@@ -43,6 +43,7 @@ const characteristic: {
     if (!boolValue) {
       // Turning off: set warm mist level to 0
       await this.device.changeWarmMistLevel(0);
+      this.updateAllCharacteristics();
     } else if (!this.device.warmEnabled && this.device.warmLevel === 0) {
       // Turning on from Off state: set to highest warmMistLevel value
       // This is because we can't determine the selected slider number from the WarmMistLevel characteristic.
@@ -52,6 +53,7 @@ const characteristic: {
       await this.device.changeWarmMistLevel(
         Number(this.device.deviceType.warmMistLevels),
       );
+      this.updateAllCharacteristics();
     }
   },
 };
