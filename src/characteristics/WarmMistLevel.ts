@@ -4,22 +4,15 @@ import {
   CharacteristicValue,
   Nullable,
 } from 'homebridge';
-import VeSyncFan from '../api/VeSyncFan';
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { debounceSet } from '../utils/debounce';
 
 /**
- * Calculates the warm mist level to display.
- * Returns 0 if device is off.
- */
-const calculateWarmMistLevel = (device: VeSyncFan) => {
-  const currentWarmLevel = device.warmLevel;
-  return device.isOn ? currentWarmLevel : 0;
-};
-
-/**
  * WarmMistLevel characteristic handler for the Warm Mist service.
  * Controls the warm mist level (0-3 typically, device-specific).
+ *
+ * HomeKit displays this as a percentage (0-100%), which we convert to/from
+ * device-specific levels (e.g., 0-3 for most models).
  *
  * Features:
  * - Returns 0 if device is off.
@@ -32,20 +25,30 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   /**
-   * Gets the current warm mist level.
+   * Gets the current warm mist level as a percentage (0-100).
+   * Converts from device level (0-3) to percentage.
    * Returns 0 if the device is off.
    * Uses cached state to ensure fast response times.
    */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     // Use cached state - background polling keeps this fresh
-    return calculateWarmMistLevel(this.device);
+    if (!this.device.isOn) {
+      return 0;
+    }
+    // Convert device level (0-3) to percentage (0-100)
+    const maxLevel = this.device.deviceType.warmMistLevels ?? 0;
+    if (maxLevel === 0) {
+      return 0;
+    }
+    return Math.round((this.device.warmLevel / maxLevel) * 100);
   },
 
   /**
-   * Sets the warm mist level with debouncing.
+   * Sets the warm mist level from a percentage (0-100) with debouncing.
    * Implements 300ms debounce to batch rapid slider changes from HomeKit.
    *
    * Logic:
+   * - Converts percentage to device level (0-3)
    * - Clamps value to device-specific range (0 to warmMistLevels)
    * - Only updates if value actually changed to avoid unnecessary API calls
    */
@@ -56,9 +59,14 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
+        const maxLevel = device.deviceType.warmMistLevels ?? 0;
+
+        // Convert percentage (0-100) to device level (0-3)
+        // Round to nearest level
+        const deviceLevel = Math.round((finalValue / 100) * maxLevel);
+
         // Clamp to valid range
-        const max = device.deviceType.warmMistLevels ?? 0;
-        const clamped = Math.max(0, Math.min(max, finalValue));
+        const clamped = Math.max(0, Math.min(maxLevel, deviceLevel));
 
         try {
           // Avoid no-op - only update if value actually changed

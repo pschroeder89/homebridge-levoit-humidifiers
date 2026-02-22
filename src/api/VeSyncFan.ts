@@ -1,7 +1,7 @@
 import AsyncLock from 'async-lock';
 import deviceTypes, {
-  DevicePrefix,
   DeviceType,
+  isLV600S,
   isNewFormatDevice,
 } from './deviceTypes';
 
@@ -242,7 +242,7 @@ export default class VeSyncFan {
    */
   public async changeMode(mode: Mode): Promise<boolean> {
     // LV600s models use "Humidity" mode instead of "Auto"
-    if (this.model.includes(DevicePrefix.LV600S) && mode == Mode.Auto) {
+    if (isLV600S(this.model) && mode == Mode.Auto) {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"

@@ -22,27 +22,31 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 1. Humidifier / Auto Mode
 
    - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
-   - Can also change Target Humidity in Sleep Mode, except on LV600 / Oasis.
-     - For LV600s and Oasis, the Humidifier slider will be set to 0% when Sleep Mode is on.
-   - For LV600s and Oasis, the Auto humidity range is 40-80%. All other models are 30-80%.
+   - Can also change Target Humidity in Sleep Mode, except on LV600S / Oasis.
+     - For LV600S and Oasis, the Humidifier slider will be set to 0% when Sleep Mode is on.
+   - For LV600S and Oasis, the Auto humidity range is 40-80%. All other models are 30-80%.
      - Selecting values outside the Auto range will set the Target Humidity to the lowest or highest number in the
        range.
+   - Setting Target Humidity to 0% turns the device off.
+   - When turning the device back on, the last Target Humidity value is restored.
 
 2. Mist Level
 
    - Sets humidifier to Manual mode unless model supports changing mist levels in Auto / Humidity mode, and sets Mist level.
-   - When set to Level 0, turns the device off.
+   - Displayed as a percentage (0-100%) in HomeKit, mapped to the device's native mist levels.
+   - When set to 0%, turns the device off.
 
 3. Warm Mist Level
 
    - Sets Warm Mist Level to the desired level.
+   - Displayed as a percentage (0-100%) in HomeKit, mapped to the device's native warm mist levels.
 
 4. Sleep Mode
 
-   - This switches the device between Sleep Mode (On) and Auto Mode (Off)
-   - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600s / Oasis.
-   - On LV600s / Oasis, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
-   - The LV600s / Oasis turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm
+   - This switches the device between Sleep Mode (On) and Auto Mode (Off).
+   - Sleep Mode Target Humidity is controlled by the Target Humidity slider, except on LV600S / Oasis.
+   - On LV600S / Oasis, Sleep Mode Target Humidity is set by VeSync at 50–60% and cannot be changed.
+   - The LV600S / Oasis turns off Warm Mist by default to keep the humidifier quiet. It can be turned back on with the Warm
      Mist slider.
 
 5. Night Light
@@ -54,7 +58,15 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
    - Toggles the display on/off
 
 7. Humidity Sensor
+
    - Sensor that displays current Humidity %
+
+### Behavior
+
+- **Turning off the humidifier** resets all controls (sleep mode, warm mist, display, night light) to off, matching the physical device behavior.
+- **State changes are pushed immediately** to HomeKit — no need to close and reopen the Home app.
+- **Service names** (Humidifier, Mist, Display, Sleep Mode, etc.) are set via `ConfiguredName`. If you rename a service in the Home app, your custom name is preserved across restarts.
+- **Authentication tokens** are validated proactively before API calls and automatically refreshed when expired, preventing devices from becoming unresponsive due to stale sessions.
 
 ### Details
 

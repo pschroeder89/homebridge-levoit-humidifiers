@@ -14,6 +14,9 @@ import { debounceSet } from '../utils/debounce';
  * MistLevel characteristic handler for the Mist service.
  * Controls the cool mist level (0-9 typically, device-specific).
  *
+ * HomeKit displays this as a percentage (0-100%), which we convert to/from
+ * device-specific levels (e.g., 0-9 for most models).
+ *
  * Features:
  * - Level 0 turns the device off
  * - Automatically switches to Manual mode when setting mist level (unless device supports changing in Auto)
@@ -25,21 +28,28 @@ const characteristic: {
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
   /**
-   * Gets the current mist level.
+   * Gets the current mist level as a percentage (0-100).
+   * Converts from device level (0-9) to percentage.
    * Returns 0 if the device is off.
    * Uses cached state to ensure fast response times.
    */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     // Use cached state - background polling keeps this fresh
-    return this.device.isOn ? this.device.mistLevel : 0;
+    if (!this.device.isOn) {
+      return 0;
+    }
+    // Convert device level (0-9) to percentage (0-100)
+    const maxLevel = this.device.deviceType.mistLevels;
+    return Math.round((this.device.mistLevel / maxLevel) * 100);
   },
 
   /**
-   * Sets the mist level with debouncing.
+   * Sets the mist level from a percentage (0-100) with debouncing.
    * Implements 300ms debounce to batch rapid slider changes from HomeKit.
    *
    * Logic:
-   * - Level 0 turns the device off
+   * - Percentage 0 turns the device off
+   * - Converts percentage to device level (0-9)
    * - Switches to Manual mode if needed (unless device supports changing mist in Auto mode)
    * - Only updates if the value actually changed
    */
@@ -50,9 +60,14 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
+        const maxLevel = device.deviceType.mistLevels;
+
+        // Convert percentage (0-100) to device level (0-9)
+        // Round to nearest level
+        const deviceLevel = Math.round((finalValue / 100) * maxLevel);
+
         // Clamp to valid range
-        const max = device.deviceType.mistLevels;
-        const clamped = Math.max(0, Math.min(max, finalValue));
+        const clamped = Math.max(0, Math.min(maxLevel, deviceLevel));
 
         try {
           // Level 0 turns device off

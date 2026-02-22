@@ -66,47 +66,28 @@ export default class VeSyncAccessory {
     return this.accessory.context.device;
   }
 
-  /**
-   * Gets the valid mist level values for the device.
-   * Returns an array containing the range of values from 0 to mistLevels.
-   * We add 1 to mistLevels to account for 0 as a potential level.
-   *
-   * @example The Classic300s has 9 mist levels, so this returns [0,1,2,3,4,5,6,7,8,9]
-   */
-  private get getMistValues() {
-    return [...new Array(this.device.deviceType.mistLevels + 1).keys()];
-  }
-
-  /**
-   * Gets the valid warm mist level values for the device.
-   * Returns an array containing the range of values from 0 to warmMistLevels.
-   * We add 1 to warmMistLevels to account for 0 as a potential level.
-   *
-   * @example The LV600s has 3 warm mist levels, so this returns [0,1,2,3]
-   */
-  private get getWarmMistValues() {
-    return [
-      ...new Array((this.device.deviceType.warmMistLevels ?? 0) + 1).keys(),
-    ];
-  }
-
   constructor(
     private readonly platform: Platform,
     private readonly accessory: VeSyncPlatformAccessory,
   ) {
-    const { manufacturer, model, mac } = this.device;
     const config = platform.config;
     const accessories = config.accessories ? config.accessories : {};
-    const mistAccessory =
-      accessories.mist !== false && accessories.cool_mist !== false;
-    const warmMistAccessory = accessories.warm_mist !== false;
-    const nightLightAccessory = accessories.night_light !== false;
-    const sleepModeAccessory = accessories.sleep_mode !== false;
-    const displayAccessory = accessories.display !== false;
-    const autoProAccessory = accessories.auto_pro !== false;
-    const humiditySensor = accessories.humidity_sensor !== false;
 
-    // Accessory info
+    this.setupAccessoryInfo();
+    this.humidifierService = this.setupHumidifierService();
+    this.mistService = this.setupMistService(accessories);
+    this.displayService = this.setupDisplayService(accessories);
+    this.humiditySensorService = this.setupHumiditySensorService(accessories);
+    this.warmMistService = this.setupWarmMistService(accessories);
+    this.sleepService = this.setupSleepService(accessories);
+    this.lightService = this.setupLightService(accessories);
+    this.autoProService = this.setupAutoProService(accessories);
+
+    this.startPolling();
+  }
+
+  private setupAccessoryInfo(): void {
+    const { manufacturer, model, mac } = this.device;
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(
@@ -115,307 +96,294 @@ export default class VeSyncAccessory {
       )
       .setCharacteristic(this.platform.Characteristic.Model, model)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, mac);
+  }
 
-    // Humidifier service
-    this.humidifierService =
-      this.accessory.getService(HumidifierName) ||
-      this.accessory.addService(
-        this.platform.Service.HumidifierDehumidifier,
+  private setupHumidifierService(): Service {
+    let service = this.accessory.getService(HumidifierName);
+    if (!service) {
+      service = new this.platform.Service.HumidifierDehumidifier(
         HumidifierName,
         HumidifierName,
       );
+      this.accessory.addService(service);
+    }
+    this.ensureConfiguredName(service, HumidifierName);
+    service.setPrimaryService(true);
 
-    this.humidifierService.setPrimaryService(true);
-
-    this.humidifierService
+    service
       .getCharacteristic(this.platform.Characteristic.Active)
       .onGet(Active.get.bind(this))
       .onSet(Active.set.bind(this));
 
-    this.humidifierService
+    service
       .getCharacteristic(
         this.platform.Characteristic.TargetHumidifierDehumidifierState,
       )
-      .setProps({
-        validValues: [1],
-      })
+      .setProps({ validValues: [1] })
       .onGet(TargetState.get.bind(this));
 
-    this.humidifierService
+    service
       .getCharacteristic(
         this.platform.Characteristic.CurrentHumidifierDehumidifierState,
       )
-      .setProps({
-        validValues: [1, 2],
-      })
+      .setProps({ validValues: [1, 2] })
       .onGet(CurrentState.get.bind(this));
 
-    this.humidifierService
+    service
       .getCharacteristic(
         this.platform.Characteristic.RelativeHumidityHumidifierThreshold,
       )
-      .setProps({
-        minStep: 1,
-        minValue: 0,
-        maxValue: 100,
-      })
+      .setProps({ minStep: 1, minValue: 0, maxValue: 100 })
       .onGet(TargetHumidity.get.bind(this))
       .onSet(TargetHumidity.set.bind(this));
 
-    this.humidifierService
+    service
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .onGet(Humidity.get.bind(this));
 
-    // Mist service
-    if (mistAccessory) {
-      this.mistService = this.accessory.getService(MistName);
-      if (!this.mistService) {
-        this.mistService = this.accessory.addService(
-          this.platform.Service.Fan,
-          MistName,
-          MistName,
-        );
-        this.mistService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          MistName,
-        );
-      }
+    return service;
+  }
 
-      this.mistService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(Active.get.bind(this))
-        .onSet(Active.set.bind(this));
+  /**
+   * Sets ConfiguredName on a service, using HAPStorage to track whether the user
+   * has customized it. Only sets the default name if no override exists in storage.
+   * Persists user renames via the change event.
+   */
+  private ensureConfiguredName(service: Service, name: string): void {
+    const key = `homebridge-levoit-humidifiers-configured-name-${name.replaceAll(' ', '_')}`;
+    service.addOptionalCharacteristic(
+      this.platform.Characteristic.ConfiguredName,
+    );
+    if (!this.platform.api.hap.HAPStorage.storage().getItemSync(key)) {
+      service.setCharacteristic(
+        this.platform.Characteristic.ConfiguredName,
+        name,
+      );
+    }
+    service
+      .getCharacteristic(this.platform.Characteristic.ConfiguredName)
+      .on('change', ({ newValue }) => {
+        this.platform.api.hap.HAPStorage.storage().setItemSync(key, newValue);
+      });
+  }
 
-      this.mistService
-        .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        .setProps({
-          minStep: 1,
-          minValue: 0,
-          maxValue: this.device.deviceType.mistLevels,
-          validValues: this.getMistValues,
-        })
-        .onGet(MistLevel.get.bind(this))
-        .onSet(MistLevel.set.bind(this));
-      this.humidifierService.addLinkedService(this.mistService);
-    } else {
-      this.mistService =
-        this.accessory.getService(MistName) ||
-        this.accessory.getService(CoolMistName);
-      if (this.mistService) {
-        this.platform.log.info(`Removing ${MistName} service.`);
-        this.accessory.removeService(this.mistService);
+  /**
+   * Gets or creates a service with ConfiguredName support.
+   * Returns undefined and removes the service if the accessory config disables it.
+   */
+  private getOrCreateService(
+    serviceType: typeof Service,
+    name: string,
+    enabled: boolean,
+    fallbackName?: string,
+  ): Service | undefined {
+    if (enabled) {
+      let service = this.accessory.getService(name);
+      if (!service) {
+        service = new serviceType(name, name);
+        this.accessory.addService(service);
       }
+      this.ensureConfiguredName(service, name);
+      return service;
     }
 
-    // Display Switch service
-    if (displayAccessory) {
-      this.displayService = this.accessory.getService(DisplayName);
-      if (!this.displayService) {
-        this.displayService = this.accessory.addService(
-          this.platform.Service.Switch,
-          DisplayName,
-          DisplayName,
-        );
-        this.displayService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          DisplayName,
-        );
-      }
+    const existing =
+      this.accessory.getService(name) ||
+      (fallbackName ? this.accessory.getService(fallbackName) : undefined);
+    if (existing) {
+      this.platform.log.info(`Removing ${name} service.`);
+      this.accessory.removeService(existing);
+    }
+    return undefined;
+  }
 
-      this.humidifierService.addLinkedService(this.displayService);
+  private setupMistService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      accessories.mist !== false && accessories.cool_mist !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Fan,
+      MistName,
+      enabled,
+      CoolMistName,
+    );
 
-      this.displayService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(DisplayState.get.bind(this))
-        .onSet(DisplayState.set.bind(this));
-    } else {
-      this.displayService = this.accessory.getService(DisplayName);
-      if (this.displayService) {
-        this.platform.log.info(`Removing ${DisplayName} service.`);
-        this.accessory.removeService(this.displayService);
-      }
+    if (!service) {
+      return undefined;
     }
 
-    // Humidity Sensor service
-    if (humiditySensor) {
-      this.humiditySensorService =
-        this.accessory.getService(HumiditySensorName);
-      if (!this.humiditySensorService) {
-        this.humiditySensorService = this.accessory.addService(
-          this.platform.Service.HumiditySensor,
-          HumiditySensorName,
-          HumiditySensorName,
-        );
-        this.humiditySensorService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          HumiditySensorName,
-        );
-      }
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(Active.get.bind(this))
+      .onSet(Active.set.bind(this));
 
-      this.humidifierService.addLinkedService(this.humiditySensorService);
+    service
+      .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .setProps({ minStep: 1, minValue: 0, maxValue: 100 })
+      .onGet(MistLevel.get.bind(this))
+      .onSet(MistLevel.set.bind(this));
 
-      this.humiditySensorService
-        .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-        .onGet(Humidity.get.bind(this));
-    } else {
-      this.humiditySensorService =
-        this.accessory.getService(HumiditySensorName);
-      if (this.humiditySensorService) {
-        this.platform.log.info(`Removing ${HumiditySensorName} service.`);
-        this.accessory.removeService(this.humiditySensorService);
-      }
+    this.humidifierService.addLinkedService(service);
+    return service;
+  }
+
+  private setupDisplayService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const service = this.getOrCreateService(
+      this.platform.Service.Switch,
+      DisplayName,
+      accessories.display !== false,
+    );
+
+    if (!service) {
+      return undefined;
     }
 
-    // Warm Mist service
-    if (this.device.deviceType.hasWarmMode && warmMistAccessory) {
-      this.warmMistService = this.accessory.getService(WarmMistName);
-      if (!this.warmMistService) {
-        this.warmMistService = this.accessory.addService(
-          this.platform.Service.Fan,
-          WarmMistName,
-          WarmMistName,
-        );
-        this.warmMistService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          WarmMistName,
-        );
-      }
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(DisplayState.get.bind(this))
+      .onSet(DisplayState.set.bind(this));
+    return service;
+  }
 
-      this.humidifierService.addLinkedService(this.warmMistService);
+  private setupHumiditySensorService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const service = this.getOrCreateService(
+      this.platform.Service.HumiditySensor,
+      HumiditySensorName,
+      accessories.humidity_sensor !== false,
+    );
 
-      this.warmMistService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(WarmActive.get.bind(this))
-        .onSet(WarmActive.set.bind(this));
-
-      this.warmMistService
-        .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        .setProps({
-          minStep: 1,
-          minValue: 0,
-          maxValue: this.device.deviceType.warmMistLevels,
-          validValues: this.getWarmMistValues,
-        })
-        .onGet(WarmMistLevel.get.bind(this))
-        .onSet(WarmMistLevel.set.bind(this));
-    } else {
-      this.warmMistService = this.accessory.getService(WarmMistName);
-      if (this.warmMistService) {
-        this.platform.log.info(`Removing ${WarmMistName} service.`);
-        this.accessory.removeService(this.warmMistService);
-      }
+    if (!service) {
+      return undefined;
     }
 
-    // Sleep Mode service
-    if (this.device.deviceType.hasSleepMode && sleepModeAccessory) {
-      this.sleepService = this.accessory.getService(SleepModeName);
-      if (!this.sleepService) {
-        this.sleepService = this.accessory.addService(
-          this.platform.Service.Switch,
-          SleepModeName,
-          SleepModeName,
-        );
-        this.sleepService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          SleepModeName,
-        );
-      }
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+      .onGet(Humidity.get.bind(this));
+    return service;
+  }
 
-      this.humidifierService.addLinkedService(this.sleepService);
+  private setupWarmMistService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      this.device.deviceType.hasWarmMode && accessories.warm_mist !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Fan,
+      WarmMistName,
+      enabled,
+    );
 
-      this.sleepService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(SleepState.get.bind(this))
-        .onSet(SleepState.set.bind(this));
-    } else {
-      this.sleepService = this.accessory.getService(SleepModeName);
-      if (this.sleepService) {
-        this.platform.log.info(`Removing ${SleepModeName} service.`);
-        this.accessory.removeService(this.sleepService);
-      }
+    if (!service) {
+      return undefined;
     }
 
-    // Night Light service
-    if (this.device.deviceType.hasLight && nightLightAccessory) {
-      this.lightService = this.accessory.getService(NightLightName);
-      if (!this.lightService) {
-        this.lightService = this.accessory.addService(
-          this.platform.Service.Lightbulb,
-          NightLightName,
-          NightLightName,
-        );
-        this.lightService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          NightLightName,
-        );
-      }
+    this.humidifierService.addLinkedService(service);
 
-      this.humidifierService.addLinkedService(this.lightService);
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(WarmActive.get.bind(this))
+      .onSet(WarmActive.set.bind(this));
 
-      this.lightService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(LightState.get.bind(this))
-        .onSet(LightState.set.bind(this));
+    service
+      .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .setProps({ minStep: 1, minValue: 0, maxValue: 100 })
+      .onGet(WarmMistLevel.get.bind(this))
+      .onSet(WarmMistLevel.set.bind(this));
 
-      let props: object;
-      if (this.device.deviceType.hasColorMode) {
-        props = {
-          minValue: 39,
-          maxValue: 100,
-        };
-      } else {
-        props = {
+    return service;
+  }
+
+  private setupSleepService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      this.device.deviceType.hasSleepMode && accessories.sleep_mode !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Switch,
+      SleepModeName,
+      enabled,
+    );
+
+    if (!service) {
+      return undefined;
+    }
+
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(SleepState.get.bind(this))
+      .onSet(SleepState.set.bind(this));
+    return service;
+  }
+
+  private setupLightService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      this.device.deviceType.hasLight && accessories.night_light !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Lightbulb,
+      NightLightName,
+      enabled,
+    );
+
+    if (!service) {
+      return undefined;
+    }
+
+    this.humidifierService.addLinkedService(service);
+
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(LightState.get.bind(this))
+      .onSet(LightState.set.bind(this));
+
+    const props = this.device.deviceType.hasColorMode
+      ? { minValue: 39, maxValue: 100 }
+      : {
           minStep: 25,
           minValue: 0,
           maxValue: 100,
           validValues: [0, 25, 50, 75, 100],
         };
-      }
 
-      this.lightService
-        .getCharacteristic(this.platform.Characteristic.Brightness)
-        .setProps(props)
-        .onGet(LightBrightness.get.bind(this))
-        .onSet(LightBrightness.set.bind(this));
-    } else {
-      this.lightService = this.accessory.getService(NightLightName);
-      if (this.lightService) {
-        this.platform.log.info(`Removing ${NightLightName} service.`);
-        this.accessory.removeService(this.lightService);
-      }
-    }
-    // AutoPro Switch service
-    if (this.device.deviceType.hasAutoProMode && autoProAccessory) {
-      this.autoProService = this.accessory.getService(AutoProModeName);
-      if (!this.autoProService) {
-        this.autoProService = this.accessory.addService(
-          this.platform.Service.Switch,
-          AutoProModeName,
-          AutoProModeName,
-        );
-        this.autoProService.setCharacteristic(
-          this.platform.Characteristic.Name,
-          AutoProModeName,
-        );
-      }
+    service
+      .getCharacteristic(this.platform.Characteristic.Brightness)
+      .setProps(props)
+      .onGet(LightBrightness.get.bind(this))
+      .onSet(LightBrightness.set.bind(this));
 
-      this.humidifierService.addLinkedService(this.autoProService);
+    return service;
+  }
 
-      this.autoProService
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onGet(AutoProState.get.bind(this))
-        .onSet(AutoProState.set.bind(this));
-    } else {
-      this.autoProService = this.accessory.getService(AutoProModeName);
-      if (this.autoProService) {
-        this.platform.log.info(`Removing ${AutoProModeName} service.`);
-        this.accessory.removeService(this.autoProService);
-      }
+  private setupAutoProService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      !!this.device.deviceType.hasAutoProMode && accessories.auto_pro !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Switch,
+      AutoProModeName,
+      enabled,
+    );
+
+    if (!service) {
+      return undefined;
     }
 
-    // Start background polling to keep device state fresh
-    // This prevents slow read handler warnings by ensuring data is cached
-    this.startPolling();
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(AutoProState.get.bind(this))
+      .onSet(AutoProState.set.bind(this));
+    return service;
   }
 
   /**
@@ -424,7 +392,6 @@ export default class VeSyncAccessory {
    * HomeKit read requests, which prevents "slow to respond" warnings.
    */
   private startPolling(): void {
-    // Initial update to populate cache
     this.device.updateInfo().catch((err) => {
       this.platform.log.debug(
         `[${this.device.name}] Initial device update failed:`,
@@ -432,7 +399,6 @@ export default class VeSyncAccessory {
       );
     });
 
-    // Set up periodic polling
     this.pollingInterval = setInterval(() => {
       this.device.updateInfo().catch((err) => {
         this.platform.log.debug(
@@ -446,7 +412,6 @@ export default class VeSyncAccessory {
   /**
    * Stops background polling.
    * Should be called when the accessory is removed to clean up resources.
-   * Note: Currently not automatically called, but available for future cleanup needs.
    */
   public stopPolling(): void {
     if (this.pollingInterval) {
@@ -458,12 +423,15 @@ export default class VeSyncAccessory {
   /**
    * Updates all HomeKit characteristics to match current device state.
    * Call this after any device command to immediately reflect changes in HomeKit.
-   * This ensures the Home app shows updated values without requiring a refresh.
    */
   public updateAllCharacteristics(): void {
     const { device } = this;
 
-    // Update humidifier service characteristics
+    this.updateHumidifierCharacteristics(device);
+    this.updateOptionalServiceCharacteristics(device);
+  }
+
+  private updateHumidifierCharacteristics(device: VeSyncFan): void {
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.Active)
       .updateValue(device.isOn ? 1 : 0);
@@ -489,35 +457,41 @@ export default class VeSyncAccessory {
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .updateValue(device.humidityLevel);
+  }
 
-    // Update humidity sensor if it exists
+  private updateOptionalServiceCharacteristics(device: VeSyncFan): void {
     if (this.humiditySensorService) {
       this.humiditySensorService
         .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
         .updateValue(device.humidityLevel);
     }
 
-    // Update mist service if it exists
     if (this.mistService) {
       this.mistService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.isOn);
+      const mistPct = device.isOn
+        ? Math.round((device.mistLevel / device.deviceType.mistLevels) * 100)
+        : 0;
       this.mistService
         .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        .updateValue(device.mistLevel);
+        .updateValue(mistPct);
     }
 
-    // Update warm mist service if it exists
     if (this.warmMistService) {
       this.warmMistService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.warmEnabled);
+      const maxWarm = device.deviceType.warmMistLevels ?? 0;
+      const warmPct =
+        device.isOn && maxWarm > 0
+          ? Math.round((device.warmLevel / maxWarm) * 100)
+          : 0;
       this.warmMistService
         .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        .updateValue(device.warmLevel);
+        .updateValue(warmPct);
     }
 
-    // Update night light service if it exists
     if (this.lightService) {
       this.lightService
         .getCharacteristic(this.platform.Characteristic.On)
@@ -527,21 +501,18 @@ export default class VeSyncAccessory {
         .updateValue(device.brightnessLevel);
     }
 
-    // Update display service if it exists
     if (this.displayService) {
       this.displayService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.isOn && device.displayOn);
     }
 
-    // Update sleep mode service if it exists
     if (this.sleepService) {
       this.sleepService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.isOn && device.mode === 'sleep');
     }
 
-    // Update AutoPro mode service if it exists
     if (this.autoProService) {
       this.autoProService
         .getCharacteristic(this.platform.Characteristic.On)

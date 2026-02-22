@@ -7,7 +7,7 @@ import {
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { Mode } from '../api/VeSyncFan';
-import { DevicePrefix } from '../api/deviceTypes';
+import { DevicePrefix, isLV600S } from '../api/deviceTypes';
 import { debounceSet } from '../utils/debounce';
 
 /**
@@ -53,13 +53,16 @@ const characteristic: {
       humidity,
       async (finalValue) => {
         try {
-          // Turn device on if it's currently off
+          if (finalValue <= 0) {
+            await device.setPower(false);
+            this.updateAllCharacteristics();
+            return;
+          }
+
           if (!device.isOn) {
             await device.setPower(true);
           }
 
-          // Clamp value to device-specific range
-          // LV600S/Oasis: 40-80%, Others: 30-80%
           let h = finalValue;
           if (h < device.deviceType.minHumidityLevel)
             h = device.deviceType.minHumidityLevel;
@@ -69,7 +72,7 @@ const characteristic: {
           // Determine correct auto-like mode based on device type
           // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
           let autoLikeMode: Mode;
-          if (device.model.startsWith(DevicePrefix.LV600S)) {
+          if (isLV600S(device.model)) {
             autoLikeMode = Mode.Humidity;
           } else if (device.deviceType.hasAutoProMode) {
             autoLikeMode = Mode.AutoPro;
@@ -79,7 +82,7 @@ const characteristic: {
 
           // LV600S / Oasis cannot change target humidity in Sleep mode
           const canSetTargetHumidityInSleep =
-            !device.model.startsWith(DevicePrefix.LV600S) &&
+            !isLV600S(device.model) &&
             !device.model.startsWith(DevicePrefix.OASIS) &&
             !device.model.startsWith(DevicePrefix.OASIS_1000S);
 
