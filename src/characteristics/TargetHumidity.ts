@@ -9,6 +9,7 @@ import { AccessoryThisType } from '../VeSyncAccessory';
 import { Mode } from '../api/VeSyncFan';
 import { DevicePrefix, isLV600S } from '../api/deviceTypes';
 import { debounceSet } from '../utils/debounce';
+import { getErrorMessage } from '../utils/errorMessage';
 
 /**
  * TargetHumidity characteristic handler for the Humidifier service.
@@ -101,9 +102,8 @@ const characteristic: {
           // Update all HomeKit characteristics immediately
           this.updateAllCharacteristics();
         } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
           this.platform.log.debug(
-            `[HUMIDITY] debounced set failed: ${message}`,
+            `[HUMIDITY] debounced set failed: ${getErrorMessage(err)}`,
           );
         }
       },

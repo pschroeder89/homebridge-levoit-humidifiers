@@ -7,6 +7,7 @@ import {
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { debounceSet } from '../utils/debounce';
+import { getErrorMessage } from '../utils/errorMessage';
 
 /**
  * LightBrightness characteristic handler for the Night Light service.
@@ -75,9 +76,8 @@ const characteristic: {
           // Update all HomeKit characteristics immediately
           this.updateAllCharacteristics();
         } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
           this.platform.log.debug(
-            `[LIGHT] debounced brightness set failed: ${message}`,
+            `[LIGHT] debounced brightness set failed: ${getErrorMessage(err)}`,
           );
         }
       },

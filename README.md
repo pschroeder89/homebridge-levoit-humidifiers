@@ -6,16 +6,16 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm |
-| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- |
-| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
-| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
-| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
-| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
-| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
-| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   |
-| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   |
-| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   |
+| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm | Temp | Filter |
+| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ---- | ------ |
+| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅   | ✅     |
+| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌   | ❌     |
+| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
+| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
+| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
+| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌   | ❌     |
+| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌   | ❌     |
+| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌   | ❌     |
 
 ### Features (if supported by model)
 
@@ -61,10 +61,24 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
    - Sensor that displays current Humidity %
 
+8. Water Level
+
+   - Shows 0% when the water tank is empty or lifted, 100% otherwise.
+
+9. Temperature Sensor (Superior 6000S)
+
+   - Exposes the built-in temperature sensor as a separate HomeKit sensor.
+
+10. Filter Maintenance (Superior 6000S)
+
+    - Shows filter life remaining as a percentage.
+    - Alerts when filter life drops below 10%.
+
 ### Behavior
 
 - **Turning off the humidifier** resets all controls (sleep mode, warm mist, display, night light) to off, matching the physical device behavior.
 - **State changes are pushed immediately** to HomeKit — no need to close and reopen the Home app.
+- **Smart status display**: In Auto/Sleep modes, HomeKit shows "Raising to X%" while actively humidifying and "Set to X%" once the target is reached. Manual mode always shows "Raising to X%".
 - **Service names** (Humidifier, Mist, Display, Sleep Mode, etc.) are set via `ConfiguredName`. If you rename a service in the Home app, your custom name is preserved across restarts.
 - **Authentication tokens** are validated proactively before API calls and automatically refreshed when expired, preventing devices from becoming unresponsive due to stale sessions.
 
@@ -119,6 +133,11 @@ Via config.json:
         "auto_pro": false,
         "humidity_sensor": true
       },
+      "exclude": {
+        "name": ["Bedroom Humidifier"],
+        "model": ["Classic200S"],
+        "id": ["device-uuid-here"]
+      },
       "options": {
         "enableDebugMode": false,
         "showOffWhenDisconnected": false
@@ -127,6 +146,14 @@ Via config.json:
   ]
 }
 ```
+
+### Excluding Devices
+
+You can exclude specific devices from being added to HomeKit using the `exclude` section. All fields are optional arrays:
+
+- `name` — Exact device names to exclude (as shown in the VeSync app)
+- `model` — Model strings to exclude (e.g. `LUH-A602S`, `Classic300S`). Matches any device whose model contains the string.
+- `id` — Device IDs (UUID or CID) to exclude
 
 ### Note to Seasonal Humidifier Users:
 

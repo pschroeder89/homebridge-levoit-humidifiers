@@ -1,5 +1,7 @@
 import { CharacteristicValue } from 'homebridge';
 
+import { getErrorMessage } from './errorMessage';
+
 /**
  * Generic debounce utility for characteristic set handlers.
  * Prevents rapid API calls while users drag sliders in HomeKit.
@@ -71,9 +73,8 @@ export function debounceSet(
     } catch (err) {
       // Errors should be handled by the callback, but we catch here to prevent unhandled rejections
       // Log error if logger is provided, otherwise silently catch (callbacks handle their own errors)
-      const message = err instanceof Error ? err.message : String(err);
       if (logger) {
-        logger(`[DEBOUNCE] Callback failed for ${uuid}: ${message}`);
+        logger(`[DEBOUNCE] Callback failed for ${uuid}: ${getErrorMessage(err)}`);
       }
     }
   }, DEBOUNCE_DELAY_MS);

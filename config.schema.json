@@ -70,6 +70,31 @@
           }
         }
       },
+      "exclude": {
+        "type": "object",
+        "title": "Device Exclusions",
+        "description": "Exclude specific devices from being added to HomeKit.",
+        "properties": {
+          "name": {
+            "title": "Exclude by Name",
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Exact device names to exclude (as shown in the VeSync app)"
+          },
+          "model": {
+            "title": "Exclude by Model",
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Model strings to exclude (e.g. LUH-A602S, Classic300S). Matches any device whose model contains the string."
+          },
+          "id": {
+            "title": "Exclude by ID",
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Device IDs (UUID or CID) to exclude"
+          }
+        }
+      },
       "options": {
         "type": "object",
         "properties": {

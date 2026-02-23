@@ -11,12 +11,12 @@ export enum DevicePrefix {
   O601S = 'LUH-O601S-',
 }
 
-export const LV600S_PREFIXES = [
+const LV600S_PREFIXES = [
   DevicePrefix.LV600S_V1,
   DevicePrefix.LV600S_V2,
 ] as const;
 
-export const NEW_FORMAT_PREFIXES = [
+const NEW_FORMAT_PREFIXES = [
   DevicePrefix.OASIS_1000S,
   DevicePrefix.LEH_S601S,
   DevicePrefix.LV600S_V2,
@@ -30,7 +30,7 @@ const matchesAnyPrefix = (
 export const isLV600S = (model: string): boolean =>
   matchesAnyPrefix(model, LV600S_PREFIXES);
 
-export const DeviceName = {
+const DeviceName = {
   Classic300S: 'Classic300S',
   Classic300S_US: `${DevicePrefix.Classic300S}WUSB`,
   Classic300S_AUS: `${DevicePrefix.Classic300S}AUSW`,
@@ -60,7 +60,7 @@ export const DeviceName = {
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
 } as const;
 
-export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
+type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
 
 export const isNewFormatDevice = (model: string): boolean =>
   matchesAnyPrefix(model, NEW_FORMAT_PREFIXES);
@@ -77,6 +77,8 @@ export interface DeviceType {
   minHumidityLevel: number;
   maxHumidityLevel: number;
   hasAutoProMode?: boolean;
+  hasTemperature?: boolean;
+  hasFilter?: boolean;
 }
 
 // All supported models, matched by either an exact model name or a stable device prefix.
@@ -183,6 +185,8 @@ const deviceTypes: DeviceType[] = [
     hasColorMode: false,
     hasSleepMode: true,
     hasWarmMode: false,
+    hasTemperature: true,
+    hasFilter: true,
     minHumidityLevel: 30,
     maxHumidityLevel: 80,
   },
@@ -196,6 +200,8 @@ const deviceTypes: DeviceType[] = [
     hasColorMode: false,
     hasSleepMode: true,
     hasWarmMode: false,
+    hasTemperature: true,
+    hasFilter: true,
     minHumidityLevel: 40,
     maxHumidityLevel: 80,
   },

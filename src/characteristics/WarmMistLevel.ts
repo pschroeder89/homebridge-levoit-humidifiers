@@ -6,6 +6,8 @@ import {
 } from 'homebridge';
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { debounceSet } from '../utils/debounce';
+import { getErrorMessage } from '../utils/errorMessage';
+import { levelToPercent, percentToLevel } from '../utils/levelPercent';
 
 /**
  * WarmMistLevel characteristic handler for the Warm Mist service.
@@ -35,12 +37,10 @@ const characteristic: {
     if (!this.device.isOn) {
       return 0;
     }
-    // Convert device level (0-3) to percentage (0-100)
-    const maxLevel = this.device.deviceType.warmMistLevels ?? 0;
-    if (maxLevel === 0) {
-      return 0;
-    }
-    return Math.round((this.device.warmLevel / maxLevel) * 100);
+    return levelToPercent(
+      this.device.warmLevel,
+      this.device.deviceType.warmMistLevels ?? 0,
+    );
   },
 
   /**
@@ -59,14 +59,10 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
-        const maxLevel = device.deviceType.warmMistLevels ?? 0;
-
-        // Convert percentage (0-100) to device level (0-3)
-        // Round to nearest level
-        const deviceLevel = Math.round((finalValue / 100) * maxLevel);
-
-        // Clamp to valid range
-        const clamped = Math.max(0, Math.min(maxLevel, deviceLevel));
+        const clamped = percentToLevel(
+          finalValue,
+          device.deviceType.warmMistLevels ?? 0,
+        );
 
         try {
           // Avoid no-op - only update if value actually changed
@@ -77,8 +73,9 @@ const characteristic: {
           // Update all HomeKit characteristics immediately
           this.updateAllCharacteristics();
         } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          this.platform.log.debug(`[WARM] debounced set failed: ${message}`);
+          this.platform.log.debug(
+            `[WARM] debounced set failed: ${getErrorMessage(err)}`,
+          );
         }
       },
       (message) => this.platform.log.debug(message),

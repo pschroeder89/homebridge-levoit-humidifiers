@@ -9,6 +9,8 @@ import { AccessoryThisType } from '../VeSyncAccessory';
 import { Mode } from '../api/VeSyncFan';
 import { DevicePrefix } from '../api/deviceTypes';
 import { debounceSet } from '../utils/debounce';
+import { getErrorMessage } from '../utils/errorMessage';
+import { levelToPercent, percentToLevel } from '../utils/levelPercent';
 
 /**
  * MistLevel characteristic handler for the Mist service.
@@ -38,9 +40,7 @@ const characteristic: {
     if (!this.device.isOn) {
       return 0;
     }
-    // Convert device level (0-9) to percentage (0-100)
-    const maxLevel = this.device.deviceType.mistLevels;
-    return Math.round((this.device.mistLevel / maxLevel) * 100);
+    return levelToPercent(this.device.mistLevel, this.device.deviceType.mistLevels);
   },
 
   /**
@@ -60,14 +60,7 @@ const characteristic: {
       device.uuid,
       value,
       async (finalValue) => {
-        const maxLevel = device.deviceType.mistLevels;
-
-        // Convert percentage (0-100) to device level (0-9)
-        // Round to nearest level
-        const deviceLevel = Math.round((finalValue / 100) * maxLevel);
-
-        // Clamp to valid range
-        const clamped = Math.max(0, Math.min(maxLevel, deviceLevel));
+        const clamped = percentToLevel(finalValue, device.deviceType.mistLevels);
 
         try {
           // Level 0 turns device off
@@ -96,8 +89,9 @@ const characteristic: {
           this.updateAllCharacteristics();
         } catch (err) {
           // Don't crash the plugin on timer errors; log for debugging
-          const message = err instanceof Error ? err.message : String(err);
-          this.platform.log.debug(`[MIST] debounced set failed: ${message}`);
+          this.platform.log.debug(
+            `[MIST] debounced set failed: ${getErrorMessage(err)}`,
+          );
         }
       },
       (message) => this.platform.log.debug(message),

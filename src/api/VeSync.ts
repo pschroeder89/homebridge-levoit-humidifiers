@@ -24,7 +24,6 @@ export enum BypassMethod {
   MIST_LEVEL = 'setVirtualLevel',
   LEVEL = 'setLevel',
   LIGHT_STATUS = 'setLightStatus',
-  DRYING_MODE = 'setDryingMode',
 }
 
 // Known API hosts
@@ -40,7 +39,7 @@ const DEVICE_OFFLINE_MSG = 'device offline';
 /**
  * Standard error message for unreachable devices.
  */
-const DEVICE_UNREACHABLE_ERROR =
+export const DEVICE_UNREACHABLE_ERROR =
   'Device was unreachable. Ensure it is plugged in and connected to WiFi.';
 
 /**
@@ -193,6 +192,10 @@ interface DeviceResult {
   warm_level?: number;
   warm_enabled?: boolean;
   night_light_brightness?: number;
+  water_lacks?: boolean;
+  water_tank_lifted?: boolean;
+  temperature?: number;
+  filter_life?: number;
   rgbNightLight?: {
     brightness?: number;
     action?: string;

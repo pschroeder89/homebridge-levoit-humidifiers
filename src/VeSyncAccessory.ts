@@ -1,5 +1,8 @@
 import { Service } from 'homebridge';
 
+import { getErrorMessage } from './utils/errorMessage';
+import { levelToPercent } from './utils/levelPercent';
+import { Mode } from './api/VeSyncFan';
 import Platform, { VeSyncPlatformAccessory } from './platform';
 import CurrentState from './characteristics/CurrentState';
 import Humidity from './characteristics/Humidity';
@@ -25,6 +28,8 @@ const NightLightName = 'Night Light';
 const SleepModeName = 'Sleep Mode';
 const DisplayName = 'Display';
 const AutoProModeName = 'AutoPro Mode';
+const TemperatureSensorName = 'Temperature';
+const FilterName = 'Filter';
 
 export type AccessoryThisType = ThisType<{
   humidifierService: Service;
@@ -48,6 +53,8 @@ export default class VeSyncAccessory {
   private readonly mistService: Service | undefined;
   private readonly warmMistService: Service | undefined;
   private readonly autoProService: Service | undefined;
+  private readonly temperatureService: Service | undefined;
+  private readonly filterService: Service | undefined;
 
   /**
    * Background polling interval to keep device state fresh.
@@ -58,17 +65,13 @@ export default class VeSyncAccessory {
   private pollingInterval: NodeJS.Timeout | null = null;
   private readonly POLLING_INTERVAL_MS = 30000; // 30 seconds
 
-  public get UUID() {
-    return this.device.uuid.toString();
-  }
-
   private get device() {
     return this.accessory.context.device;
   }
 
   constructor(
     private readonly platform: Platform,
-    private readonly accessory: VeSyncPlatformAccessory,
+    public readonly accessory: VeSyncPlatformAccessory,
   ) {
     const config = platform.config;
     const accessories = config.accessories ? config.accessories : {};
@@ -82,6 +85,8 @@ export default class VeSyncAccessory {
     this.sleepService = this.setupSleepService(accessories);
     this.lightService = this.setupLightService(accessories);
     this.autoProService = this.setupAutoProService(accessories);
+    this.temperatureService = this.setupTemperatureService();
+    this.filterService = this.setupFilterService();
 
     this.startPolling();
   }
@@ -140,6 +145,12 @@ export default class VeSyncAccessory {
     service
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .onGet(Humidity.get.bind(this));
+
+    if (!service.testCharacteristic(this.platform.Characteristic.WaterLevel)) {
+      service.addOptionalCharacteristic(
+        this.platform.Characteristic.WaterLevel,
+      );
+    }
 
     return service;
   }
@@ -386,6 +397,37 @@ export default class VeSyncAccessory {
     return service;
   }
 
+  private setupTemperatureService(): Service | undefined {
+    const enabled = !!this.device.deviceType.hasTemperature;
+    const service = this.getOrCreateService(
+      this.platform.Service.TemperatureSensor,
+      TemperatureSensorName,
+      enabled,
+    );
+    if (!service) {
+      return undefined;
+    }
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+      .setProps({ minValue: -50, maxValue: 100, minStep: 0.1 });
+    return service;
+  }
+
+  private setupFilterService(): Service | undefined {
+    const enabled = !!this.device.deviceType.hasFilter;
+    const service = this.getOrCreateService(
+      this.platform.Service.FilterMaintenance,
+      FilterName,
+      enabled,
+    );
+    if (!service) {
+      return undefined;
+    }
+    this.humidifierService.addLinkedService(service);
+    return service;
+  }
+
   /**
    * Starts background polling to periodically update device state.
    * This ensures characteristics always have fresh data without blocking
@@ -395,7 +437,7 @@ export default class VeSyncAccessory {
     this.device.updateInfo().catch((err) => {
       this.platform.log.debug(
         `[${this.device.name}] Initial device update failed:`,
-        err instanceof Error ? err.message : String(err),
+        getErrorMessage(err),
       );
     });
 
@@ -403,7 +445,7 @@ export default class VeSyncAccessory {
       this.device.updateInfo().catch((err) => {
         this.platform.log.debug(
           `[${this.device.name}] Background polling update failed:`,
-          err instanceof Error ? err.message : String(err),
+          getErrorMessage(err),
         );
       });
     }, this.POLLING_INTERVAL_MS);
@@ -432,21 +474,28 @@ export default class VeSyncAccessory {
   }
 
   private updateHumidifierCharacteristics(device: VeSyncFan): void {
+    const { HUMIDIFYING, IDLE } =
+      this.platform.Characteristic.CurrentHumidifierDehumidifierState;
+
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.Active)
       .updateValue(device.isOn ? 1 : 0);
+
+    let currentState = IDLE;
+    if (device.isOn && device.mode !== Mode.Manual) {
+      currentState =
+        device.targetReached || device.humidityLevel >= device.targetHumidity
+          ? IDLE
+          : HUMIDIFYING;
+    } else if (device.isOn) {
+      currentState = HUMIDIFYING;
+    }
 
     this.humidifierService
       .getCharacteristic(
         this.platform.Characteristic.CurrentHumidifierDehumidifierState,
       )
-      .updateValue(
-        device.isOn
-          ? this.platform.Characteristic.CurrentHumidifierDehumidifierState
-              .HUMIDIFYING
-          : this.platform.Characteristic.CurrentHumidifierDehumidifierState
-              .IDLE,
-      );
+      .updateValue(currentState);
 
     this.humidifierService
       .getCharacteristic(
@@ -457,6 +506,10 @@ export default class VeSyncAccessory {
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .updateValue(device.humidityLevel);
+
+    this.humidifierService
+      .getCharacteristic(this.platform.Characteristic.WaterLevel)
+      .updateValue(device.waterLacks || device.waterTankLifted ? 0 : 100);
   }
 
   private updateOptionalServiceCharacteristics(device: VeSyncFan): void {
@@ -471,7 +524,7 @@ export default class VeSyncAccessory {
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.isOn);
       const mistPct = device.isOn
-        ? Math.round((device.mistLevel / device.deviceType.mistLevels) * 100)
+        ? levelToPercent(device.mistLevel, device.deviceType.mistLevels)
         : 0;
       this.mistService
         .getCharacteristic(this.platform.Characteristic.RotationSpeed)
@@ -482,11 +535,12 @@ export default class VeSyncAccessory {
       this.warmMistService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.warmEnabled);
-      const maxWarm = device.deviceType.warmMistLevels ?? 0;
-      const warmPct =
-        device.isOn && maxWarm > 0
-          ? Math.round((device.warmLevel / maxWarm) * 100)
-          : 0;
+      const warmPct = device.isOn
+        ? levelToPercent(
+            device.warmLevel,
+            device.deviceType.warmMistLevels ?? 0,
+          )
+        : 0;
       this.warmMistService
         .getCharacteristic(this.platform.Characteristic.RotationSpeed)
         .updateValue(warmPct);
@@ -510,13 +564,28 @@ export default class VeSyncAccessory {
     if (this.sleepService) {
       this.sleepService
         .getCharacteristic(this.platform.Characteristic.On)
-        .updateValue(device.isOn && device.mode === 'sleep');
+        .updateValue(device.isOn && device.mode === Mode.Sleep);
     }
 
     if (this.autoProService) {
       this.autoProService
         .getCharacteristic(this.platform.Characteristic.On)
-        .updateValue(device.isOn && device.mode === 'autoPro');
+        .updateValue(device.isOn && device.mode === Mode.AutoPro);
+    }
+
+    if (this.temperatureService) {
+      this.temperatureService
+        .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+        .updateValue(device.temperature);
+    }
+
+    if (this.filterService) {
+      this.filterService
+        .getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
+        .updateValue(device.filterLife);
+      this.filterService
+        .getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
+        .updateValue(device.filterLife < 10 ? 1 : 0);
     }
   }
 }

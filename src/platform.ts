@@ -11,6 +11,7 @@ import {
 import * as path from 'node:path';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
+import { getErrorMessage } from './utils/errorMessage';
 import VeSyncAccessory from './VeSyncAccessory';
 import VeSyncFan from './api/VeSyncFan';
 import DebugMode from './debugMode';
@@ -132,8 +133,14 @@ export default class Platform implements DynamicPlatformPlugin {
 
       this.log.info('Discovering devices...');
 
-      // Fetch all devices from VeSync and load them as accessories
-      const devices = await this.client.getDevices();
+      // Fetch all devices from VeSync, apply exclusions, and load as accessories
+      const allDevices = await this.client.getDevices();
+      const devices = allDevices.filter((d) => !this.isDeviceExcluded(d));
+      if (allDevices.length !== devices.length) {
+        this.log.info(
+          `Excluded ${allDevices.length - devices.length} device(s) based on config.`,
+        );
+      }
       await Promise.all(devices.map(this.loadDevice.bind(this)));
 
       // Track which device UUIDs were successfully loaded
@@ -142,8 +149,10 @@ export default class Platform implements DynamicPlatformPlugin {
       // Remove accessories for devices that no longer exist
       this.checkOldDevices(loadedDeviceUUIDs);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.log.error('Unexpected error during device discovery:', message);
+      this.log.error(
+        'Unexpected error during device discovery:',
+        getErrorMessage(err),
+      );
     }
   }
 
@@ -201,12 +210,32 @@ export default class Platform implements DynamicPlatformPlugin {
         accessory,
       ]);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
       this.log.error(
-        `Error for device: ${device.name}:${device.uuid} | ${message}`,
+        `Error for device: ${device.name}:${device.uuid} | ${getErrorMessage(error)}`,
       );
       return null;
     }
+  }
+
+  private isDeviceExcluded(device: VeSyncFan): boolean {
+    const exclude = this.config.exclude;
+    if (!exclude) {
+      return false;
+    }
+    const names: string[] = exclude.name ?? [];
+    const models: string[] = exclude.model ?? [];
+    const ids: string[] = exclude.id ?? [];
+
+    if (names.includes(device.name)) {
+      return true;
+    }
+    if (models.some((m: string) => device.model.includes(m))) {
+      return true;
+    }
+    if (ids.includes(device.uuid) || ids.includes(device.cid)) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -226,12 +255,22 @@ export default class Platform implements DynamicPlatformPlugin {
 
       if (!exists) {
         this.log.info('Removing accessory:', accessory.displayName);
+        const registered = this.registeredDevices.find(
+          (d) => d.accessory.UUID === accessory.UUID,
+        );
+        registered?.stopPolling();
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
           accessory,
         ]);
-        const index = this.cachedAccessories.indexOf(accessory);
-        if (index > -1) {
-          this.cachedAccessories.splice(index, 1);
+        const cachedIdx = this.cachedAccessories.indexOf(accessory);
+        if (cachedIdx > -1) {
+          this.cachedAccessories.splice(cachedIdx, 1);
+        }
+        if (registered) {
+          const regIdx = this.registeredDevices.indexOf(registered);
+          if (regIdx > -1) {
+            this.registeredDevices.splice(regIdx, 1);
+          }
         }
       }
     });

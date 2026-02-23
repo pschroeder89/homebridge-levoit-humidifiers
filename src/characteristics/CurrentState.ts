@@ -11,37 +11,36 @@ import { Mode } from '../api/VeSyncFan';
  * CurrentState characteristic handler for the Humidifier service.
  * Indicates whether the humidifier is currently humidifying or idle.
  *
- * Returns:
- * - IDLE: Device is off, target reached, or in Manual mode
- * - HUMIDIFYING: Device is on and actively humidifying (in Auto/Humidity/Sleep mode)
+ * In Auto/Humidity/Sleep modes, compares current vs target humidity to determine
+ * HUMIDIFYING (actively misting) vs IDLE (target reached). In Manual mode, always
+ * reports HUMIDIFYING while the device is on.
  *
  * Note: Uses cached device state from background polling to avoid slow read warnings.
  */
 const characteristic: {
   get: CharacteristicGetHandler;
 } & AccessoryThisType = {
-  /**
-   * Gets the current humidifier state (IDLE or HUMIDIFYING).
-   * Uses cached state to ensure fast response times.
-   */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
-    // Use cached state - background polling keeps this fresh
     const { HUMIDIFYING, IDLE } =
       this.platform.Characteristic.CurrentHumidifierDehumidifierState;
 
-    // Device is idle if:
-    // - Target humidity has been reached
-    // - Device is off
-    // - Device is in Manual mode
-    if (
-      this.device.targetReached ||
-      !this.device.isOn ||
-      this.device.mode == Mode.Manual
-    ) {
+    if (!this.device.isOn) {
       return IDLE;
-    } else {
+    }
+
+    if (this.device.mode === Mode.Manual) {
       return HUMIDIFYING;
     }
+
+    // In auto-like modes, check if target has been reached
+    if (
+      this.device.targetReached ||
+      this.device.humidityLevel >= this.device.targetHumidity
+    ) {
+      return IDLE;
+    }
+
+    return HUMIDIFYING;
   },
 };
 

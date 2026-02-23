@@ -4,8 +4,9 @@ import deviceTypes, {
   isLV600S,
   isNewFormatDevice,
 } from './deviceTypes';
+import { getErrorMessage } from '../utils/errorMessage';
 
-import VeSync, { BypassMethod } from './VeSync';
+import VeSync, { BypassMethod, DEVICE_UNREACHABLE_ERROR } from './VeSync';
 
 export enum Mode {
   Manual = 'manual',
@@ -30,6 +31,10 @@ export default class VeSyncFan {
   private lastCheck = 0;
 
   private _displayOn = true;
+  private _waterLacks = false;
+  private _waterTankLifted = false;
+  private _temperature = 0;
+  private _filterLife = 100;
 
   public readonly manufacturer = 'Levoit';
 
@@ -90,6 +95,22 @@ export default class VeSyncFan {
 
   public get isOn() {
     return this._isOn;
+  }
+
+  public get waterLacks() {
+    return this._waterLacks;
+  }
+
+  public get waterTankLifted() {
+    return this._waterTankLifted;
+  }
+
+  public get temperature() {
+    return this._temperature;
+  }
+
+  public get filterLife() {
+    return this._filterLife;
   }
 
   constructor(
@@ -543,6 +564,10 @@ export default class VeSyncFan {
 
         this._warmLevel = (result.warm_level as number) ?? 0;
         this._warmEnabled = (result.warm_enabled as boolean) ?? false;
+        this._waterLacks = (result.water_lacks as boolean) ?? false;
+        this._waterTankLifted = (result.water_tank_lifted as boolean) ?? false;
+        this._temperature = (result.temperature as number) ?? 0;
+        this._filterLife = (result.filter_life as number) ?? 100;
 
         this._brightnessLevel =
           ((result.night_light_brightness ??
@@ -575,16 +600,14 @@ export default class VeSyncFan {
           );
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
         this.client.log.error(
-          'Failed to updateInfo due to unreachable device: ' + message,
+          'Failed to updateInfo due to unreachable device: ' +
+            getErrorMessage(err),
         );
         if (this.client.config.options.showOffWhenDisconnected) {
           this.resetStateToOff();
         } else {
-          throw new Error(
-            'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
-          );
+          throw new Error(DEVICE_UNREACHABLE_ERROR);
         }
       }
     });
