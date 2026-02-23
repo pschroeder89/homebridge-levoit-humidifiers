@@ -77,6 +77,7 @@ export interface DeviceType {
   minHumidityLevel: number;
   maxHumidityLevel: number;
   hasAutoProMode?: boolean;
+  hasHumidityMode?: boolean;
   hasTemperature?: boolean;
   hasFilter?: boolean;
 }
@@ -180,6 +181,7 @@ const deviceTypes: DeviceType[] = [
       input.includes(DevicePrefix.LEH_S601S) && input.includes('WUSR'),
     hasAutoMode: true,
     hasAutoProMode: true,
+    hasHumidityMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -195,6 +197,7 @@ const deviceTypes: DeviceType[] = [
     isValid: (input: string) => input.includes(DevicePrefix.LEH_S601S),
     hasAutoMode: true,
     hasAutoProMode: true,
+    hasHumidityMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,

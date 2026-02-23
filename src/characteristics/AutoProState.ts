@@ -10,14 +10,14 @@ import { AccessoryThisType } from '../VeSyncAccessory';
 
 /**
  * AutoProState characteristic handler for the AutoPro Mode service.
- * Controls whether the device is in AutoPro Mode or Manual Mode.
+ * Controls whether the device is in AutoPro Mode.
  *
  * AutoPro Mode is available on certain models (e.g., Superior 6000S) and provides
- * advanced automatic humidity control.
+ * fully automatic humidity control (device chooses both target and fan speed).
  *
  * Behavior:
  * - On: Switches to AutoPro Mode
- * - Off: Switches to Manual Mode
+ * - Off: Switches to Humidity Mode (if supported) or Manual Mode
  * - Returns false if device is off (so switch displays Off)
  *
  * Note: Uses cached device state from background polling to avoid slow read warnings.
@@ -43,21 +43,24 @@ const characteristic: {
 
   /**
    * Sets AutoPro Mode state.
-   * - On: Switches to AutoPro Mode
-   * - Off: Switches to Manual Mode
+   * - On: Switches to AutoPro Mode (device controls everything)
+   * - Off: Switches to Humidity Mode (user target, smart fan) if available,
+   *        otherwise Manual Mode
    */
   set: async function (value: CharacteristicValue) {
     switch (value) {
       case true:
-        // Turn on AutoPro Mode
         await this.device.changeMode(Mode.AutoPro);
         this.updateAllCharacteristics();
         break;
-      case false:
-        // Turn off AutoPro Mode - switch to Manual
-        await this.device.changeMode(Mode.Manual);
+      case false: {
+        const fallback = this.device.deviceType.hasHumidityMode
+          ? Mode.Humidity
+          : Mode.Manual;
+        await this.device.changeMode(fallback);
         this.updateAllCharacteristics();
         break;
+      }
     }
   },
 };

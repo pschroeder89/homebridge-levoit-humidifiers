@@ -70,15 +70,18 @@ const characteristic: {
           if (h > device.deviceType.maxHumidityLevel)
             h = device.deviceType.maxHumidityLevel;
 
-          // Determine correct auto-like mode based on device type
-          // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
-          let autoLikeMode: Mode;
-          if (isLV600S(device.model)) {
-            autoLikeMode = Mode.Humidity;
+          // Determine the best target-humidity mode for this device:
+          // - Devices with Humidity mode (LV600S, Superior 6000S) use it so the
+          //   device smartly picks fan speed to reach the user's target.
+          // - Devices with only AutoPro use that as the auto-like mode.
+          // - All others fall back to plain Auto.
+          let humidityMode: Mode;
+          if (isLV600S(device.model) || device.deviceType.hasHumidityMode) {
+            humidityMode = Mode.Humidity;
           } else if (device.deviceType.hasAutoProMode) {
-            autoLikeMode = Mode.AutoPro;
+            humidityMode = Mode.AutoPro;
           } else {
-            autoLikeMode = Mode.Auto;
+            humidityMode = Mode.Auto;
           }
 
           // LV600S / Oasis cannot change target humidity in Sleep mode
@@ -87,13 +90,18 @@ const characteristic: {
             !device.model.startsWith(DevicePrefix.OASIS) &&
             !device.model.startsWith(DevicePrefix.OASIS_1000S);
 
-          // Switch to auto-like mode if currently in Manual or Sleep (for LV600S/Oasis)
-          const shouldSwitchToAutoLike =
+          // Switch mode when the current mode doesn't respect user-set targets:
+          // - Manual has no target humidity tracking
+          // - Sleep on LV600S/Oasis ignores target humidity changes
+          // - AutoPro overrides the target with its own 40-50% range
+          const shouldSwitchMode =
             device.mode === Mode.Manual ||
-            (device.mode === Mode.Sleep && !canSetTargetHumidityInSleep);
+            (device.mode === Mode.Sleep && !canSetTargetHumidityInSleep) ||
+            (device.mode === Mode.AutoPro &&
+              !!device.deviceType.hasHumidityMode);
 
-          if (shouldSwitchToAutoLike) {
-            await device.changeMode(autoLikeMode);
+          if (shouldSwitchMode) {
+            await device.changeMode(humidityMode);
           }
 
           // Apply the target humidity

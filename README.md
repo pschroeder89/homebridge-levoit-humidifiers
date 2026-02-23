@@ -74,14 +74,6 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
     - Shows filter life remaining as a percentage.
     - Alerts when filter life drops below 10%.
 
-### Behavior
-
-- **Turning off the humidifier** resets all controls (sleep mode, warm mist, display, night light) to off, matching the physical device behavior.
-- **State changes are pushed immediately** to HomeKit — no need to close and reopen the Home app.
-- **Smart status display**: In Auto/Sleep modes, HomeKit shows "Raising to X%" while actively humidifying and "Set to X%" once the target is reached. Manual mode always shows "Raising to X%".
-- **Service names** (Humidifier, Mist, Display, Sleep Mode, etc.) are set via `ConfiguredName`. If you rename a service in the Home app, your custom name is preserved across restarts.
-- **Authentication tokens** are validated proactively before API calls and automatically refreshed when expired, preventing devices from becoming unresponsive due to stale sessions.
-
 ### Details
 
 <a href="url"><img src="images/services2.png" width=25% height=25%></a>
