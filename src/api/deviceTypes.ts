@@ -8,6 +8,7 @@ export enum DevicePrefix {
   OASIS = 'LUH-O451S-',
   OASIS_1000S = 'LUH-M101S-',
   LEH_S601S = 'LEH-S601S-',
+  LEH_S602S = 'LEH-S602S-',
   O601S = 'LUH-O601S-',
 }
 
@@ -16,9 +17,14 @@ const LV600S_PREFIXES = [
   DevicePrefix.LV600S_V2,
 ] as const;
 
+const SUPERIOR_PREFIXES = [
+  DevicePrefix.LEH_S601S,
+  DevicePrefix.LEH_S602S,
+] as const;
+
 const NEW_FORMAT_PREFIXES = [
   DevicePrefix.OASIS_1000S,
-  DevicePrefix.LEH_S601S,
+  ...SUPERIOR_PREFIXES,
   DevicePrefix.LV600S_V2,
 ] as const;
 
@@ -29,6 +35,9 @@ const matchesAnyPrefix = (
 
 export const isLV600S = (model: string): boolean =>
   matchesAnyPrefix(model, LV600S_PREFIXES);
+
+export const isSuperior6000S = (model: string): boolean =>
+  matchesAnyPrefix(model, SUPERIOR_PREFIXES);
 
 const DeviceName = {
   Classic300S: 'Classic300S',
@@ -56,6 +65,7 @@ const DeviceName = {
   OASIS_1000S_JP: `${DevicePrefix.OASIS_1000S}WJP`,
   LEH_S601S_WUS: `${DevicePrefix.LEH_S601S}WUS`,
   LEH_S601S_WUSR: `${DevicePrefix.LEH_S601S}WUSR`,
+  LEH_S602S_WUS: `${DevicePrefix.LEH_S602S}WUS`,
   LUH_O601S_WUS: `${DevicePrefix.O601S}WUS`,
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
 } as const;
@@ -176,9 +186,9 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LEH-S601S WUSR variants (lower min humidity)
+    // Superior 6000S WUSR variants (lower min humidity)
     isValid: (input: string) =>
-      input.includes(DevicePrefix.LEH_S601S) && input.includes('WUSR'),
+      isSuperior6000S(input) && input.includes('WUSR'),
     hasAutoMode: true,
     hasAutoProMode: true,
     hasHumidityMode: true,
@@ -193,8 +203,8 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LEH-S601S family (all other variants)
-    isValid: (input: string) => input.includes(DevicePrefix.LEH_S601S),
+    // Superior 6000S family (LEH-S601S-*, LEH-S602S-*)
+    isValid: (input: string) => isSuperior6000S(input),
     hasAutoMode: true,
     hasAutoProMode: true,
     hasHumidityMode: true,
