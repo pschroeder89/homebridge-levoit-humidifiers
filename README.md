@@ -6,22 +6,24 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm | Temp | Filter |
-| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ---- | ------ |
-| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅   | ✅     |
-| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌   | ❌     |
-| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
-| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
-| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     |
-| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌   | ❌     |
-| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌   | ❌     |
-| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌   | ❌     |
+| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm | Temp | Filter | Humidity Mode |
+| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ---- | ------ | ------------- |
+| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅   | ✅     | ✅            |
+| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌   | ❌     | ❌            |
+| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     | ❌            |
+| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     | ❌            |
+| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌   | ❌     | ❌            |
+| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌   | ❌     | ❌            |
+| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌   | ❌     | ❌            |
+| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌   | ❌     | ❌            |
 
 ### Features (if supported by model)
 
 1. Humidifier / Auto Mode
 
    - Sets humidifier to Auto / Humidity and sets the Target Humidity to the desired level.
+   - On the **Superior 6000S**, adjusting the humidity slider enters **Humidity (Smart) mode** — the device
+     picks the optimal fan speed to reach your target. This matches the "Humidity > Smart" mode in the VeSync app.
    - Can also change Target Humidity in Sleep Mode, except on LV600S / Oasis.
      - For LV600S and Oasis, the Humidifier slider will be set to 0% when Sleep Mode is on.
    - For LV600S and Oasis, the Auto humidity range is 40-80%. All other models are 30-80%.
@@ -73,6 +75,19 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
     - Shows filter life remaining as a percentage.
     - Alerts when filter life drops below 10%.
+
+### Superior 6000S Mode Mapping
+
+The Superior 6000S has more operating modes than other models. Here's how HomeKit controls map to the VeSync app modes:
+
+| HomeKit Action            | VeSync Mode        | Behavior                                          |
+| ------------------------- | ------------------ | ------------------------------------------------- |
+| Drag humidity slider      | Humidity (Smart)   | Device picks fan speed to reach your target        |
+| Drag mist slider          | Manual (Fan)       | You control fan speed directly                     |
+| AutoPro switch ON         | AutoPro            | Device controls both target (40-50%) and fan speed |
+| AutoPro switch OFF        | Humidity (Smart)   | Returns to smart humidity targeting                |
+| Sleep switch ON           | Sleep              | Lowest fan speed, auto target humidity             |
+| Sleep switch OFF          | Humidity (Smart)   | Returns to smart humidity targeting                |
 
 ### Details
 
