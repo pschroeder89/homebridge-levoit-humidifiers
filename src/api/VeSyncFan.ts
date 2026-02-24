@@ -44,7 +44,6 @@ export default class VeSyncFan {
    */
   private resetStateToOff(): void {
     this._isOn = false;
-    this._targetHumidity = 0;
     this._displayOn = false;
     this._mistLevel = 0;
     this._warmLevel = 0;
@@ -177,7 +176,19 @@ export default class VeSyncFan {
 
     if (success) {
       this._isOn = power;
-      if (this._isOn) {
+      if (!this._isOn) {
+        // When turning off, save current target and reset all state to match device behavior
+        if (this._targetHumidity > 0) {
+          this._lastTargetHumidity = this._targetHumidity;
+        }
+        this._mistLevel = 0;
+        this._warmLevel = 0;
+        this._warmEnabled = false;
+        this._brightnessLevel = 0;
+        this._lightOn = 'off';
+        this._displayOn = false;
+        // Note: mode is not reset as the device retains its last mode when powered back on
+      } else {
         // When turning on, restore last known target from memory
         // Background polling will sync with device's actual value within 30s
         if (this._targetHumidity === 0 && this._lastTargetHumidity > 0) {
@@ -186,19 +197,6 @@ export default class VeSyncFan {
           // Fallback default if no previous value exists
           this._targetHumidity = 55;
         }
-      } else {
-        // When turning off, save current target and reset all state to match device behavior
-        if (this._targetHumidity > 0) {
-          this._lastTargetHumidity = this._targetHumidity;
-        }
-        this._targetHumidity = 0;
-        this._mistLevel = 0;
-        this._warmLevel = 0;
-        this._warmEnabled = false;
-        this._brightnessLevel = 0;
-        this._lightOn = 'off';
-        this._displayOn = false;
-        // Note: mode is not reset as the device retains its last mode when powered back on
       }
     } else {
       this.client.log.error('Failed to setPower due to unreachable device.');
