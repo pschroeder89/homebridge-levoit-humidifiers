@@ -231,7 +231,13 @@ export default class VeSyncAccessory {
 
     service
       .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-      .setProps({ minStep: 1, minValue: 0, maxValue: 100 })
+      .setProps({
+        minStep: 1,
+        minValue: 0,
+        maxValue: 100,
+        validValues: null,
+        validValueRanges: null,
+      })
       .onGet(MistLevel.get.bind(this))
       .onSet(MistLevel.set.bind(this));
 
@@ -304,7 +310,13 @@ export default class VeSyncAccessory {
 
     service
       .getCharacteristic(this.platform.Characteristic.RotationSpeed)
-      .setProps({ minStep: 1, minValue: 0, maxValue: 100 })
+      .setProps({
+        minStep: 1,
+        minValue: 0,
+        maxValue: 100,
+        validValues: null,
+        validValueRanges: null,
+      })
       .onGet(WarmMistLevel.get.bind(this))
       .onSet(WarmMistLevel.set.bind(this));
 
