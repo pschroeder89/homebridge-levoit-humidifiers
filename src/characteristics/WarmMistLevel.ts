@@ -4,36 +4,85 @@ import {
   CharacteristicValue,
   Nullable,
 } from 'homebridge';
-import VeSyncFan from '../api/VeSyncFan';
-
 import { AccessoryThisType } from '../VeSyncAccessory';
+import { debounceSet } from '../utils/debounce';
 
-const calculateWarmMistLevel = (device: VeSyncFan) => {
-  const currentMistLevel = device.warmLevel;
-  return device.isOn ? currentMistLevel : 0;
-};
-
+/**
+ * WarmMistLevel characteristic handler for the Warm Mist service.
+ * Controls the warm mist level (0-3 typically, device-specific).
+ *
+ * HomeKit displays this as a percentage (0-100%), which we convert to/from
+ * device-specific levels (e.g., 0-3 for most models).
+ *
+ * Features:
+ * - Returns 0 if device is off.
+ * - Only updates if value actually changed
+ *
+ * Note: Uses cached device state from background polling to avoid slow read warnings.
+ */
 const characteristic: {
   get: CharacteristicGetHandler;
   set: CharacteristicSetHandler;
 } & AccessoryThisType = {
+  /**
+   * Gets the current warm mist level as a percentage (0-100).
+   * Converts from device level (0-3) to percentage.
+   * Returns 0 if the device is off.
+   * Uses cached state to ensure fast response times.
+   */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
-    await this.device.updateInfo();
-    return calculateWarmMistLevel(this.device);
+    // Use cached state - background polling keeps this fresh
+    if (!this.device.isOn) {
+      return 0;
+    }
+    // Convert device level (0-3) to percentage (0-100)
+    const maxLevel = this.device.deviceType.warmMistLevels ?? 0;
+    if (maxLevel === 0) {
+      return 0;
+    }
+    return Math.round((this.device.warmLevel / maxLevel) * 100);
   },
 
+  /**
+   * Sets the warm mist level from a percentage (0-100) with debouncing.
+   * Implements 300ms debounce to batch rapid slider changes from HomeKit.
+   *
+   * Logic:
+   * - Converts percentage to device level (0-3)
+   * - Clamps value to device-specific range (0 to warmMistLevels)
+   * - Only updates if value actually changed to avoid unnecessary API calls
+   */
   set: async function (value: CharacteristicValue) {
-    const numValue = Number(value);
-    if (!this.device.warmEnabled && numValue > 0) {
-      // if from Off state and level is greater than 0, return immediately.
-      return;
-    }
-    if (this.device.warmEnabled && numValue === 0) {
-      // if from On state and level is less than 0, return immediately
-      return;
-    }
+    const device = this.device;
 
-    await this.device.changeWarmMistLevel(Number(value));
+    debounceSet(
+      device.uuid,
+      value,
+      async (finalValue) => {
+        const maxLevel = device.deviceType.warmMistLevels ?? 0;
+
+        // Convert percentage (0-100) to device level (0-3)
+        // Round to nearest level
+        const deviceLevel = Math.round((finalValue / 100) * maxLevel);
+
+        // Clamp to valid range
+        const clamped = Math.max(0, Math.min(maxLevel, deviceLevel));
+
+        try {
+          // Avoid no-op - only update if value actually changed
+          if (device.warmLevel !== clamped) {
+            await device.changeWarmMistLevel(clamped);
+          }
+
+          // Update all HomeKit characteristics immediately
+          this.updateAllCharacteristics();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.platform.log.debug(`[WARM] debounced set failed: ${message}`);
+        }
+      },
+      (message) => this.platform.log.debug(message),
+    );
   },
 };
 

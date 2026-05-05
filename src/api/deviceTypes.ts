@@ -3,12 +3,32 @@
 export enum DevicePrefix {
   Classic300S = 'LUH-A601S-',
   Dual200S = 'LUH-D301S-',
-  LV600S = 'LUH-A602S-',
+  LV600S_V1 = 'LUH-A602S-',
+  LV600S_V2 = 'LUH-A603S-',
   OASIS = 'LUH-O451S-',
   OASIS_1000S = 'LUH-M101S-',
   LEH_S601S = 'LEH-S601S-',
   O601S = 'LUH-O601S-',
 }
+
+export const LV600S_PREFIXES = [
+  DevicePrefix.LV600S_V1,
+  DevicePrefix.LV600S_V2,
+] as const;
+
+export const NEW_FORMAT_PREFIXES = [
+  DevicePrefix.OASIS_1000S,
+  DevicePrefix.LEH_S601S,
+  DevicePrefix.LV600S_V2,
+] as const;
+
+const matchesAnyPrefix = (
+  model: string,
+  prefixes: readonly string[],
+): boolean => prefixes.some((p) => model.includes(p));
+
+export const isLV600S = (model: string): boolean =>
+  matchesAnyPrefix(model, LV600S_PREFIXES);
 
 export const DeviceName = {
   Classic300S: 'Classic300S',
@@ -20,11 +40,11 @@ export const DeviceName = {
   Dual200S_EU: `${DevicePrefix.Dual200S}WEU`,
   Dual200S_UK: `${DevicePrefix.Dual200S}WUK`,
   Dual200S_JP: `${DevicePrefix.Dual200S}WJP`,
-  LV600S: `${DevicePrefix.LV600S}WUS`,
-  LV600S_REMOTE: `${DevicePrefix.LV600S}WUSR`,
-  LV600S_EU: `${DevicePrefix.LV600S}WEU`,
-  LV600S_UK: `${DevicePrefix.LV600S}WUK`,
-  LV600S_JP: `${DevicePrefix.LV600S}WJP`,
+  LV600S: `${DevicePrefix.LV600S_V1}WUS`,
+  LV600S_REMOTE: `${DevicePrefix.LV600S_V1}WUSR`,
+  LV600S_EU: `${DevicePrefix.LV600S_V1}WEU`,
+  LV600S_UK: `${DevicePrefix.LV600S_V1}WUK`,
+  LV600S_JP: `${DevicePrefix.LV600S_V1}WJP`,
   OASIS: `${DevicePrefix.OASIS}WUS`,
   OASIS_UK: `${DevicePrefix.OASIS}WUK`,
   OASIS_EU: `${DevicePrefix.OASIS}WEU`,
@@ -42,14 +62,8 @@ export const DeviceName = {
 
 export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
 
-/**
- * New response format devices:
- * - Oasis 1000S family (LUH-M101S-*)
- * - LEH-S601S family (LEH-S601S-*)
- */
 export const isNewFormatDevice = (model: string): boolean =>
-  model.includes(DevicePrefix.OASIS_1000S) ||
-  model.includes(DevicePrefix.LEH_S601S);
+  matchesAnyPrefix(model, NEW_FORMAT_PREFIXES);
 
 export interface DeviceType {
   isValid: (input: string) => boolean;
@@ -121,8 +135,8 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LV600S family (all LUH-A602S-* models)
-    isValid: (input: string) => input.includes(DevicePrefix.LV600S),
+    // LV600S family (LUH-A602S-* and LUH-A603S-* variants)
+    isValid: (input: string) => isLV600S(input),
     hasAutoMode: true,
     mistLevels: 9,
     hasLight: false,

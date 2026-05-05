@@ -1,7 +1,7 @@
 import AsyncLock from 'async-lock';
 import deviceTypes, {
-  DevicePrefix,
   DeviceType,
+  isLV600S,
   isNewFormatDevice,
 } from './deviceTypes';
 
@@ -15,14 +15,38 @@ export enum Mode {
   Humidity = 'humidity',
 }
 
+/**
+ * VeSyncFan represents a single Levoit humidifier device.
+ * Manages device state, API communication, and provides methods to control the device.
+ */
 export default class VeSyncFan {
   private readonly lock: AsyncLock = new AsyncLock();
   public readonly deviceType: DeviceType;
+
+  /**
+   * Timestamp of the last successful device info update.
+   * Used to implement a 5-second cache to prevent excessive API calls.
+   */
   private lastCheck = 0;
 
   private _displayOn = true;
 
   public readonly manufacturer = 'Levoit';
+
+  /**
+   * Resets all device state values to their "off" state.
+   * Used when device is turned off or becomes unreachable.
+   */
+  private resetStateToOff(): void {
+    this._isOn = false;
+    this._humidityLevel = 0;
+    this._targetHumidity = 0;
+    this._displayOn = false;
+    this._mistLevel = 0;
+    this._warmLevel = 0;
+    this._brightnessLevel = 0;
+    this._lightOn = 'off';
+  }
 
   public get humidityLevel() {
     return this._humidityLevel;
@@ -68,30 +92,6 @@ export default class VeSyncFan {
     return this._isOn;
   }
 
-  public get getBlue() {
-    return this._blue;
-  }
-
-  public get getGreen() {
-    return this._green;
-  }
-
-  public get getColorMode() {
-    return this._colorMode;
-  }
-
-  public get getColorSliderLocation() {
-    return this._colorSliderLocation;
-  }
-
-  public get getLightSpeed() {
-    return this._lightSpeed;
-  }
-
-  public get getRed() {
-    return this._red;
-  }
-
   constructor(
     private readonly client: VeSync,
     public readonly name: string,
@@ -121,6 +121,20 @@ export default class VeSyncFan {
     this.deviceType = deviceTypes.find(({ isValid }) => isValid(this.model))!;
   }
 
+  /**
+   * Stores the last non-zero target humidity to restore when device is turned back on.
+   * This preserves user preferences across power cycles.
+   */
+  private _lastTargetHumidity = 0;
+
+  /**
+   * Sets the device power state (on/off).
+   * When turning off, resets related state values to 0.
+   * When turning on, restores the last known target humidity from memory.
+   *
+   * @param power - true to turn on, false to turn off
+   * @returns true if successful, false otherwise
+   */
   public async setPower(power: boolean): Promise<boolean> {
     this.client.log.info('Setting Power to ' + power);
     let switchJson;
@@ -144,22 +158,33 @@ export default class VeSyncFan {
     if (success) {
       this._isOn = power;
       if (!this._isOn) {
+        // When turning off, save current target and reset all state to match device behavior
+        if (this._targetHumidity > 0) {
+          this._lastTargetHumidity = this._targetHumidity;
+        }
         this._humidityLevel = 0;
         this._targetHumidity = 0;
         this._mistLevel = 0;
         this._warmLevel = 0;
+        this._warmEnabled = false;
+        this._brightnessLevel = 0;
+        this._lightOn = 'off';
+        this._displayOn = false;
+        // Note: mode is not reset as the device retains its last mode when powered back on
+      } else {
+        // When turning on, restore last known target from memory
+        // Background polling will sync with device's actual value within 30s
+        if (this._targetHumidity === 0 && this._lastTargetHumidity > 0) {
+          this._targetHumidity = this._lastTargetHumidity;
+        } else if (this._targetHumidity === 0) {
+          // Fallback default if no previous value exists
+          this._targetHumidity = 55;
+        }
       }
     } else {
       this.client.log.error('Failed to setPower due to unreachable device.');
       if (this.client.config.options.showOffWhenDisconnected) {
-        this._isOn = false;
-        this._humidityLevel = 0;
-        this._targetHumidity = 0;
-        this._displayOn = false;
-        this._mistLevel = 0;
-        this._warmLevel = 0;
-        this._brightnessLevel = 0;
-        this._lightOn = 'off';
+        this.resetStateToOff();
       } else {
         return false;
       }
@@ -168,6 +193,13 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Sets the target humidity percentage for Auto/Humidity mode.
+   * Handles different JSON field names for new vs old device formats.
+   *
+   * @param level - Target humidity percentage (device-specific range, typically 30-80% or 40-80%)
+   * @returns true if successful, false otherwise
+   */
   public async setTargetHumidity(level: number): Promise<boolean> {
     this.client.log.info('Setting Target Humidity to ' + level);
 
@@ -198,9 +230,19 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Changes the device operating mode.
+   * Automatically maps Auto mode to the appropriate mode for the device:
+   * - LV600S models use "Humidity" mode instead of "Auto"
+   * - Models with AutoPro support use "AutoPro" mode instead of "Auto"
+   * Skips API call if already in the requested mode.
+   *
+   * @param mode - The mode to switch to
+   * @returns true if successful, false otherwise
+   */
   public async changeMode(mode: Mode): Promise<boolean> {
     // LV600s models use "Humidity" mode instead of "Auto"
-    if (this.model.includes(DevicePrefix.LV600S) && mode == Mode.Auto) {
+    if (isLV600S(this.model) && mode == Mode.Auto) {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
@@ -239,6 +281,13 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Sets the night light brightness level.
+   * For non-RGB devices only. RGB devices should use setLightStatus().
+   *
+   * @param brightness - Brightness level (0-100)
+   * @returns true if successful, false otherwise
+   */
   public async setBrightness(brightness: number): Promise<boolean> {
     this.client.log.info('Setting Night Light to ' + brightness);
 
@@ -257,6 +306,13 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Sets the device display screen state (on/off).
+   * Handles different JSON field names for new vs old device formats.
+   *
+   * @param power - true to turn display on, false to turn off
+   * @returns true if successful, false otherwise
+   */
   public async setDisplay(power: boolean): Promise<boolean> {
     this.client.log.info('Setting Display to ' + power);
 
@@ -287,6 +343,14 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Changes the cool mist level.
+   * Validates the level is within device limits (1 to mistLevels).
+   * Handles different JSON field names for new vs old device formats.
+   *
+   * @param mistLevel - Mist level (1 to device-specific maximum, typically 9)
+   * @returns true if successful, false if level is out of range
+   */
   public async changeMistLevel(mistLevel: number): Promise<boolean> {
     if (mistLevel > this.deviceType.mistLevels || mistLevel < 1) {
       return false;
@@ -320,6 +384,15 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Changes the warm mist level.
+   * Only available on devices with warm mist capability.
+   * Validates the level is within device limits (0 to warmMistLevels).
+   * Updates warmEnabled state based on level (0 = disabled, >0 = enabled).
+   *
+   * @param warmMistLevel - Warm mist level (0 to device-specific maximum, typically 3)
+   * @returns true if successful, false if device doesn't support warm mist or level is out of range
+   */
   public async changeWarmMistLevel(warmMistLevel: number): Promise<boolean> {
     if (!this.deviceType.warmMistLevels) {
       this.client.log.error(
@@ -352,15 +425,24 @@ export default class VeSyncFan {
     return success;
   }
 
+  /**
+   * Sets the RGB night light status and brightness.
+   * Only for RGB-capable devices. Calculates RGB color values proportionally
+   * when brightness changes to maintain color appearance.
+   *
+   * @param action - Light action: 'on' or 'off'
+   * @param brightness - Brightness level (0-100)
+   * @returns true if successful, false otherwise
+   */
   public async setLightStatus(
     action: string,
     brightness: number,
   ): Promise<boolean> {
     // Get the current RGB values and brightness %
-    const red = this.getRed;
-    const green = this.getGreen;
-    const blue = this.getBlue;
-    const currentBrightness = this.brightnessLevel;
+    const red = this._red;
+    const green = this._green;
+    const blue = this._blue;
+    const currentBrightness = this._brightnessLevel;
     let newRed: number | undefined;
     let newGreen: number | undefined;
     let newBlue: number | undefined;
@@ -374,13 +456,13 @@ export default class VeSyncFan {
 
     const lightJson = {
       action: action,
-      speed: this.getLightSpeed,
-      red: newRed || this.getRed,
-      green: newGreen || this.getGreen,
-      blue: newBlue || this.getBlue,
+      speed: this._lightSpeed,
+      red: newRed || this._red,
+      green: newGreen || this._green,
+      blue: newBlue || this._blue,
       brightness: brightness,
-      colorMode: this.getColorMode,
-      colorSliderLocation: this.getColorSliderLocation,
+      colorMode: this._colorMode,
+      colorSliderLocation: this._colorSliderLocation,
     };
     this.client.log.debug(
       'Setting Night Light Status to ' + JSON.stringify(lightJson),
@@ -394,19 +476,32 @@ export default class VeSyncFan {
 
     if (success) {
       this._brightnessLevel = brightness;
-      this._blue = newBlue || this.getBlue;
-      this._green = newGreen || this.getGreen;
-      this._red = newRed || this.getRed;
+      this._blue = newBlue || this._blue;
+      this._green = newGreen || this._green;
+      this._red = newRed || this._red;
       this._lightOn = action;
     }
 
     return success;
   }
 
+  /**
+   * Updates device state from the VeSync API.
+   * Implements a 15-second cache to prevent excessive API calls.
+   * This cache works in conjunction with background polling (30-second interval)
+   * to ensure fresh data while minimizing API load and respecting quota limits.
+   *
+   * Thread-safe: Uses AsyncLock to prevent concurrent updates.
+   *
+   * @throws Error if device is unreachable and showOffWhenDisconnected is false
+   */
   public async updateInfo(): Promise<void> {
     return this.lock.acquire('update-info', async () => {
       try {
-        if (Date.now() - this.lastCheck < 5 * 1000) {
+        // 15-second cache prevents excessive API calls
+        // Background polling (30s) ensures cache is refreshed regularly
+        // while respecting VeSync API quota limits
+        if (Date.now() - this.lastCheck < 15 * 1000) {
           return;
         }
 
@@ -418,13 +513,7 @@ export default class VeSyncFan {
           !deviceResult &&
           this.client.config.options?.showOffWhenDisconnected
         ) {
-          this._isOn = false;
-          this._humidityLevel = 0;
-          this._targetHumidity = 0;
-          this._displayOn = false;
-          this._mistLevel = 0;
-          this._warmLevel = 0;
-          this._brightnessLevel = 0;
+          this.resetStateToOff();
           return;
         } else if (!deviceResult) {
           return;
@@ -491,13 +580,7 @@ export default class VeSyncFan {
           'Failed to updateInfo due to unreachable device: ' + message,
         );
         if (this.client.config.options.showOffWhenDisconnected) {
-          this._isOn = false;
-          this._humidityLevel = 0;
-          this._targetHumidity = 0;
-          this._displayOn = false;
-          this._mistLevel = 0;
-          this._warmLevel = 0;
-          this._brightnessLevel = 0;
+          this.resetStateToOff();
         } else {
           throw new Error(
             'Device was unreachable. Ensure it is plugged in and connected to WiFi.',
@@ -507,6 +590,13 @@ export default class VeSyncFan {
     });
   }
 
+  /**
+   * Factory method to create a VeSyncFan instance from VeSync API response data.
+   * Used during device discovery to instantiate devices from the device list.
+   *
+   * @param client - The VeSync client instance for API communication
+   * @returns A function that takes device data and returns a VeSyncFan instance
+   */
   public static readonly fromResponse =
     (client: VeSync) =>
     ({

@@ -23,12 +23,19 @@ export interface VeSyncContext {
 
 export type VeSyncPlatformAccessory = PlatformAccessory<VeSyncContext>;
 
+/**
+ * Platform class that manages the Levoit Humidifiers Homebridge plugin.
+ * Handles device discovery, accessory registration, and lifecycle management.
+ */
 export default class Platform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic =
     this.api.hap.Characteristic;
 
+  /** Cached accessories loaded from Homebridge's persistent storage */
   public readonly cachedAccessories: VeSyncPlatformAccessory[] = [];
+
+  /** Currently registered and active device accessories */
   public readonly registeredDevices: VeSyncAccessory[] = [];
 
   public readonly debugger: DebugMode;
@@ -71,14 +78,30 @@ export default class Platform implements DynamicPlatformPlugin {
     });
   }
 
+  /**
+   * Called by Homebridge when it loads cached accessories from persistent storage.
+   * These accessories will be restored if they're still present during device discovery.
+   */
   configureAccessory(accessory: PlatformAccessory<UnknownContext>) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
     this.cachedAccessories.push(accessory as VeSyncPlatformAccessory);
   }
 
+  /**
+   * Discovers and loads all Levoit humidifier devices from VeSync.
+   * Called automatically when Homebridge finishes launching.
+   *
+   * Process:
+   * 1. Validates credentials
+   * 2. Authenticates with VeSync API
+   * 3. Fetches device list
+   * 4. Loads/restores each device as an accessory
+   * 5. Removes accessories for devices that no longer exist
+   */
   async discoverDevices() {
     const { email, password } = this.config ?? {};
     if (!email || !password) {
+      // If credentials are missing, remove all cached accessories
       if (this.cachedAccessories.length > 0) {
         this.debugger.debug(
           '[PLATFORM]',
@@ -109,26 +132,40 @@ export default class Platform implements DynamicPlatformPlugin {
 
       this.log.info('Discovering devices...');
 
+      // Fetch all devices from VeSync and load them as accessories
       const devices = await this.client.getDevices();
       await Promise.all(devices.map(this.loadDevice.bind(this)));
 
-      this.checkOldDevices();
+      // Track which device UUIDs were successfully loaded
+      const loadedDeviceUUIDs = new Set(devices.map((device) => device.uuid));
+
+      // Remove accessories for devices that no longer exist
+      this.checkOldDevices(loadedDeviceUUIDs);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       this.log.error('Unexpected error during device discovery:', message);
     }
   }
 
+  /**
+   * Loads a single device as a Homebridge accessory.
+   * Either restores an existing cached accessory or creates a new one.
+   *
+   * @param device The VeSync device to load
+   */
   private async loadDevice(device: VeSyncFan) {
     try {
+      // Update device info to get current state
       await device.updateInfo();
       const { uuid, name } = device;
 
+      // Check if this device was previously cached
       const existingAccessory = this.cachedAccessories.find(
         (accessory) => accessory.UUID === uuid,
       );
 
       if (existingAccessory) {
+        // Restore existing accessory from cache
         this.log.info(
           'Restoring existing accessory from cache:',
           existingAccessory.displayName,
@@ -139,6 +176,7 @@ export default class Platform implements DynamicPlatformPlugin {
           device,
         };
 
+        // Create VeSyncAccessory instance (starts background polling)
         this.registeredDevices.push(
           new VeSyncAccessory(this, existingAccessory),
         );
@@ -146,6 +184,7 @@ export default class Platform implements DynamicPlatformPlugin {
         return;
       }
 
+      // Create new accessory for newly discovered device
       this.log.info('Adding new accessory:', name);
       const accessory = new this.api.platformAccessory<VeSyncContext>(
         name,
@@ -156,6 +195,7 @@ export default class Platform implements DynamicPlatformPlugin {
         device,
       };
 
+      // Create VeSyncAccessory instance (starts background polling) and register with Homebridge
       this.registeredDevices.push(new VeSyncAccessory(this, accessory));
       return this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
         accessory,
@@ -169,17 +209,30 @@ export default class Platform implements DynamicPlatformPlugin {
     }
   }
 
-  private checkOldDevices() {
+  /**
+   * Removes accessories for devices that no longer exist.
+   * Compares cached accessories against currently registered devices
+   * and unregisters any that are no longer present.
+   *
+   * Note: When accessories are unregistered, their polling intervals
+   * will be cleaned up automatically when the VeSyncAccessory instances
+   * are garbage collected.
+   *
+   * @param loadedDeviceUUIDs - Set of UUIDs for devices that were successfully loaded
+   */
+  private checkOldDevices(loadedDeviceUUIDs: Set<string>) {
     this.cachedAccessories.forEach((accessory) => {
-      const exists = this.registeredDevices.find(
-        (device) => device.UUID === accessory.UUID,
-      );
+      const exists = loadedDeviceUUIDs.has(accessory.UUID);
 
       if (!exists) {
-        this.log.info('Remove cached accessory:', accessory.displayName);
+        this.log.info('Removing accessory:', accessory.displayName);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
           accessory,
         ]);
+        const index = this.cachedAccessories.indexOf(accessory);
+        if (index > -1) {
+          this.cachedAccessories.splice(index, 1);
+        }
       }
     });
   }
