@@ -7,6 +7,7 @@ export enum DevicePrefix {
   LV600S_V2 = 'LUH-A603S-',
   OASIS = 'LUH-O451S-',
   OASIS_1000S = 'LUH-M101S-',
+  NeoClassic450S = 'LUH-N451S-',
   LEH_S601S = 'LEH-S601S-',
   O601S = 'LUH-O601S-',
 }
@@ -18,6 +19,7 @@ export const LV600S_PREFIXES = [
 
 export const NEW_FORMAT_PREFIXES = [
   DevicePrefix.OASIS_1000S,
+  DevicePrefix.NeoClassic450S,
   DevicePrefix.LEH_S601S,
   DevicePrefix.LV600S_V2,
 ] as const;
@@ -54,6 +56,7 @@ export const DeviceName = {
   OASIS_1000S_EU: `${DevicePrefix.OASIS_1000S}WEU`,
   OASIS_1000S_EUR: `${DevicePrefix.OASIS_1000S}WEUR`,
   OASIS_1000S_JP: `${DevicePrefix.OASIS_1000S}WJP`,
+  NeoClassic450S_US: `${DevicePrefix.NeoClassic450S}WUS`,
   LEH_S601S_WUS: `${DevicePrefix.LEH_S601S}WUS`,
   LEH_S601S_WUSR: `${DevicePrefix.LEH_S601S}WUSR`,
   LUH_O601S_WUS: `${DevicePrefix.O601S}WUS`,
@@ -170,6 +173,18 @@ const deviceTypes: DeviceType[] = [
     hasSleepMode: true,
     hasWarmMode: false,
     minHumidityLevel: 40,
+    maxHumidityLevel: 80,
+  },
+  {
+    // NeoClassic 450S family (LUH-N451S-*)
+    isValid: (input: string) => input.includes(DevicePrefix.NeoClassic450S),
+    hasAutoMode: true,
+    mistLevels: 9,
+    hasLight: true,
+    hasColorMode: false,
+    hasSleepMode: true,
+    hasWarmMode: false,
+    minHumidityLevel: 30,
     maxHumidityLevel: 80,
   },
   {
