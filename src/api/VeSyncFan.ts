@@ -242,8 +242,9 @@ export default class VeSyncFan {
    * @returns true if successful, false otherwise
    */
   public async changeMode(mode: Mode): Promise<boolean> {
-    // LV600s models use "Humidity" mode instead of "Auto"
-    if (isLV600S(this.model) && mode == Mode.Auto) {
+    // Only the newer LUH-A603S uses "Humidity" as its Auto-equivalent workMode;
+    // the older LUH-A602S uses plain "auto" (confirmed against pyvesync's device map).
+    if (isLV600S(this.model) && isNewFormatDevice(this.model) && mode == Mode.Auto) {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
@@ -408,16 +409,17 @@ export default class VeSyncFan {
 
     this.client.log.info('Setting Warm Level to ' + warmMistLevel);
 
-    // New models use different JSON keys (matches changeMistLevel's format handling)
+    // New-format devices (currently just LUH-A603S) use a distinct payload shape
+    // for warm level, confirmed against pyvesync's dedicated LV600S class: unlike
+    // cool mist, it is NOT a virtualLevel/setVirtualLevel command.
     let warmJson;
-    let method = BypassMethod.LEVEL;
     if (isNewFormatDevice(this.model)) {
       warmJson = {
-        virtualLevel: warmMistLevel,
+        levelIdx: 0,
         levelType: 'warm',
-        id: 0,
+        mistLevel: 0,
+        warmLevel: warmMistLevel,
       };
-      method = BypassMethod.MIST_LEVEL;
     } else {
       warmJson = {
         level: warmMistLevel,
@@ -426,7 +428,11 @@ export default class VeSyncFan {
       };
     }
 
-    const success = await this.client.sendCommand(this, method, warmJson);
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.LEVEL,
+      warmJson,
+    );
 
     if (success) {
       this._warmLevel = warmMistLevel;
@@ -556,8 +562,17 @@ export default class VeSyncFan {
           this._mistLevel = (result.mist_virtual_level as number) ?? 0;
         }
 
-        this._warmLevel = (result.warm_level as number) ?? 0;
-        this._warmEnabled = (result.warm_enabled as boolean) ?? false;
+        // New-format devices (currently just LUH-A603S) return warm mist state
+        // under camelCase keys (warmLevel/warmPower) instead of the old
+        // snake_case ones - reading the wrong keys silently kept warm mist
+        // state stuck at 0/off after every poll, regardless of device state.
+        if (isNewFormatDevice(this.model)) {
+          this._warmLevel = (result.warmLevel as number) ?? 0;
+          this._warmEnabled = (result.warmPower as boolean) ?? false;
+        } else {
+          this._warmLevel = (result.warm_level as number) ?? 0;
+          this._warmEnabled = (result.warm_enabled as boolean) ?? false;
+        }
 
         this._brightnessLevel =
           ((result.night_light_brightness ??

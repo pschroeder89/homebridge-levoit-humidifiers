@@ -7,7 +7,7 @@ import {
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { Mode } from '../api/VeSyncFan';
-import { DevicePrefix, isLV600S } from '../api/deviceTypes';
+import { DevicePrefix, isLV600S, isNewFormatDevice } from '../api/deviceTypes';
 import { debounceSet } from '../utils/debounce';
 
 /**
@@ -72,11 +72,13 @@ const characteristic: {
             h = device.deviceType.maxHumidityLevel;
 
           // Determine correct auto-like mode based on device type
-          // LV600S uses "Humidity" mode; AutoPro-capable devices use "Humidity" mode too
-          // once verified (see humiditySliderTargetsAutoMode), otherwise "AutoPro"; others use "Auto"
+          // Only the newer LUH-A603S uses "Humidity" mode (the older LUH-A602S uses
+          // plain "Auto" - confirmed against pyvesync's device map). AutoPro-capable
+          // devices use "Humidity" mode too once verified (see
+          // humiditySliderTargetsAutoMode), otherwise "AutoPro"; others use "Auto"
           let autoLikeMode: Mode;
           if (
-            isLV600S(device.model) ||
+            (isLV600S(device.model) && isNewFormatDevice(device.model)) ||
             (device.deviceType.hasAutoProMode &&
               device.deviceType.humiditySliderTargetsAutoMode)
           ) {

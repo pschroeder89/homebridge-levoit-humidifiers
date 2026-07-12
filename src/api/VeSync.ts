@@ -192,6 +192,8 @@ interface DeviceResult {
   mist_virtual_level?: number;
   warm_level?: number;
   warm_enabled?: boolean;
+  warmLevel?: number;
+  warmPower?: boolean;
   night_light_brightness?: number;
   rgbNightLight?: {
     brightness?: number;
