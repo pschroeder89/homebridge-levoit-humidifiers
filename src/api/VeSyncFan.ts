@@ -159,6 +159,15 @@ export default class VeSyncFan {
   private _lastTargetHumidity = 0;
 
   /**
+   * Picks the new-format or old-format command payload for this device.
+   * Most set-commands need entirely different JSON field names between newer
+   * devices (camelCase, e.g. LUH-N451S-, LUH-A603S-) and older ones (snake_case).
+   */
+  private formatPayload<T>(newFormat: T, oldFormat: T): T {
+    return isNewFormatDevice(this.model) ? newFormat : oldFormat;
+  }
+
+  /**
    * Sets the device power state (on/off).
    * When turning off, resets related state values to 0.
    * When turning on, restores the last known target humidity from memory.
@@ -168,18 +177,10 @@ export default class VeSyncFan {
    */
   public async setPower(power: boolean): Promise<boolean> {
     this.client.log.info('Setting Power to ' + power);
-    let switchJson;
-    if (isNewFormatDevice(this.model)) {
-      switchJson = {
-        powerSwitch: power ? 1 : 0,
-        id: 0,
-      };
-    } else {
-      switchJson = {
-        enabled: power,
-        id: 0,
-      };
-    }
+    const switchJson = this.formatPayload(
+      { powerSwitch: power ? 1 : 0, id: 0 },
+      { enabled: power, id: 0 },
+    );
     const success = await this.client.sendCommand(
       this,
       BypassMethod.SWITCH,
@@ -236,18 +237,10 @@ export default class VeSyncFan {
     this.client.log.info('Setting Target Humidity to ' + level);
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let humidityJson;
-    if (isNewFormatDevice(this.model)) {
-      humidityJson = {
-        targetHumidity: level,
-        id: 0,
-      };
-    } else {
-      humidityJson = {
-        target_humidity: level,
-        id: 0,
-      };
-    }
+    const humidityJson = this.formatPayload(
+      { targetHumidity: level, id: 0 },
+      { target_humidity: level, id: 0 },
+    );
 
     const success = await this.client.sendCommand(
       this,
@@ -290,16 +283,10 @@ export default class VeSyncFan {
     let success: boolean;
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let modeJson;
-    if (isNewFormatDevice(this.model)) {
-      modeJson = {
-        workMode: mode.toString(),
-      };
-    } else {
-      modeJson = {
-        mode: mode.toString(),
-      };
-    }
+    const modeJson = this.formatPayload(
+      { workMode: mode.toString() },
+      { mode: mode.toString() },
+    );
     // Don't change the mode if we are already in that mode
     if (this._mode == mode) {
       success = true;
@@ -354,18 +341,10 @@ export default class VeSyncFan {
     this.client.log.info('Setting Display to ' + power);
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let displayJson;
-    if (isNewFormatDevice(this.model)) {
-      displayJson = {
-        screenSwitch: power ? 1 : 0,
-        id: 0,
-      };
-    } else {
-      displayJson = {
-        state: power,
-        id: 0,
-      };
-    }
+    const displayJson = this.formatPayload(
+      { screenSwitch: power ? 1 : 0, id: 0 },
+      { state: power, id: 0 },
+    );
 
     const success = await this.client.sendCommand(
       this,
@@ -396,23 +375,16 @@ export default class VeSyncFan {
     this.client.log.info('Setting Mist Level to ' + mistLevel);
 
     // New models use different JSON keys
-    let mistJson;
-    const method = BypassMethod.MIST_LEVEL;
-    if (isNewFormatDevice(this.model)) {
-      mistJson = {
-        virtualLevel: mistLevel,
-        levelType: 'mist',
-        id: 0,
-      };
-    } else {
-      mistJson = {
-        level: mistLevel,
-        type: 'mist',
-        id: 0,
-      };
-    }
+    const mistJson = this.formatPayload(
+      { virtualLevel: mistLevel, levelType: 'mist', id: 0 },
+      { level: mistLevel, type: 'mist', id: 0 },
+    );
 
-    const success = await this.client.sendCommand(this, method, mistJson);
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.MIST_LEVEL,
+      mistJson,
+    );
 
     if (success) {
       this._mistLevel = mistLevel;
@@ -447,21 +419,15 @@ export default class VeSyncFan {
     // New-format devices (currently just LUH-A603S) use a distinct payload shape
     // for warm level, confirmed against pyvesync's dedicated LV600S class: unlike
     // cool mist, it is NOT a virtualLevel/setVirtualLevel command.
-    let warmJson;
-    if (isNewFormatDevice(this.model)) {
-      warmJson = {
+    const warmJson = this.formatPayload(
+      {
         levelIdx: 0,
         levelType: 'warm',
         mistLevel: 0,
         warmLevel: warmMistLevel,
-      };
-    } else {
-      warmJson = {
-        level: warmMistLevel,
-        type: 'warm',
-        id: 0,
-      };
-    }
+      },
+      { level: warmMistLevel, type: 'warm', id: 0 },
+    );
 
     const success = await this.client.sendCommand(
       this,
