@@ -13,6 +13,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 | OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
 | OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
 | LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
+| NeoClassic 450S    | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   |
 | Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   |
 | Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   |
 | Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   |
