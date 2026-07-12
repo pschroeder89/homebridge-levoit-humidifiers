@@ -174,7 +174,7 @@ interface LoginResponse {
   };
 }
 
-interface DeviceResult {
+export interface DeviceResult {
   humidity?: number;
   targetHumidity?: number;
   screenSwitch?: boolean;
@@ -207,7 +207,7 @@ interface DeviceResult {
   };
 }
 
-interface DeviceInfoResponse {
+export interface DeviceInfoResponse {
   result?: {
     result?: DeviceResult;
   };
