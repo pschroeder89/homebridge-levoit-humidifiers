@@ -158,12 +158,13 @@ export default class VeSyncFan {
     if (success) {
       this._isOn = power;
       if (!this._isOn) {
-        // When turning off, save current target and reset all state to match device behavior
+        // When turning off, save current target and reset all state to match device behavior.
+        // targetHumidity is intentionally retained (not zeroed) so HomeKit continues to
+        // display the last known value instead of flashing 0% while the device is off.
         if (this._targetHumidity > 0) {
           this._lastTargetHumidity = this._targetHumidity;
         }
         this._humidityLevel = 0;
-        this._targetHumidity = 0;
         this._mistLevel = 0;
         this._warmLevel = 0;
         this._warmEnabled = false;
@@ -407,11 +408,25 @@ export default class VeSyncFan {
 
     this.client.log.info('Setting Warm Level to ' + warmMistLevel);
 
-    const success = await this.client.sendCommand(this, BypassMethod.LEVEL, {
-      level: warmMistLevel,
-      type: 'warm',
-      id: 0,
-    });
+    // New models use different JSON keys (matches changeMistLevel's format handling)
+    let warmJson;
+    let method = BypassMethod.LEVEL;
+    if (isNewFormatDevice(this.model)) {
+      warmJson = {
+        virtualLevel: warmMistLevel,
+        levelType: 'warm',
+        id: 0,
+      };
+      method = BypassMethod.MIST_LEVEL;
+    } else {
+      warmJson = {
+        level: warmMistLevel,
+        type: 'warm',
+        id: 0,
+      };
+    }
+
+    const success = await this.client.sendCommand(this, method, warmJson);
 
     if (success) {
       this._warmLevel = warmMistLevel;

@@ -84,6 +84,13 @@
             "type": "boolean",
             "default": false,
             "description": "When set to true, HomeKit will display unresponsive humidifiers as Off instead of Not Responding. Read the \"Note to Seasonal Humidifier Users\" in the README for more info."
+          },
+          "pollingInterval": {
+            "title": "Polling Interval (seconds)",
+            "type": "integer",
+            "default": 30,
+            "minimum": 10,
+            "description": "How often (in seconds) to poll VeSync for device status updates. Increase this if you're sharing your VeSync API quota with another integration (e.g. Hubitat) and hitting daily request limits. Minimum 10 seconds."
           }
         }
       }

@@ -121,7 +121,8 @@ Via config.json:
       },
       "options": {
         "enableDebugMode": false,
-        "showOffWhenDisconnected": false
+        "showOffWhenDisconnected": false,
+        "pollingInterval": 30
       }
     }
   ]
@@ -137,6 +138,12 @@ for it to display back in HomeKit.
 If you prefer the disconnected device to be visible in HomeKit at all times,
 set `showOffWhenDisconnected` to `true` in the config. The humidifiers will remain in HomeKit in an Off state.
 **Note: This will cause benign errors in the Homebridge logs that the device could not be contacted.**
+
+### Custom Polling Interval
+
+The plugin polls VeSync every 30 seconds by default to keep HomeKit in sync with your device(s). VeSync enforces a daily
+API quota, so if you're also polling your devices from another integration (e.g. Hubitat) and exceeding that quota, you
+can slow down polling by setting `pollingInterval` (in seconds, minimum 10) in the `options` section of your config.
 
 ### Enabling Debug Mode
 

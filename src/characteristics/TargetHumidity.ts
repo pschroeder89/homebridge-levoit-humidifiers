@@ -27,12 +27,14 @@ const characteristic: {
 } & AccessoryThisType = {
   /**
    * Gets the current target humidity percentage.
-   * Returns 0 if the device is off.
+   * Returns the last known target even when the device is off, so the Home app
+   * shows the correct value immediately instead of flashing 0% on power on.
+   * HomeKit already grays out the slider based on the Active characteristic.
    * Uses cached state to ensure fast response times.
    */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     // Use cached state - background polling keeps this fresh
-    return this.device.isOn ? this.device.targetHumidity : 0;
+    return this.device.targetHumidity;
   },
 
   /**
