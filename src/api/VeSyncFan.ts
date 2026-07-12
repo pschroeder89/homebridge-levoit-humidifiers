@@ -244,7 +244,11 @@ export default class VeSyncFan {
   public async changeMode(mode: Mode): Promise<boolean> {
     // Only the newer LUH-A603S uses "Humidity" as its Auto-equivalent workMode;
     // the older LUH-A602S uses plain "auto" (confirmed against pyvesync's device map).
-    if (isLV600S(this.model) && isNewFormatDevice(this.model) && mode == Mode.Auto) {
+    if (
+      isLV600S(this.model) &&
+      isNewFormatDevice(this.model) &&
+      mode == Mode.Auto
+    ) {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
