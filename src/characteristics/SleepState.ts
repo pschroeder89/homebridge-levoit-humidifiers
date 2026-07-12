@@ -7,7 +7,7 @@ import {
 import { Mode } from '../api/VeSyncFan';
 
 import { AccessoryThisType } from '../VeSyncAccessory';
-import { DevicePrefix } from '../api/deviceTypes';
+import { isSuperior6000S } from '../api/deviceTypes';
 
 /**
  * SleepState characteristic handler for the Sleep Mode service.
@@ -42,7 +42,7 @@ const characteristic: {
   /**
    * Sets Sleep Mode state.
    * - On: Switches to Sleep Mode
-   * - Off: Switches to Auto Mode (or Humidity mode for LEH_S601S models)
+   * - Off: Switches to Auto Mode (or Humidity mode for Superior 6000S models)
    */
   set: async function (value: CharacteristicValue) {
     switch (value) {
@@ -53,8 +53,9 @@ const characteristic: {
         break;
       case false:
         // Turn off Sleep Mode - revert to appropriate auto mode
-        // LEH_S601S models have both Auto and Humidity modes, use Humidity since Auto has its own switch
-        if (this.device.model.includes(DevicePrefix.LEH_S601S)) {
+        // Superior 6000S models (LEH-S601S/LEH-S602S) have both Auto and Humidity
+        // modes, use Humidity since Auto has its own switch (AutoPro)
+        if (isSuperior6000S(this.device.model)) {
           await this.device.changeMode(Mode.Humidity);
           this.updateAllCharacteristics();
           break;
