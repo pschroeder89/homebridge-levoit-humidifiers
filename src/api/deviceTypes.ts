@@ -80,6 +80,16 @@ export interface DeviceType {
   minHumidityLevel: number;
   maxHumidityLevel: number;
   hasAutoProMode?: boolean;
+  /**
+   * When true, dragging the primary target humidity slider targets Humidity (Smart) mode
+   * instead of AutoPro mode, leaving AutoPro reachable only via its dedicated switch.
+   *
+   * Opt-in and defaults to false/unset: on AutoPro-capable devices, VeSync's "humidity"
+   * workMode has only been confirmed for the LV600S family so far. Flip this to true for a
+   * given model only after confirming on real hardware that `workMode: "humidity"` is a
+   * valid mode for it (see #99) - until then it keeps today's behavior (slider -> AutoPro).
+   */
+  humiditySliderTargetsAutoMode?: boolean;
 }
 
 // All supported models, matched by either an exact model name or a stable device prefix.

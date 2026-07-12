@@ -72,9 +72,14 @@ const characteristic: {
             h = device.deviceType.maxHumidityLevel;
 
           // Determine correct auto-like mode based on device type
-          // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
+          // LV600S uses "Humidity" mode; AutoPro-capable devices use "Humidity" mode too
+          // once verified (see humiditySliderTargetsAutoMode), otherwise "AutoPro"; others use "Auto"
           let autoLikeMode: Mode;
-          if (isLV600S(device.model)) {
+          if (
+            isLV600S(device.model) ||
+            (device.deviceType.hasAutoProMode &&
+              device.deviceType.humiditySliderTargetsAutoMode)
+          ) {
             autoLikeMode = Mode.Humidity;
           } else if (device.deviceType.hasAutoProMode) {
             autoLikeMode = Mode.AutoPro;
