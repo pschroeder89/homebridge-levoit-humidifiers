@@ -8,7 +8,7 @@ import * as path from 'node:path';
 
 import deviceTypes from './deviceTypes';
 import DebugMode from '../debugMode';
-import VeSyncFan from './VeSyncFan';
+import VeSyncFan, { DeviceListItem } from './VeSyncFan';
 
 /**
  * VeSync API bypass methods for device control.
@@ -1246,7 +1246,7 @@ export default class VeSync {
         JSON.stringify(list),
       );
 
-      const devices = list
+      const devices = (list as DeviceListItem[])
         .filter(
           ({ deviceType, type }) =>
             deviceTypes.some(({ isValid }) => isValid(deviceType)) &&

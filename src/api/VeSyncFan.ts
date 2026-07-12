@@ -16,6 +16,37 @@ export enum Mode {
 }
 
 /**
+ * Shape of a single entry in the VeSync device list API response
+ * (cloud/v2/deviceManaged/devices), for devices of type 'wifi-air'.
+ */
+export interface DeviceListItem {
+  deviceName: string;
+  mode: Mode;
+  deviceStatus: boolean;
+  mistLevel: number;
+  warmLevel: number;
+  warmEnabled: boolean;
+  brightnessLevel: number;
+  humidity: number;
+  targetHumidity: number;
+  targetReached: boolean;
+  lightOn: string;
+  lightSpeed: number;
+  red: number;
+  blue: number;
+  green: number;
+  colorMode: string;
+  colorSliderLocation: number;
+  configModule: string;
+  cid: string;
+  deviceRegion: string;
+  deviceType: string;
+  macID: string;
+  uuid: string;
+  type: string;
+}
+
+/**
  * VeSyncFan represents a single Levoit humidifier device.
  * Manages device state, API communication, and provides methods to control the device.
  */
@@ -657,7 +688,7 @@ export default class VeSyncFan {
       deviceType,
       macID,
       uuid,
-    }) =>
+    }: DeviceListItem) =>
       new VeSyncFan(
         client,
         deviceName,

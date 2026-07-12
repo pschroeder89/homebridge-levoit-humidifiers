@@ -28,9 +28,8 @@ export type VeSyncPlatformAccessory = PlatformAccessory<VeSyncContext>;
  * Handles device discovery, accessory registration, and lifecycle management.
  */
 export default class Platform implements DynamicPlatformPlugin {
-  public readonly Service: typeof Service = this.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic =
-    this.api.hap.Characteristic;
+  public readonly Service: typeof Service;
+  public readonly Characteristic: typeof Characteristic;
 
   /** Cached accessories loaded from Homebridge's persistent storage */
   public readonly cachedAccessories: VeSyncPlatformAccessory[] = [];
@@ -46,6 +45,12 @@ export default class Platform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
+    // Assigned in the constructor body (not as field initializers) since
+    // field initializers run before parameter properties like `api` are
+    // assigned under native ES2022 class field semantics.
+    this.Service = this.api.hap.Service;
+    this.Characteristic = this.api.hap.Characteristic;
+
     const { email, password } = this.config ?? {};
     // Support backwards compatibility: check top-level first, then options
     const enableDebugMode =
