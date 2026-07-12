@@ -9,6 +9,7 @@ export enum DevicePrefix {
   OASIS_1000S = 'LUH-M101S-',
   NeoClassic450S = 'LUH-N451S-',
   LEH_S601S = 'LEH-S601S-',
+  LEH_S602S = 'LEH-S602S-',
   O601S = 'LUH-O601S-',
 }
 
@@ -17,10 +18,18 @@ export const LV600S_PREFIXES = [
   DevicePrefix.LV600S_V2,
 ] as const;
 
+// Superior 6000S is sold under both the LEH-S601S and LEH-S602S hardware prefixes;
+// both share the same feature set and mode strings.
+export const SUPERIOR_6000S_PREFIXES = [
+  DevicePrefix.LEH_S601S,
+  DevicePrefix.LEH_S602S,
+] as const;
+
 export const NEW_FORMAT_PREFIXES = [
   DevicePrefix.OASIS_1000S,
   DevicePrefix.NeoClassic450S,
   DevicePrefix.LEH_S601S,
+  DevicePrefix.LEH_S602S,
   DevicePrefix.LV600S_V2,
 ] as const;
 
@@ -31,6 +40,9 @@ const matchesAnyPrefix = (
 
 export const isLV600S = (model: string): boolean =>
   matchesAnyPrefix(model, LV600S_PREFIXES);
+
+export const isSuperior6000S = (model: string): boolean =>
+  matchesAnyPrefix(model, SUPERIOR_6000S_PREFIXES);
 
 export const DeviceName = {
   Classic300S: 'Classic300S',
@@ -59,6 +71,7 @@ export const DeviceName = {
   NeoClassic450S_US: `${DevicePrefix.NeoClassic450S}WUS`,
   LEH_S601S_WUS: `${DevicePrefix.LEH_S601S}WUS`,
   LEH_S601S_WUSR: `${DevicePrefix.LEH_S601S}WUSR`,
+  LEH_S602S_WUS: `${DevicePrefix.LEH_S602S}WUS`,
   LUH_O601S_WUS: `${DevicePrefix.O601S}WUS`,
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
 } as const;
@@ -198,11 +211,15 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LEH-S601S WUSR variants (lower min humidity)
+    // Superior 6000S WUSR variants (LEH-S601S-WUSR, lower min humidity)
     isValid: (input: string) =>
       input.includes(DevicePrefix.LEH_S601S) && input.includes('WUSR'),
     hasAutoMode: true,
     hasAutoProMode: true,
+    // Confirmed against pyvesync's device map: 'humidity' is a distinct workMode
+    // from 'autoPro' on this family, so the target humidity slider can safely
+    // target Humidity (Smart) mode instead of always forcing AutoPro. See #99.
+    humiditySliderTargetsAutoMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -212,10 +229,12 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // LEH-S601S family (all other variants)
-    isValid: (input: string) => input.includes(DevicePrefix.LEH_S601S),
+    // Superior 6000S family (LEH-S601S-* and LEH-S602S-*, all other variants)
+    isValid: (input: string) => isSuperior6000S(input),
     hasAutoMode: true,
     hasAutoProMode: true,
+    // See comment above - confirmed via pyvesync's device map.
+    humiditySliderTargetsAutoMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
