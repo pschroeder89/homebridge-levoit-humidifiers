@@ -16,6 +16,37 @@ export enum Mode {
 }
 
 /**
+ * Shape of a single entry in the VeSync device list API response
+ * (cloud/v2/deviceManaged/devices), for devices of type 'wifi-air'.
+ */
+export interface DeviceListItem {
+  deviceName: string;
+  mode: Mode;
+  deviceStatus: boolean;
+  mistLevel: number;
+  warmLevel: number;
+  warmEnabled: boolean;
+  brightnessLevel: number;
+  humidity: number;
+  targetHumidity: number;
+  targetReached: boolean;
+  lightOn: string;
+  lightSpeed: number;
+  red: number;
+  blue: number;
+  green: number;
+  colorMode: string;
+  colorSliderLocation: number;
+  configModule: string;
+  cid: string;
+  deviceRegion: string;
+  deviceType: string;
+  macID: string;
+  uuid: string;
+  type: string;
+}
+
+/**
  * VeSyncFan represents a single Levoit humidifier device.
  * Manages device state, API communication, and provides methods to control the device.
  */
@@ -128,6 +159,15 @@ export default class VeSyncFan {
   private _lastTargetHumidity = 0;
 
   /**
+   * Picks the new-format or old-format command payload for this device.
+   * Most set-commands need entirely different JSON field names between newer
+   * devices (camelCase, e.g. LUH-N451S-, LUH-A603S-) and older ones (snake_case).
+   */
+  private formatPayload<T>(newFormat: T, oldFormat: T): T {
+    return isNewFormatDevice(this.model) ? newFormat : oldFormat;
+  }
+
+  /**
    * Sets the device power state (on/off).
    * When turning off, resets related state values to 0.
    * When turning on, restores the last known target humidity from memory.
@@ -137,18 +177,10 @@ export default class VeSyncFan {
    */
   public async setPower(power: boolean): Promise<boolean> {
     this.client.log.info('Setting Power to ' + power);
-    let switchJson;
-    if (isNewFormatDevice(this.model)) {
-      switchJson = {
-        powerSwitch: power ? 1 : 0,
-        id: 0,
-      };
-    } else {
-      switchJson = {
-        enabled: power,
-        id: 0,
-      };
-    }
+    const switchJson = this.formatPayload(
+      { powerSwitch: power ? 1 : 0, id: 0 },
+      { enabled: power, id: 0 },
+    );
     const success = await this.client.sendCommand(
       this,
       BypassMethod.SWITCH,
@@ -158,12 +190,13 @@ export default class VeSyncFan {
     if (success) {
       this._isOn = power;
       if (!this._isOn) {
-        // When turning off, save current target and reset all state to match device behavior
+        // When turning off, save current target and reset all state to match device behavior.
+        // targetHumidity is intentionally retained (not zeroed) so HomeKit continues to
+        // display the last known value instead of flashing 0% while the device is off.
         if (this._targetHumidity > 0) {
           this._lastTargetHumidity = this._targetHumidity;
         }
         this._humidityLevel = 0;
-        this._targetHumidity = 0;
         this._mistLevel = 0;
         this._warmLevel = 0;
         this._warmEnabled = false;
@@ -204,18 +237,10 @@ export default class VeSyncFan {
     this.client.log.info('Setting Target Humidity to ' + level);
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let humidityJson;
-    if (isNewFormatDevice(this.model)) {
-      humidityJson = {
-        targetHumidity: level,
-        id: 0,
-      };
-    } else {
-      humidityJson = {
-        target_humidity: level,
-        id: 0,
-      };
-    }
+    const humidityJson = this.formatPayload(
+      { targetHumidity: level, id: 0 },
+      { target_humidity: level, id: 0 },
+    );
 
     const success = await this.client.sendCommand(
       this,
@@ -241,8 +266,13 @@ export default class VeSyncFan {
    * @returns true if successful, false otherwise
    */
   public async changeMode(mode: Mode): Promise<boolean> {
-    // LV600s models use "Humidity" mode instead of "Auto"
-    if (isLV600S(this.model) && mode == Mode.Auto) {
+    // Only the newer LUH-A603S uses "Humidity" as its Auto-equivalent workMode;
+    // the older LUH-A602S uses plain "auto" (confirmed against pyvesync's device map).
+    if (
+      isLV600S(this.model) &&
+      isNewFormatDevice(this.model) &&
+      mode == Mode.Auto
+    ) {
       mode = Mode.Humidity;
     }
     // Some models use "AutoPro" mode instead of "Auto"
@@ -253,16 +283,10 @@ export default class VeSyncFan {
     let success: boolean;
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let modeJson;
-    if (isNewFormatDevice(this.model)) {
-      modeJson = {
-        workMode: mode.toString(),
-      };
-    } else {
-      modeJson = {
-        mode: mode.toString(),
-      };
-    }
+    const modeJson = this.formatPayload(
+      { workMode: mode.toString() },
+      { mode: mode.toString() },
+    );
     // Don't change the mode if we are already in that mode
     if (this._mode == mode) {
       success = true;
@@ -317,18 +341,10 @@ export default class VeSyncFan {
     this.client.log.info('Setting Display to ' + power);
 
     // Oasis 1000 uses camelcase instead of snakecase
-    let displayJson;
-    if (isNewFormatDevice(this.model)) {
-      displayJson = {
-        screenSwitch: power ? 1 : 0,
-        id: 0,
-      };
-    } else {
-      displayJson = {
-        state: power,
-        id: 0,
-      };
-    }
+    const displayJson = this.formatPayload(
+      { screenSwitch: power ? 1 : 0, id: 0 },
+      { state: power, id: 0 },
+    );
 
     const success = await this.client.sendCommand(
       this,
@@ -359,23 +375,16 @@ export default class VeSyncFan {
     this.client.log.info('Setting Mist Level to ' + mistLevel);
 
     // New models use different JSON keys
-    let mistJson;
-    const method = BypassMethod.MIST_LEVEL;
-    if (isNewFormatDevice(this.model)) {
-      mistJson = {
-        virtualLevel: mistLevel,
-        levelType: 'mist',
-        id: 0,
-      };
-    } else {
-      mistJson = {
-        level: mistLevel,
-        type: 'mist',
-        id: 0,
-      };
-    }
+    const mistJson = this.formatPayload(
+      { virtualLevel: mistLevel, levelType: 'mist', id: 0 },
+      { level: mistLevel, type: 'mist', id: 0 },
+    );
 
-    const success = await this.client.sendCommand(this, method, mistJson);
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.MIST_LEVEL,
+      mistJson,
+    );
 
     if (success) {
       this._mistLevel = mistLevel;
@@ -407,11 +416,24 @@ export default class VeSyncFan {
 
     this.client.log.info('Setting Warm Level to ' + warmMistLevel);
 
-    const success = await this.client.sendCommand(this, BypassMethod.LEVEL, {
-      level: warmMistLevel,
-      type: 'warm',
-      id: 0,
-    });
+    // New-format devices (currently just LUH-A603S) use a distinct payload shape
+    // for warm level, confirmed against pyvesync's dedicated LV600S class: unlike
+    // cool mist, it is NOT a virtualLevel/setVirtualLevel command.
+    const warmJson = this.formatPayload(
+      {
+        levelIdx: 0,
+        levelType: 'warm',
+        mistLevel: 0,
+        warmLevel: warmMistLevel,
+      },
+      { level: warmMistLevel, type: 'warm', id: 0 },
+    );
+
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.LEVEL,
+      warmJson,
+    );
 
     if (success) {
       this._warmLevel = warmMistLevel;
@@ -541,8 +563,17 @@ export default class VeSyncFan {
           this._mistLevel = (result.mist_virtual_level as number) ?? 0;
         }
 
-        this._warmLevel = (result.warm_level as number) ?? 0;
-        this._warmEnabled = (result.warm_enabled as boolean) ?? false;
+        // New-format devices (currently just LUH-A603S) return warm mist state
+        // under camelCase keys (warmLevel/warmPower) instead of the old
+        // snake_case ones - reading the wrong keys silently kept warm mist
+        // state stuck at 0/off after every poll, regardless of device state.
+        if (isNewFormatDevice(this.model)) {
+          this._warmLevel = (result.warmLevel as number) ?? 0;
+          this._warmEnabled = (result.warmPower as boolean) ?? false;
+        } else {
+          this._warmLevel = (result.warm_level as number) ?? 0;
+          this._warmEnabled = (result.warm_enabled as boolean) ?? false;
+        }
 
         this._brightnessLevel =
           ((result.night_light_brightness ??
@@ -623,7 +654,7 @@ export default class VeSyncFan {
       deviceType,
       macID,
       uuid,
-    }) =>
+    }: DeviceListItem) =>
       new VeSyncFan(
         client,
         deviceName,

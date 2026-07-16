@@ -8,7 +8,7 @@ import * as path from 'node:path';
 
 import deviceTypes from './deviceTypes';
 import DebugMode from '../debugMode';
-import VeSyncFan from './VeSyncFan';
+import VeSyncFan, { DeviceListItem } from './VeSyncFan';
 
 /**
  * VeSync API bypass methods for device control.
@@ -174,7 +174,7 @@ interface LoginResponse {
   };
 }
 
-interface DeviceResult {
+export interface DeviceResult {
   humidity?: number;
   targetHumidity?: number;
   screenSwitch?: boolean;
@@ -192,6 +192,8 @@ interface DeviceResult {
   mist_virtual_level?: number;
   warm_level?: number;
   warm_enabled?: boolean;
+  warmLevel?: number;
+  warmPower?: boolean;
   night_light_brightness?: number;
   rgbNightLight?: {
     brightness?: number;
@@ -205,7 +207,7 @@ interface DeviceResult {
   };
 }
 
-interface DeviceInfoResponse {
+export interface DeviceInfoResponse {
   result?: {
     result?: DeviceResult;
   };
@@ -1244,7 +1246,7 @@ export default class VeSync {
         JSON.stringify(list),
       );
 
-      const devices = list
+      const devices = (list as DeviceListItem[])
         .filter(
           ({ deviceType, type }) =>
             deviceTypes.some(({ isValid }) => isValid(deviceType)) &&

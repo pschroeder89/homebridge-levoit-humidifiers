@@ -1,4 +1,4 @@
-name: Build and Lint
+name: Build, Lint, and Test
 
 on:
   push:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Lint the project
         run: yarn lint
+
+      - name: Run tests
+        run: yarn test
 
       - name: Build the project
         run: yarn build

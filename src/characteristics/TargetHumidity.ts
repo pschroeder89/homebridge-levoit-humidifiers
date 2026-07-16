@@ -7,7 +7,7 @@ import {
 
 import { AccessoryThisType } from '../VeSyncAccessory';
 import { Mode } from '../api/VeSyncFan';
-import { DevicePrefix, isLV600S } from '../api/deviceTypes';
+import { DevicePrefix, isLV600S, isNewFormatDevice } from '../api/deviceTypes';
 import { debounceSet } from '../utils/debounce';
 
 /**
@@ -27,12 +27,14 @@ const characteristic: {
 } & AccessoryThisType = {
   /**
    * Gets the current target humidity percentage.
-   * Returns 0 if the device is off.
+   * Returns the last known target even when the device is off, so the Home app
+   * shows the correct value immediately instead of flashing 0% on power on.
+   * HomeKit already grays out the slider based on the Active characteristic.
    * Uses cached state to ensure fast response times.
    */
   get: async function (): Promise<Nullable<CharacteristicValue>> {
     // Use cached state - background polling keeps this fresh
-    return this.device.isOn ? this.device.targetHumidity : 0;
+    return this.device.targetHumidity;
   },
 
   /**
@@ -70,9 +72,16 @@ const characteristic: {
             h = device.deviceType.maxHumidityLevel;
 
           // Determine correct auto-like mode based on device type
-          // LV600S uses "Humidity" mode, others use "Auto" or "AutoPro"
+          // Only the newer LUH-A603S uses "Humidity" mode (the older LUH-A602S uses
+          // plain "Auto" - confirmed against pyvesync's device map). AutoPro-capable
+          // devices use "Humidity" mode too once verified (see
+          // humiditySliderTargetsAutoMode), otherwise "AutoPro"; others use "Auto"
           let autoLikeMode: Mode;
-          if (isLV600S(device.model)) {
+          if (
+            (isLV600S(device.model) && isNewFormatDevice(device.model)) ||
+            (device.deviceType.hasAutoProMode &&
+              device.deviceType.humiditySliderTargetsAutoMode)
+          ) {
             autoLikeMode = Mode.Humidity;
           } else if (device.deviceType.hasAutoProMode) {
             autoLikeMode = Mode.AutoPro;

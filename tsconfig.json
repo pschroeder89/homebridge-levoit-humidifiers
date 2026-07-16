@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2018", // ~node10
+    "target": "ES2022", // matches engines.node >=20.19.0
     "module": "commonjs",
-    "lib": ["es2015", "es2016", "es2017", "es2018", "es2021"],
+    "lib": ["es2022"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -10,7 +10,6 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "noImplicitAny": false,
     "skipLibCheck": true
   },
   "include": ["src/"],

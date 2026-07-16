@@ -51,12 +51,13 @@ export default class VeSyncAccessory {
 
   /**
    * Background polling interval to keep device state fresh.
-   * Polls every 30 seconds to balance freshness with API quota limits.
-   * The VeSync API has daily quotas (3200 + 1500 * device count), so we
-   * need to be conservative with polling frequency.
+   * Defaults to 30 seconds to balance freshness with API quota limits, but can be
+   * overridden via options.pollingInterval in the config for users hitting VeSync's
+   * daily quota (3200 + 1500 * device count), e.g. when sharing quota with another integration.
+   * Clamped to a 10-second minimum to avoid hammering the API.
    */
   private pollingInterval: NodeJS.Timeout | null = null;
-  private readonly POLLING_INTERVAL_MS = 30000; // 30 seconds
+  private readonly POLLING_INTERVAL_MS: number;
 
   public get UUID() {
     return this.device.uuid.toString();
@@ -72,6 +73,11 @@ export default class VeSyncAccessory {
   ) {
     const config = platform.config;
     const accessories = config.accessories ? config.accessories : {};
+    const configuredPollingSeconds = Number(config.options?.pollingInterval);
+    this.POLLING_INTERVAL_MS =
+      (Number.isFinite(configuredPollingSeconds) && configuredPollingSeconds > 0
+        ? Math.max(configuredPollingSeconds, 10)
+        : 30) * 1000;
 
     this.setupAccessoryInfo();
     this.humidifierService = this.setupHumidifierService();
@@ -452,7 +458,7 @@ export default class VeSyncAccessory {
       .getCharacteristic(
         this.platform.Characteristic.RelativeHumidityHumidifierThreshold,
       )
-      .updateValue(device.isOn ? device.targetHumidity : 0);
+      .updateValue(device.targetHumidity);
 
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
