@@ -49,6 +49,7 @@ export default class VeSyncAccessory {
   private readonly mistService: Service | undefined;
   private readonly warmMistService: Service | undefined;
   private readonly autoProService: Service | undefined;
+  private readonly hasChildLock: boolean;
 
   /**
    * Background polling interval to keep device state fresh.
@@ -79,6 +80,9 @@ export default class VeSyncAccessory {
       (Number.isFinite(configuredPollingSeconds) && configuredPollingSeconds > 0
         ? Math.max(configuredPollingSeconds, 10)
         : 30) * 1000;
+
+    this.hasChildLock =
+      !!this.device.deviceType.hasChildLock && accessories.child_lock !== false;
 
     this.setupAccessoryInfo();
     this.humidifierService = this.setupHumidifierService();
@@ -148,11 +152,19 @@ export default class VeSyncAccessory {
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .onGet(Humidity.get.bind(this));
 
-    if (this.device.deviceType.hasChildLock) {
+    if (this.hasChildLock) {
       service
         .getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
         .onGet(ChildLock.get.bind(this))
         .onSet(ChildLock.set.bind(this));
+    } else if (
+      service.testCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+    ) {
+      // Remove a previously-added characteristic if child_lock was turned off
+      // in config (or the cached accessory predates a device-support change).
+      service.removeCharacteristic(
+        service.getCharacteristic(this.platform.Characteristic.LockPhysicalControls),
+      );
     }
 
     return service;
@@ -472,7 +484,7 @@ export default class VeSyncAccessory {
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .updateValue(device.humidityLevel);
 
-    if (device.deviceType.hasChildLock) {
+    if (this.hasChildLock) {
       this.humidifierService
         .getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
         .updateValue(
