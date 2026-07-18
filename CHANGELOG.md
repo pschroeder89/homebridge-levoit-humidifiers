@@ -1,3 +1,14 @@
+## [1.23.0] - 2026-Jul-17
+
+### Fixed
+
+- AutoPro-off on Superior 6000S was returning to Manual mode instead of Humidity (Smart) mode, inconsistent with how Sleep-off already worked.
+
+### Added
+
+- Sprout Humidifier (`LEH-B381S-*`) device support: power, mode (AutoPro/Sleep/Manual), mist level, target humidity, and display.
+- Child lock support for Superior 6000S and Sprout Humidifier, exposed via the Humidifier tile's Lock Physical Controls setting in the Home app.
+
 ## [1.22.0-beta.1] - 2026-Jul-12
 
 ### Fixed
