@@ -9,6 +9,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 | Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm |
 | ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- |
 | Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
+| Sprout Humidifier  | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
 | OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   |
 | OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |
 | OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   |

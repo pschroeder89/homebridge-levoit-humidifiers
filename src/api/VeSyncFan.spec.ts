@@ -115,6 +115,7 @@ const LV600S_OLD = 'LUH-A602S-WUS'; // old format, has warm mist
 const LV600S_NEW = 'LUH-A603S-WUS'; // new format, has warm mist
 const SUPERIOR_6000S = 'LEH-S601S-WUS'; // new format, AutoPro, no warm mist
 const NEOCLASSIC_450S = 'LUH-N451S-WUS'; // new format, no warm mist
+const SPROUT = 'LEH-B381S-WUS'; // new format, AutoPro-only (no separate Humidity mode)
 
 describe('VeSyncFan.setPower', () => {
   it('sends the old-format payload for pre-A603S devices', async () => {
@@ -226,6 +227,17 @@ describe('VeSyncFan.changeMode', () => {
     assert.equal(fan.mode, Mode.AutoPro);
   });
 
+  it('remaps Auto to AutoPro for Sprout, which has no separate Humidity mode', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SPROUT, { mode: Mode.Manual });
+
+    await fan.changeMode(Mode.Auto);
+
+    assert.deepEqual(calls[0].body, { workMode: 'autoPro' });
+    assert.equal(fan.mode, Mode.AutoPro);
+  });
+
   it('skips the API call when already in the requested mode', async () => {
     const client = createClient();
     const { calls } = stubSendCommand(client);
@@ -256,6 +268,18 @@ describe('VeSyncFan.changeMistLevel', () => {
     const fan = createFan(client, CLASSIC_300S);
 
     assert.equal(await fan.changeMistLevel(0), false);
+  });
+
+  it('respects a device-specific lower max (Sprout only has 2 mist levels)', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SPROUT);
+
+    assert.equal(await fan.changeMistLevel(3), false);
+    assert.equal(calls.length, 0);
+
+    await fan.changeMistLevel(2);
+    assert.equal(calls.length, 1);
   });
 
   it('sends the old-format payload', async () => {
