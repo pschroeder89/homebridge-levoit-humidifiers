@@ -62,6 +62,13 @@ export default class VeSyncFan {
 
   private _displayOn = true;
 
+  /**
+   * Physical child lock state. Not reset on power-off (like mode) since it's
+   * a safety setting independent of power state, not something the device
+   * clears when turned off.
+   */
+  private _childLock = false;
+
   public readonly manufacturer = 'Levoit';
 
   /**
@@ -105,6 +112,10 @@ export default class VeSyncFan {
 
   public get warmEnabled() {
     return this._warmEnabled;
+  }
+
+  public get childLock() {
+    return this._childLock;
   }
 
   public get lightOn() {
@@ -267,7 +278,7 @@ export default class VeSyncFan {
    */
   public async changeMode(mode: Mode): Promise<boolean> {
     // Only the newer LUH-A603S uses "Humidity" as its Auto-equivalent workMode;
-    // the older LUH-A602S uses plain "auto" (confirmed against pyvesync's device map).
+    // the older LUH-A602S uses plain "auto".
     if (
       isLV600S(this.model) &&
       isNewFormatDevice(this.model) &&
@@ -360,6 +371,38 @@ export default class VeSyncFan {
   }
 
   /**
+   * Sets the physical child lock state.
+   * Only available on devices with child lock capability (Superior 6000S,
+   * Sprout Humidifier) - both new-format devices, so there's no old-format
+   * payload variant to handle here.
+   *
+   * @param locked - true to enable the child lock, false to disable it
+   * @returns true if successful, false if the device doesn't support child lock
+   */
+  public async changeChildLock(locked: boolean): Promise<boolean> {
+    if (!this.deviceType.hasChildLock) {
+      this.client.log.error(
+        'Error: Attempted to set child lock on a device without hasChildLock.',
+      );
+      return false;
+    }
+
+    this.client.log.info('Setting Child Lock to ' + locked);
+
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.CHILD_LOCK,
+      { childLockSwitch: locked ? 1 : 0 },
+    );
+
+    if (success) {
+      this._childLock = locked;
+    }
+
+    return success;
+  }
+
+  /**
    * Changes the cool mist level.
    * Validates the level is within device limits (1 to mistLevels).
    * Handles different JSON field names for new vs old device formats.
@@ -417,8 +460,8 @@ export default class VeSyncFan {
     this.client.log.info('Setting Warm Level to ' + warmMistLevel);
 
     // New-format devices (currently just LUH-A603S) use a distinct payload shape
-    // for warm level, confirmed against pyvesync's dedicated LV600S class: unlike
-    // cool mist, it is NOT a virtualLevel/setVirtualLevel command.
+    // for warm level: unlike cool mist, it is NOT a virtualLevel/setVirtualLevel
+    // command.
     const warmJson = this.formatPayload(
       {
         levelIdx: 0,
@@ -567,6 +610,10 @@ export default class VeSyncFan {
         // under camelCase keys (warmLevel/warmPower) instead of the old
         // snake_case ones - reading the wrong keys silently kept warm mist
         // state stuck at 0/off after every poll, regardless of device state.
+        // Only devices with hasChildLock ever send this field; harmless no-op
+        // (stays false) for devices that don't.
+        this._childLock = (result.childLockSwitch as boolean) ?? false;
+
         if (isNewFormatDevice(this.model)) {
           this._warmLevel = (result.warmLevel as number) ?? 0;
           this._warmEnabled = (result.warmPower as boolean) ?? false;

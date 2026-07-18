@@ -63,6 +63,11 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
    - Sensor that displays current Humidity %
 
+8. Child Lock
+
+   - Locks the physical buttons on the device (Superior 6000S and Sprout Humidifier only). Does not affect control
+     from HomeKit or the VeSync app. Exposed as the Humidifier tile's Lock Physical Controls setting in the Home app.
+
 ### Behavior
 
 - **Turning off the humidifier** resets all controls (sleep mode, warm mist, display, night light) to off, matching the physical device behavior.

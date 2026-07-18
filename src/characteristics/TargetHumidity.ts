@@ -72,10 +72,10 @@ const characteristic: {
             h = device.deviceType.maxHumidityLevel;
 
           // Determine correct auto-like mode based on device type
-          // Only the newer LUH-A603S uses "Humidity" mode (the older LUH-A602S uses
-          // plain "Auto" - confirmed against pyvesync's device map). AutoPro-capable
-          // devices use "Humidity" mode too once verified (see
-          // humiditySliderTargetsAutoMode), otherwise "AutoPro"; others use "Auto"
+          // Only the newer LUH-A603S uses "Humidity" mode - the older LUH-A602S
+          // uses plain "Auto". AutoPro-capable devices use "Humidity" mode too
+          // once verified (see humiditySliderTargetsAutoMode), otherwise
+          // "AutoPro"; others use "Auto"
           let autoLikeMode: Mode;
           if (
             (isLV600S(device.model) && isNewFormatDevice(device.model)) ||
