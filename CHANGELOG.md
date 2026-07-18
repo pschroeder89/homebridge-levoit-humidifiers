@@ -35,7 +35,7 @@
 
 ### Added
 
-- NeoClassic 450S (`LUH-N451S-*`) device support: auto mode, 9 mist levels, night light, sleep mode, 30-80% target humidity.
+- #109: NeoClassic 450S (`LUH-N451S-*`) device support: auto mode, 9 mist levels, night light, sleep mode, 30-80% target humidity.
 
 ## [1.20.0] - 2026-May-05
 
@@ -44,10 +44,10 @@ reconstructable from git history).
 
 ### Fixed
 
-- Token expiration errors ("the user is not logged in") that made devices unresponsive or caused them to be silently
-  removed from HomeKit - tokens are now proactively validated and refreshed before every API call, with automatic
-  retry on 401 responses.
-- Mist and warm mist sliders showing invalid `validValues` warnings in HomeKit.
+- #100: Token expiration errors ("the user is not logged in") that made devices unresponsive or caused them to be
+  silently removed from HomeKit - tokens are now proactively validated and refreshed before every API call, with
+  automatic retry on 401 responses.
+- #75: Mist and warm mist sliders showing invalid `validValues` warnings in HomeKit.
 
 ### Added
 
@@ -75,16 +75,37 @@ reconstructable from git history).
 
 ### Added
 
-- Homebridge v2.0 support.
+- #78: Homebridge 2.0 support.
+
+### Changed
+
+- Node 18 is no longer supported (dropped by Homebridge itself as of April 2025) - Node 20 or 22 is required.
 
 ## [1.16.0] - 2025-Dec-29
 
 ### Fixed
 
-- #89: User login failures ("the user is not logged in") affecting some accounts.
+- #89: Login failures for newer VeSync accounts and non-US accounts, caused by upstream VeSync API changes. Country
+  Code no longer needs to be configured manually - the correct region is now detected from the API response and the
+  login automatically retried with it.
 
-## [1.15.0] - 2025-Sept-08
+### Added
+
+- Debug mode exposed as a UI config option.
+- Auth tokens are now cached across restarts instead of logging in again on every reboot.
+
+### Changed
+
+- Device model matching refactored to use hardware ID prefixes instead of hardcoded full model names, broadening
+  support to regional variants without needing to add each one individually.
+
+## [1.15.0] - 2025-Sept-23
 
 ### Fixed
 
-- #89: Update login implementation for non-US users to use region
+- #89: Users outside the US were unable to log in.
+
+### Added
+
+- #86: `LEH-S601S-WUSR` device support.
+- #87: `LUH-M101S-WEUR` device support.
