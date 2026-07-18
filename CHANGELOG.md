@@ -1,3 +1,11 @@
+## [1.23.1] - 2026-Jul-17
+
+### Added
+
+- `accessories.child_lock` config toggle to hide the child lock control introduced in 1.23.0. Every other optional
+  feature (`mist`, `warm_mist`, `sleep_mode`, `display`, `night_light`, `auto_pro`, `humidity_sensor`) already had
+  this; child lock was missing it.
+
 ## [1.23.0] - 2026-Jul-17
 
 ### Fixed
