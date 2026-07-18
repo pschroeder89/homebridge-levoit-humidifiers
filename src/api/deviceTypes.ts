@@ -11,6 +11,7 @@ export enum DevicePrefix {
   LEH_S601S = 'LEH-S601S-',
   LEH_S602S = 'LEH-S602S-',
   O601S = 'LUH-O601S-',
+  Sprout = 'LEH-B381S-',
 }
 
 export const LV600S_PREFIXES = [
@@ -31,6 +32,7 @@ export const NEW_FORMAT_PREFIXES = [
   DevicePrefix.LEH_S601S,
   DevicePrefix.LEH_S602S,
   DevicePrefix.LV600S_V2,
+  DevicePrefix.Sprout,
 ] as const;
 
 const matchesAnyPrefix = (
@@ -74,6 +76,8 @@ export const DeviceName = {
   LEH_S602S_WUS: `${DevicePrefix.LEH_S602S}WUS`,
   LUH_O601S_WUS: `${DevicePrefix.O601S}WUS`,
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
+  Sprout_WUS: `${DevicePrefix.Sprout}WUS`,
+  Sprout_WEU: `${DevicePrefix.Sprout}WEU`,
 } as const;
 
 export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
@@ -255,6 +259,27 @@ const deviceTypes: DeviceType[] = [
     hasWarmMode: true,
     warmMistLevels: 3,
     minHumidityLevel: 40,
+    maxHumidityLevel: 80,
+  },
+  {
+    // Sprout Humidifier family (LEH-B381S-*). Per pyvesync's device map, this
+    // device's only auto-like mode is "autoPro" (no separate "humidity" mode
+    // like Superior 6000S has), so humiditySliderTargetsAutoMode is left unset
+    // and the target humidity slider/AutoPro-off correctly fall back to
+    // AutoPro/Manual. It also has a tunable-white night light (brightness +
+    // color temperature, not RGB), drying mode, child lock, and filter/
+    // temperature sensors - none of which this plugin models yet for any
+    // device, so hasLight stays false here rather than exposing a control
+    // shape we don't actually support.
+    isValid: (input: string) => input.includes(DevicePrefix.Sprout),
+    hasAutoMode: true,
+    hasAutoProMode: true,
+    mistLevels: 2,
+    hasLight: false,
+    hasColorMode: false,
+    hasSleepMode: true,
+    hasWarmMode: false,
+    minHumidityLevel: 30,
     maxHumidityLevel: 80,
   },
 ];
