@@ -67,6 +67,12 @@
             "type": "boolean",
             "default": true,
             "description": "Enables switch to turn on / off Auto Pro Mode on LEH_S601S / LUH_O601S models"
+          },
+          "child_lock": {
+            "title": "Child Lock",
+            "type": "boolean",
+            "default": true,
+            "description": "Enables control of the physical child lock on Superior 6000S and Sprout Humidifier models"
           }
         }
       },

@@ -124,7 +124,8 @@ Via config.json:
         "warm_mist": false,
         "night_light": false,
         "auto_pro": false,
-        "humidity_sensor": true
+        "humidity_sensor": true,
+        "child_lock": false
       },
       "options": {
         "enableDebugMode": false,
