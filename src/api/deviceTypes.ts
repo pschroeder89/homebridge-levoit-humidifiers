@@ -107,6 +107,11 @@ export interface DeviceType {
    * valid mode for it (see #99) - until then it keeps today's behavior (slider -> AutoPro).
    */
   humiditySliderTargetsAutoMode?: boolean;
+  /**
+   * Whether the device supports a physical child lock toggle. Only confirmed
+   * on Superior 6000S and Sprout Humidifier.
+   */
+  hasChildLock?: boolean;
 }
 
 // All supported models, matched by either an exact model name or a stable device prefix.
@@ -220,10 +225,11 @@ const deviceTypes: DeviceType[] = [
       input.includes(DevicePrefix.LEH_S601S) && input.includes('WUSR'),
     hasAutoMode: true,
     hasAutoProMode: true,
-    // Confirmed against pyvesync's device map: 'humidity' is a distinct workMode
-    // from 'autoPro' on this family, so the target humidity slider can safely
-    // target Humidity (Smart) mode instead of always forcing AutoPro. See #99.
+    // 'humidity' is a distinct workMode from 'autoPro' on this family, so the
+    // target humidity slider can safely target Humidity (Smart) mode instead
+    // of always forcing AutoPro. See #99.
     humiditySliderTargetsAutoMode: true,
+    hasChildLock: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -237,8 +243,9 @@ const deviceTypes: DeviceType[] = [
     isValid: (input: string) => isSuperior6000S(input),
     hasAutoMode: true,
     hasAutoProMode: true,
-    // See comment above - confirmed via pyvesync's device map.
+    // See comment above.
     humiditySliderTargetsAutoMode: true,
+    hasChildLock: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -262,18 +269,19 @@ const deviceTypes: DeviceType[] = [
     maxHumidityLevel: 80,
   },
   {
-    // Sprout Humidifier family (LEH-B381S-*). Per pyvesync's device map, this
-    // device's only auto-like mode is "autoPro" (no separate "humidity" mode
-    // like Superior 6000S has), so humiditySliderTargetsAutoMode is left unset
-    // and the target humidity slider/AutoPro-off correctly fall back to
+    // Sprout Humidifier family (LEH-B381S-*). This device's only auto-like
+    // mode is "autoPro" (no separate "humidity" mode like Superior 6000S
+    // has), so humiditySliderTargetsAutoMode is left unset and the target
+    // humidity slider/AutoPro-off correctly fall back to
     // AutoPro/Manual. It also has a tunable-white night light (brightness +
-    // color temperature, not RGB), drying mode, child lock, and filter/
-    // temperature sensors - none of which this plugin models yet for any
-    // device, so hasLight stays false here rather than exposing a control
-    // shape we don't actually support.
+    // color temperature, not RGB), drying mode, and filter/temperature
+    // sensors - none of which this plugin models yet for any device, so
+    // hasLight stays false here rather than exposing a control shape we
+    // don't actually support.
     isValid: (input: string) => input.includes(DevicePrefix.Sprout),
     hasAutoMode: true,
     hasAutoProMode: true,
+    hasChildLock: true,
     mistLevels: 2,
     hasLight: false,
     hasColorMode: false,

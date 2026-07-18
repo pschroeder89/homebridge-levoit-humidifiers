@@ -308,6 +308,46 @@ describe('VeSyncFan.changeMistLevel', () => {
   });
 });
 
+describe('VeSyncFan.changeChildLock', () => {
+  it('rejects devices without child lock support', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, CLASSIC_300S);
+
+    const success = await fan.changeChildLock(true);
+
+    assert.equal(success, false);
+    assert.equal(calls.length, 0);
+  });
+
+  it('sends the childLockSwitch payload for a supported device', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SUPERIOR_6000S);
+
+    await fan.changeChildLock(true);
+
+    assert.equal(calls[0].method, BypassMethod.CHILD_LOCK);
+    assert.deepEqual(calls[0].body, { childLockSwitch: 1 });
+    assert.equal(fan.childLock, true);
+
+    await fan.changeChildLock(false);
+    assert.deepEqual(calls[1].body, { childLockSwitch: 0 });
+    assert.equal(fan.childLock, false);
+  });
+
+  it('is supported on Sprout as well as Superior 6000S', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SPROUT);
+
+    const success = await fan.changeChildLock(true);
+
+    assert.equal(success, true);
+    assert.deepEqual(calls[0].body, { childLockSwitch: 1 });
+  });
+});
+
 describe('VeSyncFan.changeWarmMistLevel', () => {
   it('rejects devices without warm mist support', async () => {
     const client = createClient();
@@ -347,9 +387,9 @@ describe('VeSyncFan.changeWarmMistLevel', () => {
 
     await fan.changeWarmMistLevel(2);
 
-    // This is NOT a virtualLevel/setVirtualLevel command like cool mist -
-    // confirmed against pyvesync's dedicated LV600S class. Getting this
-    // wrong doesn't error, it just gets silently ignored by the device.
+    // This is NOT a virtualLevel/setVirtualLevel command like cool mist.
+    // Getting this wrong doesn't error, it just gets silently ignored by
+    // the device.
     assert.equal(calls[0].method, BypassMethod.LEVEL);
     assert.deepEqual(calls[0].body, {
       levelIdx: 0,
@@ -423,6 +463,29 @@ describe('VeSyncFan.updateInfo', () => {
       'should read warmLevel, not fall back to 0 via the snake_case key',
     );
     assert.equal(fan.warmEnabled, true);
+  });
+
+  it('reads childLockSwitch for devices that support child lock', async () => {
+    const client = createClient();
+    const fan = createFan(client, SUPERIOR_6000S);
+    stubGetDeviceInfo(client, {
+      result: {
+        result: {
+          powerSwitch: 1,
+          workMode: 'autoPro',
+          targetHumidity: 55,
+          humidity: 50,
+          virtualLevel: 3,
+          screenSwitch: true,
+          autoStopState: false,
+          childLockSwitch: true,
+        },
+      },
+    });
+
+    await fan.updateInfo();
+
+    assert.equal(fan.childLock, true);
   });
 
   it('reads warm mist state from snake_case keys for old-format devices', async () => {

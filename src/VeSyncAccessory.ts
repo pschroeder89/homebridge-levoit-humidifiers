@@ -15,6 +15,7 @@ import LightState from './characteristics/LightState';
 import WarmMistLevel from './characteristics/WarmMistLevel';
 import WarmActive from './characteristics/WarmActive';
 import AutoProState from './characteristics/AutoProState';
+import ChildLock from './characteristics/ChildLock';
 
 const HumidifierName = 'Humidifier';
 const HumiditySensorName = 'Humidity Sensor';
@@ -146,6 +147,13 @@ export default class VeSyncAccessory {
     service
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .onGet(Humidity.get.bind(this));
+
+    if (this.device.deviceType.hasChildLock) {
+      service
+        .getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+        .onGet(ChildLock.get.bind(this))
+        .onSet(ChildLock.set.bind(this));
+    }
 
     return service;
   }
@@ -463,6 +471,18 @@ export default class VeSyncAccessory {
     this.humidifierService
       .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .updateValue(device.humidityLevel);
+
+    if (device.deviceType.hasChildLock) {
+      this.humidifierService
+        .getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+        .updateValue(
+          device.childLock
+            ? this.platform.Characteristic.LockPhysicalControls
+                .CONTROL_LOCK_ENABLED
+            : this.platform.Characteristic.LockPhysicalControls
+                .CONTROL_LOCK_DISABLED,
+        );
+    }
   }
 
   private updateOptionalServiceCharacteristics(device: VeSyncFan): void {

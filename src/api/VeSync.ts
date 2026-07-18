@@ -25,6 +25,7 @@ export enum BypassMethod {
   LEVEL = 'setLevel',
   LIGHT_STATUS = 'setLightStatus',
   DRYING_MODE = 'setDryingMode',
+  CHILD_LOCK = 'setChildLock',
 }
 
 // Known API hosts
@@ -194,6 +195,7 @@ export interface DeviceResult {
   warm_enabled?: boolean;
   warmLevel?: number;
   warmPower?: boolean;
+  childLockSwitch?: boolean;
   night_light_brightness?: number;
   rgbNightLight?: {
     brightness?: number;
