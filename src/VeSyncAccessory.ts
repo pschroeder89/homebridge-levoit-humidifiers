@@ -180,7 +180,7 @@ export default class VeSyncAccessory {
     service.addOptionalCharacteristic(
       this.platform.Characteristic.ConfiguredName,
     );
-    if (!this.platform.api.hap.HAPStorage.storage().getItemSync(key)) {
+    if (!this.platform.api.hap.HAPStorage.storage().getItem(key)) {
       service.setCharacteristic(
         this.platform.Characteristic.ConfiguredName,
         name,
