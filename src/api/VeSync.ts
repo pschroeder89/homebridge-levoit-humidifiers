@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import { Logger, PlatformConfig } from 'homebridge';
 import AsyncLock from 'async-lock';
-import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import deviceTypes from './deviceTypes';
@@ -116,6 +117,23 @@ function initialHostForCountry(cc: string): string {
   const upper = (cc || '').toUpperCase();
   if (EU_COUNTRY_CODES.has(upper)) return EU_HOST;
   return US_HOST;
+}
+
+/**
+ * Builds a terminal ID that stays the same across restarts on the same host,
+ * mirroring pyvesync: '2' + uuid5(hostname + first non-internal MAC).
+ */
+function stableTerminalId(): string {
+  const mac =
+    Object.values(os.networkInterfaces())
+      .flat()
+      .find(
+        (iface) =>
+          iface && !iface.internal && iface.mac !== '00:00:00:00:00:00',
+      )?.mac ?? '';
+  return (
+    '2' + uuidv5(`${mac}-${os.hostname()}`, uuidv5.DNS).replaceAll('-', '')
+  );
 }
 
 const lock = new AsyncLock();
@@ -264,15 +282,17 @@ export default class VeSync {
 
   /**
    * Terminal/device identifier that VeSync expects to remain stable across sessions.
-   * Generated once per instance and used for all API calls.
+   * Derived from the host so restarts don't register as a new device (which triggers
+   * "New Login" emails and counts against VeSync's 5-login limit).
    */
-  private readonly terminalId = '2' + uuidv4().replaceAll('-', '');
+  private readonly terminalId = stableTerminalId();
 
   /**
-   * Application ID used for authentication requests.
-   * Randomly generated per instance.
+   * Official VeSync app ID. VeSync rejects logins with any other appID
+   * (step 2 fails with "login temporary auth code expired").
+   * See https://github.com/webdjoe/pyvesync/issues/466
    */
-  private readonly appID = Math.random().toString(36).substring(2, 10);
+  private readonly appID = 'eldodkfj';
 
   /**
    * Simple login backoff to prevent hammering the API on repeated failures.
