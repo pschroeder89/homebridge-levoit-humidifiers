@@ -372,6 +372,46 @@ describe('VeSyncFan.changeChildLock', () => {
   });
 });
 
+describe('VeSyncFan.changeAutoDrying', () => {
+  it('rejects devices without drying mode support', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, CLASSIC_300S);
+
+    const success = await fan.changeAutoDrying(true);
+
+    assert.equal(success, false);
+    assert.equal(calls.length, 0);
+  });
+
+  it('sends the autoDryingSwitch payload for a supported device', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SUPERIOR_6000S);
+
+    await fan.changeAutoDrying(true);
+
+    assert.equal(calls[0].method, BypassMethod.DRYING_MODE);
+    assert.deepEqual(calls[0].body, { autoDryingSwitch: 1 });
+    assert.equal(fan.autoDrying, true);
+
+    await fan.changeAutoDrying(false);
+    assert.deepEqual(calls[1].body, { autoDryingSwitch: 0 });
+    assert.equal(fan.autoDrying, false);
+  });
+
+  it('is supported on Sprout and Superior Studio 450S', async () => {
+    for (const model of [SPROUT, SUPERIOR_STUDIO_450S]) {
+      const client = createClient();
+      const { calls } = stubSendCommand(client);
+      const fan = createFan(client, model);
+
+      assert.equal(await fan.changeAutoDrying(true), true, model);
+      assert.deepEqual(calls[0].body, { autoDryingSwitch: 1 });
+    }
+  });
+});
+
 describe('VeSyncFan.changeWarmMistLevel', () => {
   it('rejects devices without warm mist support', async () => {
     const client = createClient();
@@ -510,6 +550,34 @@ describe('VeSyncFan.updateInfo', () => {
     await fan.updateInfo();
 
     assert.equal(fan.childLock, true);
+  });
+
+  it('reads dryingMode.autoDryingSwitch for devices that support drying mode', async () => {
+    const client = createClient();
+    const fan = createFan(client, SPROUT);
+    stubGetDeviceInfo(client, {
+      result: {
+        result: {
+          powerSwitch: 0,
+          workMode: 'autoPro',
+          targetHumidity: 55,
+          humidity: 50,
+          virtualLevel: 1,
+          screenSwitch: false,
+          autoStopState: false,
+          dryingMode: {
+            autoDryingSwitch: 1,
+            dryingState: 1,
+            dryingLevel: 1,
+            dryingRemain: 3600,
+          },
+        },
+      },
+    });
+
+    await fan.updateInfo();
+
+    assert.equal(fan.autoDrying, true);
   });
 
   it('reads warm mist state from snake_case keys for old-format devices', async () => {

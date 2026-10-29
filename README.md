@@ -70,7 +70,12 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
      control both target humidity (within a 40-50% range) and fan speed automatically.
    - Turning AutoPro off returns to Humidity (Smart) mode.
 
-9. Child Lock
+9. Auto Dry
+
+   - Switch to turn automatic filter drying on or off (Superior 6000S, Superior Studio 450S and Sprout Humidifier
+     only). When on, the device dries its wick filter after it turns off to prevent mold and odor.
+
+10. Child Lock
 
    - Locks the physical buttons on the device (Superior 6000S and Sprout Humidifier only). Does not affect control
      from HomeKit or the VeSync app. Exposed as the Humidifier tile's Lock Physical Controls setting in the Home app.

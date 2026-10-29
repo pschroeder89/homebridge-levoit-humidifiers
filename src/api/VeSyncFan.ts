@@ -69,6 +69,12 @@ export default class VeSyncFan {
    */
   private _childLock = false;
 
+  /**
+   * Automatic filter drying after shutoff. Like child lock, a persistent
+   * setting that isn't reset on power-off.
+   */
+  private _autoDrying = false;
+
   public readonly manufacturer = 'Levoit';
 
   /**
@@ -116,6 +122,10 @@ export default class VeSyncFan {
 
   public get childLock() {
     return this._childLock;
+  }
+
+  public get autoDrying() {
+    return this._autoDrying;
   }
 
   public get lightOn() {
@@ -403,6 +413,37 @@ export default class VeSyncFan {
   }
 
   /**
+   * Enables or disables automatic filter drying after shutoff.
+   * Only available on devices with drying mode (Superior 6000S, Sprout
+   * Humidifier, Superior Studio 450S) - all new-format devices.
+   *
+   * @param enabled - true to dry the filter automatically after shutoff
+   * @returns true if successful, false if the device doesn't support drying mode
+   */
+  public async changeAutoDrying(enabled: boolean): Promise<boolean> {
+    if (!this.deviceType.hasDryingMode) {
+      this.client.log.error(
+        'Error: Attempted to set auto drying on a device without hasDryingMode.',
+      );
+      return false;
+    }
+
+    this.client.log.info('Setting Auto Drying to ' + enabled);
+
+    const success = await this.client.sendCommand(
+      this,
+      BypassMethod.DRYING_MODE,
+      { autoDryingSwitch: enabled ? 1 : 0 },
+    );
+
+    if (success) {
+      this._autoDrying = enabled;
+    }
+
+    return success;
+  }
+
+  /**
    * Changes the cool mist level.
    * Validates the level is within device limits (1 to mistLevels).
    * Handles different JSON field names for new vs old device formats.
@@ -613,6 +654,8 @@ export default class VeSyncFan {
         // Only devices with hasChildLock ever send this field; harmless no-op
         // (stays false) for devices that don't.
         this._childLock = (result.childLockSwitch as boolean) ?? false;
+        // Likewise only sent by devices with hasDryingMode
+        this._autoDrying = result.dryingMode?.autoDryingSwitch === 1;
 
         if (isNewFormatDevice(this.model)) {
           this._warmLevel = (result.warmLevel as number) ?? 0;

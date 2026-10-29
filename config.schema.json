@@ -73,6 +73,12 @@
             "type": "boolean",
             "default": true,
             "description": "Enables control of the physical child lock on Superior 6000S and Sprout Humidifier models"
+          },
+          "auto_drying": {
+            "title": "Auto Dry Switch",
+            "type": "boolean",
+            "default": true,
+            "description": "Enables switch to turn on / off automatic filter drying after shutoff on Superior 6000S, Superior Studio 450S and Sprout Humidifier models"
           }
         }
       },
