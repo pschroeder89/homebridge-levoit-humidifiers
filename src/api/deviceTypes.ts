@@ -12,6 +12,7 @@ export enum DevicePrefix {
   LEH_S602S = 'LEH-S602S-',
   O601S = 'LUH-O601S-',
   Sprout = 'LEH-B381S-',
+  SuperiorStudio450S = 'LEH-S451S-',
 }
 
 export const LV600S_PREFIXES = [
@@ -33,6 +34,7 @@ export const NEW_FORMAT_PREFIXES = [
   DevicePrefix.LEH_S602S,
   DevicePrefix.LV600S_V2,
   DevicePrefix.Sprout,
+  DevicePrefix.SuperiorStudio450S,
 ] as const;
 
 const matchesAnyPrefix = (
@@ -78,6 +80,7 @@ export const DeviceName = {
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
   Sprout_WUS: `${DevicePrefix.Sprout}WUS`,
   Sprout_WEU: `${DevicePrefix.Sprout}WEU`,
+  SuperiorStudio450S_WUS: `${DevicePrefix.SuperiorStudio450S}WUS`,
 } as const;
 
 export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
@@ -288,6 +291,23 @@ const deviceTypes: DeviceType[] = [
     hasSleepMode: true,
     hasWarmMode: false,
     minHumidityLevel: 30,
+    maxHumidityLevel: 80,
+  },
+  {
+    // Superior Studio 450S family (LEH-S451S-*). Not yet verified on real
+    // hardware (#121) - modeled on the Sprout, the closest recent evaporative
+    // model: new payload format, and the app's "Auto" is the "autoPro"
+    // workMode, so humiditySliderTargetsAutoMode stays unset. Child lock and
+    // drying mode aren't enabled until confirmed.
+    isValid: (input: string) => input.includes(DevicePrefix.SuperiorStudio450S),
+    hasAutoMode: true,
+    hasAutoProMode: true,
+    mistLevels: 3,
+    hasLight: false,
+    hasColorMode: false,
+    hasSleepMode: true,
+    hasWarmMode: false,
+    minHumidityLevel: 40,
     maxHumidityLevel: 80,
   },
 ];

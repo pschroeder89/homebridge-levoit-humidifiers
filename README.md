@@ -10,6 +10,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 | ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ------- | ---------- |
 | Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
 | Sprout Humidifier  | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
+| Superior Studio 450S (beta) | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ❌         |
 | OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌      | ❌         |
 | OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
 | OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
@@ -65,7 +66,7 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 8. AutoPro Mode
 
-   - Switch to turn AutoPro Mode on or off (Superior 6000S and Sprout Humidifier only). AutoPro lets the device
+   - Switch to turn AutoPro Mode on or off (Superior 6000S, Superior Studio 450S and Sprout Humidifier only). AutoPro lets the device
      control both target humidity (within a 40-50% range) and fan speed automatically.
    - Turning AutoPro off returns to Humidity (Smart) mode.
 
