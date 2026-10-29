@@ -137,7 +137,8 @@ Via config.json:
         "night_light": false,
         "auto_pro": false,
         "humidity_sensor": true,
-        "child_lock": false
+        "child_lock": false,
+        "auto_drying": false
       },
       "options": {
         "enableDebugMode": false,
