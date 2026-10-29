@@ -6,19 +6,19 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm | AutoPro | Child Lock |
-| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ------- | ---------- |
-| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
-| Sprout Humidifier  | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
-| Superior Studio 450S (beta) | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ❌         |
-| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌      | ❌         |
-| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| NeoClassic 450S    | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         |
-| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         |
-| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌      | ❌         |
-| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌      | ❌         |
+| Supported Versions   | Auto / Humidity | Mist | Sleep | Light | Display | Warm | AutoPro | Child Lock | Auto Dry |
+| -------------------- | --------------- | ---- | ----- | ----- | ------- | ---- | ------- | ---------- | -------- |
+| Superior 6000S       | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         | ✅       |
+| Sprout Humidifier    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         | ✅       |
+| Superior Studio 450S | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ❌         | ✅       |
+| OasisMist 1000S      | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| OasisMist 600S       | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| OasisMist 450S       | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| LV600S               | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| NeoClassic 450S      | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Classic 300S         | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Classic 200S         | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Dual 200S            | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
 
 ### Features (if supported by model)
 
