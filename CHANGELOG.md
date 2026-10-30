@@ -1,3 +1,17 @@
+## [1.23.3] - 2026-Oct-30
+
+### Fixed
+
+- #120: VeSync login failing with "login temporary auth code expired". VeSync now rejects logins that don't use the
+  official VeSync app ID; the plugin was sending a random one on every start. The terminal ID is also now stable across
+  restarts, so VeSync no longer treats each restart as a new device login.
+
+## [1.23.2] - 2026-Aug-17
+
+### Fixed
+
+- #119: Plugin failing to start on Homebridge 2.4.0+, which removed `getItemSync()` from HAP storage.
+
 ## [1.23.1] - 2026-Jul-17
 
 ### Added
