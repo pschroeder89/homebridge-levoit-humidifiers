@@ -116,6 +116,7 @@ const LV600S_NEW = 'LUH-A603S-WUS'; // new format, has warm mist
 const SUPERIOR_6000S = 'LEH-S601S-WUS'; // new format, AutoPro, no warm mist
 const NEOCLASSIC_450S = 'LUH-N451S-WUS'; // new format, no warm mist
 const SPROUT = 'LEH-B381S-WUS'; // new format, AutoPro-only (no separate Humidity mode)
+const SUPERIOR_STUDIO_450S = 'LEH-S451S-WUS'; // new format, AutoPro-only, 3 mist levels
 
 describe('VeSyncFan.setPower', () => {
   it('sends the old-format payload for pre-A603S devices', async () => {
@@ -238,6 +239,17 @@ describe('VeSyncFan.changeMode', () => {
     assert.equal(fan.mode, Mode.AutoPro);
   });
 
+  it('remaps Auto to AutoPro for Superior Studio 450S', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SUPERIOR_STUDIO_450S, { mode: Mode.Manual });
+
+    await fan.changeMode(Mode.Auto);
+
+    assert.deepEqual(calls[0].body, { workMode: 'autoPro' });
+    assert.equal(fan.mode, Mode.AutoPro);
+  });
+
   it('skips the API call when already in the requested mode', async () => {
     const client = createClient();
     const { calls } = stubSendCommand(client);
@@ -279,6 +291,18 @@ describe('VeSyncFan.changeMistLevel', () => {
     assert.equal(calls.length, 0);
 
     await fan.changeMistLevel(2);
+    assert.equal(calls.length, 1);
+  });
+
+  it('caps Superior Studio 450S at 3 mist levels', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SUPERIOR_STUDIO_450S);
+
+    assert.equal(await fan.changeMistLevel(4), false);
+    assert.equal(calls.length, 0);
+
+    await fan.changeMistLevel(3);
     assert.equal(calls.length, 1);
   });
 
@@ -345,6 +369,46 @@ describe('VeSyncFan.changeChildLock', () => {
 
     assert.equal(success, true);
     assert.deepEqual(calls[0].body, { childLockSwitch: 1 });
+  });
+});
+
+describe('VeSyncFan.changeAutoDrying', () => {
+  it('rejects devices without drying mode support', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, CLASSIC_300S);
+
+    const success = await fan.changeAutoDrying(true);
+
+    assert.equal(success, false);
+    assert.equal(calls.length, 0);
+  });
+
+  it('sends the autoDryingSwitch payload for a supported device', async () => {
+    const client = createClient();
+    const { calls } = stubSendCommand(client);
+    const fan = createFan(client, SUPERIOR_6000S);
+
+    await fan.changeAutoDrying(true);
+
+    assert.equal(calls[0].method, BypassMethod.DRYING_MODE);
+    assert.deepEqual(calls[0].body, { autoDryingSwitch: 1 });
+    assert.equal(fan.autoDrying, true);
+
+    await fan.changeAutoDrying(false);
+    assert.deepEqual(calls[1].body, { autoDryingSwitch: 0 });
+    assert.equal(fan.autoDrying, false);
+  });
+
+  it('is supported on Sprout and Superior Studio 450S', async () => {
+    for (const model of [SPROUT, SUPERIOR_STUDIO_450S]) {
+      const client = createClient();
+      const { calls } = stubSendCommand(client);
+      const fan = createFan(client, model);
+
+      assert.equal(await fan.changeAutoDrying(true), true, model);
+      assert.deepEqual(calls[0].body, { autoDryingSwitch: 1 });
+    }
   });
 });
 
@@ -486,6 +550,34 @@ describe('VeSyncFan.updateInfo', () => {
     await fan.updateInfo();
 
     assert.equal(fan.childLock, true);
+  });
+
+  it('reads dryingMode.autoDryingSwitch for devices that support drying mode', async () => {
+    const client = createClient();
+    const fan = createFan(client, SPROUT);
+    stubGetDeviceInfo(client, {
+      result: {
+        result: {
+          powerSwitch: 0,
+          workMode: 'autoPro',
+          targetHumidity: 55,
+          humidity: 50,
+          virtualLevel: 1,
+          screenSwitch: false,
+          autoStopState: false,
+          dryingMode: {
+            autoDryingSwitch: 1,
+            dryingState: 1,
+            dryingLevel: 1,
+            dryingRemain: 3600,
+          },
+        },
+      },
+    });
+
+    await fan.updateInfo();
+
+    assert.equal(fan.autoDrying, true);
   });
 
   it('reads warm mist state from snake_case keys for old-format devices', async () => {

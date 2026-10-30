@@ -214,6 +214,12 @@ export interface DeviceResult {
   warmLevel?: number;
   warmPower?: boolean;
   childLockSwitch?: boolean;
+  dryingMode?: {
+    autoDryingSwitch?: number;
+    dryingState?: number;
+    dryingLevel?: number;
+    dryingRemain?: number;
+  };
   night_light_brightness?: number;
   rgbNightLight?: {
     brightness?: number;

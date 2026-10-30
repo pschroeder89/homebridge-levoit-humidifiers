@@ -16,6 +16,7 @@ import WarmMistLevel from './characteristics/WarmMistLevel';
 import WarmActive from './characteristics/WarmActive';
 import AutoProState from './characteristics/AutoProState';
 import ChildLock from './characteristics/ChildLock';
+import AutoDrying from './characteristics/AutoDrying';
 
 const HumidifierName = 'Humidifier';
 const HumiditySensorName = 'Humidity Sensor';
@@ -26,6 +27,7 @@ const NightLightName = 'Night Light';
 const SleepModeName = 'Sleep Mode';
 const DisplayName = 'Display';
 const AutoProModeName = 'AutoPro Mode';
+const AutoDryName = 'Auto Dry';
 
 export type AccessoryThisType = ThisType<{
   humidifierService: Service;
@@ -49,6 +51,7 @@ export default class VeSyncAccessory {
   private readonly mistService: Service | undefined;
   private readonly warmMistService: Service | undefined;
   private readonly autoProService: Service | undefined;
+  private readonly autoDryService: Service | undefined;
   private readonly hasChildLock: boolean;
 
   /**
@@ -93,6 +96,7 @@ export default class VeSyncAccessory {
     this.sleepService = this.setupSleepService(accessories);
     this.lightService = this.setupLightService(accessories);
     this.autoProService = this.setupAutoProService(accessories);
+    this.autoDryService = this.setupAutoDryService(accessories);
 
     this.startPolling();
   }
@@ -158,12 +162,16 @@ export default class VeSyncAccessory {
         .onGet(ChildLock.get.bind(this))
         .onSet(ChildLock.set.bind(this));
     } else if (
-      service.testCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+      service.testCharacteristic(
+        this.platform.Characteristic.LockPhysicalControls,
+      )
     ) {
       // Remove a previously-added characteristic if child_lock was turned off
       // in config (or the cached accessory predates a device-support change).
       service.removeCharacteristic(
-        service.getCharacteristic(this.platform.Characteristic.LockPhysicalControls),
+        service.getCharacteristic(
+          this.platform.Characteristic.LockPhysicalControls,
+        ),
       );
     }
 
@@ -412,6 +420,30 @@ export default class VeSyncAccessory {
     return service;
   }
 
+  private setupAutoDryService(
+    accessories: Record<string, unknown>,
+  ): Service | undefined {
+    const enabled =
+      !!this.device.deviceType.hasDryingMode &&
+      accessories.auto_drying !== false;
+    const service = this.getOrCreateService(
+      this.platform.Service.Switch,
+      AutoDryName,
+      enabled,
+    );
+
+    if (!service) {
+      return undefined;
+    }
+
+    this.humidifierService.addLinkedService(service);
+    service
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(AutoDrying.get.bind(this))
+      .onSet(AutoDrying.set.bind(this));
+    return service;
+  }
+
   /**
    * Starts background polling to periodically update device state.
    * This ensures characteristics always have fresh data without blocking
@@ -555,6 +587,13 @@ export default class VeSyncAccessory {
       this.autoProService
         .getCharacteristic(this.platform.Characteristic.On)
         .updateValue(device.isOn && device.mode === 'autoPro');
+    }
+
+    if (this.autoDryService) {
+      // Persistent setting, so not gated on device.isOn
+      this.autoDryService
+        .getCharacteristic(this.platform.Characteristic.On)
+        .updateValue(device.autoDrying);
     }
   }
 }

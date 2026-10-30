@@ -6,18 +6,19 @@
 
 This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
-| Supported Versions | Auto / Humidity | Mist | Sleep | Light | Display | Warm | AutoPro | Child Lock |
-| ------------------ | --------------- | ---- | ----- | ----- | ------- | ---- | ------- | ---------- |
-| Superior 6000S     | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
-| Sprout Humidifier  | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         |
-| OasisMist 1000S    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌      | ❌         |
-| OasisMist 600S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| OasisMist 450S     | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| LV600S             | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         |
-| NeoClassic 450S    | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         |
-| Classic 300S       | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         |
-| Classic 200S       | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌      | ❌         |
-| Dual 200S          | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌      | ❌         |
+| Supported Versions   | Auto / Humidity | Mist | Sleep | Light | Display | Warm | AutoPro | Child Lock | Auto Dry |
+| -------------------- | --------------- | ---- | ----- | ----- | ------- | ---- | ------- | ---------- | -------- |
+| Superior 6000S       | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         | ✅       |
+| Sprout Humidifier    | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ✅         | ✅       |
+| Superior Studio 450S | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ✅      | ❌         | ✅       |
+| OasisMist 1000S      | ✅              | ✅   | ✅    | ❌    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| OasisMist 600S       | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| OasisMist 450S       | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| LV600S               | ✅              | ✅   | ✅    | ❌    | ✅      | ✅   | ❌      | ❌         | ❌       |
+| NeoClassic 450S      | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Classic 300S         | ✅              | ✅   | ✅    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Classic 200S         | ✅              | ✅   | ❌    | ❌    | ✅      | ❌   | ❌      | ❌         | ❌       |
+| Dual 200S            | ✅              | ✅   | ❌    | ✅    | ✅      | ❌   | ❌      | ❌         | ❌       |
 
 ### Features (if supported by model)
 
@@ -65,11 +66,16 @@ This is a Homebridge plugin to control Levoit Humidifiers from Apple HomeKit.
 
 8. AutoPro Mode
 
-   - Switch to turn AutoPro Mode on or off (Superior 6000S and Sprout Humidifier only). AutoPro lets the device
+   - Switch to turn AutoPro Mode on or off (Superior 6000S, Superior Studio 450S and Sprout Humidifier only). AutoPro lets the device
      control both target humidity (within a 40-50% range) and fan speed automatically.
    - Turning AutoPro off returns to Humidity (Smart) mode.
 
-9. Child Lock
+9. Auto Dry
+
+   - Switch to turn automatic filter drying on or off (Superior 6000S, Superior Studio 450S and Sprout Humidifier
+     only). When on, the device dries its wick filter after it turns off to prevent mold and odor.
+
+10. Child Lock
 
    - Locks the physical buttons on the device (Superior 6000S and Sprout Humidifier only). Does not affect control
      from HomeKit or the VeSync app. Exposed as the Humidifier tile's Lock Physical Controls setting in the Home app.
@@ -131,7 +137,8 @@ Via config.json:
         "night_light": false,
         "auto_pro": false,
         "humidity_sensor": true,
-        "child_lock": false
+        "child_lock": false,
+        "auto_drying": false
       },
       "options": {
         "enableDebugMode": false,

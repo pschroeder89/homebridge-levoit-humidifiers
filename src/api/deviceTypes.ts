@@ -12,6 +12,7 @@ export enum DevicePrefix {
   LEH_S602S = 'LEH-S602S-',
   O601S = 'LUH-O601S-',
   Sprout = 'LEH-B381S-',
+  SuperiorStudio450S = 'LEH-S451S-',
 }
 
 export const LV600S_PREFIXES = [
@@ -33,6 +34,7 @@ export const NEW_FORMAT_PREFIXES = [
   DevicePrefix.LEH_S602S,
   DevicePrefix.LV600S_V2,
   DevicePrefix.Sprout,
+  DevicePrefix.SuperiorStudio450S,
 ] as const;
 
 const matchesAnyPrefix = (
@@ -78,6 +80,7 @@ export const DeviceName = {
   LUH_O601S_KUS: `${DevicePrefix.O601S}KUS`,
   Sprout_WUS: `${DevicePrefix.Sprout}WUS`,
   Sprout_WEU: `${DevicePrefix.Sprout}WEU`,
+  SuperiorStudio450S_WUS: `${DevicePrefix.SuperiorStudio450S}WUS`,
 } as const;
 
 export type DeviceName = (typeof DeviceName)[keyof typeof DeviceName];
@@ -112,6 +115,12 @@ export interface DeviceType {
    * on Superior 6000S and Sprout Humidifier.
    */
   hasChildLock?: boolean;
+  /**
+   * Whether the device supports automatic filter drying after shutoff
+   * (setDryingMode / autoDryingSwitch). Confirmed on Superior 6000S and
+   * Sprout Humidifier via pyvesync.
+   */
+  hasDryingMode?: boolean;
 }
 
 // All supported models, matched by either an exact model name or a stable device prefix.
@@ -230,6 +239,7 @@ const deviceTypes: DeviceType[] = [
     // of always forcing AutoPro. See #99.
     humiditySliderTargetsAutoMode: true,
     hasChildLock: true,
+    hasDryingMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -246,6 +256,7 @@ const deviceTypes: DeviceType[] = [
     // See comment above.
     humiditySliderTargetsAutoMode: true,
     hasChildLock: true,
+    hasDryingMode: true,
     mistLevels: 9,
     hasLight: false,
     hasColorMode: false,
@@ -274,20 +285,39 @@ const deviceTypes: DeviceType[] = [
     // has), so humiditySliderTargetsAutoMode is left unset and the target
     // humidity slider/AutoPro-off correctly fall back to
     // AutoPro/Manual. It also has a tunable-white night light (brightness +
-    // color temperature, not RGB), drying mode, and filter/temperature
-    // sensors - none of which this plugin models yet for any device, so
-    // hasLight stays false here rather than exposing a control shape we
+    // color temperature, not RGB), drying mode (exposed via hasDryingMode),
+    // and filter/temperature sensors - the light and sensors aren't modeled
+    // yet for any device, so hasLight stays false here rather than exposing a control shape we
     // don't actually support.
     isValid: (input: string) => input.includes(DevicePrefix.Sprout),
     hasAutoMode: true,
     hasAutoProMode: true,
     hasChildLock: true,
+    hasDryingMode: true,
     mistLevels: 2,
     hasLight: false,
     hasColorMode: false,
     hasSleepMode: true,
     hasWarmMode: false,
     minHumidityLevel: 30,
+    maxHumidityLevel: 80,
+  },
+  {
+    // Superior Studio 450S family (LEH-S451S-*). Not yet verified on real
+    // hardware (#121) - modeled on the Sprout, the closest recent evaporative
+    // model: new payload format, and the app's "Auto" is the "autoPro"
+    // workMode, so humiditySliderTargetsAutoMode stays unset. Auto drying is
+    // listed in the device request; child lock isn't enabled until confirmed.
+    isValid: (input: string) => input.includes(DevicePrefix.SuperiorStudio450S),
+    hasAutoMode: true,
+    hasAutoProMode: true,
+    hasDryingMode: true,
+    mistLevels: 3,
+    hasLight: false,
+    hasColorMode: false,
+    hasSleepMode: true,
+    hasWarmMode: false,
+    minHumidityLevel: 40,
     maxHumidityLevel: 80,
   },
 ];
